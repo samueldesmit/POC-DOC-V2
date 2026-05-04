@@ -1,0 +1,23 @@
+{
+    "useTabs": false,
+    "tabWidth": 4,
+    "printWidth": 80,
+    "trailingComma": "all",
+    "singleQuote": true,
+    "bracketSpacing": true,
+    "bracketSameLine": false,
+    "singleAttributePerLine": true,
+    "overrides": [
+        {
+            "files": "*.liquid",
+            "options": {
+                "singleQuote": false,
+                "parser": "liquid-html"
+            }
+        }
+    ],
+    "plugins": [
+        "@shopify/prettier-plugin-liquid",
+        "prettier-plugin-tailwindcss"
+    ]
+}

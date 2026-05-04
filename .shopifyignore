@@ -1,0 +1,12 @@
+node_modules/
+.vscode/
+src/
+
+vite.config.js
+package.json
+package-lock.json
+.postcssrc
+tailwind.config.js
+.gitignore
+jsconfig.json
+watch.js

@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project
+node_modules/
+*.local
+templates
+**/settings_data.json
+*.json
+.shopify
+.cursor*
+.claude/
+.kickstarter/
+.planning/
+.playwright-mcp/

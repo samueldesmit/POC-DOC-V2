@@ -1,0 +1,40 @@
+name: Sync Stores
+on:
+    push:
+        branches:
+            - staging
+
+jobs:
+    build:
+        uses: ./.github/workflows/build.yml # Call deployment action
+    sync:
+        runs-on: ubuntu-latest
+        name: Syncing branches
+        needs: build
+        strategy:
+            matrix:
+                store:
+                    [
+                        {
+                            branch: main,
+                            label: Winelist-lexception B2C Main 🚀,
+                            store: winelist-lexception,
+                        },
+                    ]
+        steps:
+            # https://github.com/peter-evans/create-pull-request/blob/main/docs/examples.md#keep-a-branch-up-to-date-with-another
+            - uses: actions/checkout@v3
+              with:
+                  ref: ${{ matrix.store.branch }}
+            - name: Reset promotion branch
+              run: |
+                  git fetch origin staging:staging
+                  git reset --hard staging
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v6.0.1
+              with:
+                  author: 'Strix Owl 🦉 popup  <owl@strix.net>'
+                  title: 'Deploy to ${{ matrix.store.label }}'
+                  body: 'Deploy to ${{ matrix.store.label }}'
+                  branch: patch/${{ matrix.store.branch }}
+                  delete-branch: true

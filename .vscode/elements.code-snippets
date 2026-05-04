@@ -1,0 +1,29 @@
+{
+  "Element": {
+    "description": "Custom element",
+    "scope": "javascript",
+    "prefix": "@element",
+    "body": [
+      "customElements.define(",
+      "  '${TM_FILENAME_BASE}',",
+      "  class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} extends HTMLElement {",
+      "    connectedCallback() {",
+      "      $0",
+      "    }",
+      "",
+      "    disconnectedCallback() {}",
+      "  },",
+      ");",
+    ],
+  },
+  "Target": {
+    "scope": "liquid",
+    "prefix": ["data-target", "dt"],
+    "body": ["data-target=\"${1:custom-element}.${2:target}\""],
+  },
+  "Get Targets": {
+    "scope": "javascript",
+    "prefix": ["getTargets", "targets"],
+    "body": ["const { ${1:target}: ${2:targets} } = getTargets(${3:this});"],
+  },
+}
