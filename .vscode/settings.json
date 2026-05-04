@@ -1,0 +1,29 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "tailwindCSS.includeLanguages": {
+        "liquid": "html"
+    },
+    "tailwindCSS.experimental.classRegex": [
+        ".+?(?:classe?s?|\"class\")\\s*(?:=|:)\\s*(?:'|\"){1}([^'\"]+?)(?:'|\"){1}",
+        "class:\\s*['\"]([^'\"]*)['\"]"
+    ],
+    "tailwindCSS.files.exclude": [
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/.hg/**",
+        "**/.svn/**"
+    ],
+    "[liquid]": {
+        "editor.defaultFormatter": "Shopify.theme-check-vscode"
+    },
+    "files.associations": {
+        "**/src/*.css": "tailwindcss",
+        "*.liquid": "liquid"
+    },
+    "javascript.preferences.importModuleSpecifier": "non-relative",
+    "javascript.preferences.importModuleSpecifierEnding": "minimal",
+    "emmet.includeLanguages": {
+        "liquid": "html"
+    }
+}

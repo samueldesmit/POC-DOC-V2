@@ -10,9 +10,7 @@ Thumbs.db
 # Project
 node_modules/
 *.local
-templates
 **/settings_data.json
-*.json
 .shopify
 .cursor*
 .claude/

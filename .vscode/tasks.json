@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run Owls Nest",
+            "dependsOrder": "parallel",
+            "dependsOn": ["start", "watch"]
+        },
+        {
+            "label": "start",
+            "type": "shell",
+            "command": "npm run start",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "focus": true,
+                "panel": "dedicated",
+                "group": "watch group"
+            }
+        },
+        {
+            "label": "watch",
+            "type": "shell",
+            "command": "npm run watch",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "focus": false,
+                "panel": "dedicated",
+                "group": "watch group"
+            }
+        }
+    ]
+}
