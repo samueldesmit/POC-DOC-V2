@@ -109,7 +109,7 @@
         "winery_9FrCPq": {
           "type": "winery",
           "settings": {
-            "article": "{{ product.metafields.custom.winery.value }}",
+            "article": "",
             "show_winery_video": true,
             "show_winery_logo": true,
             "show_winery_name": true,
