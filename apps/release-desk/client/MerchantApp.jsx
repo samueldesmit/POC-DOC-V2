@@ -113,13 +113,14 @@ export default function MerchantApp({ onTechnical }) {
   const release = pulls.find(pull => pull.stage === 'live') || null;
   const merged = (data?.history || []).filter(pull => pull.merged);
   const stagedNumbers = new Set(data?.release?.pulls || []);
-  const inTest = (data?.release?.aheadBy || 0) > 0 ? merged.filter(pull => pull.stage === 'staging' && stagedNumbers.has(pull.number) && !isRemoval(pull)) : [];
-  const ahead = inTest.length > 0 || (data?.release?.aheadBy || 0) > 0;
   // History: the changes each release took live, each shown once, when it first went live.
   const liveEntries = merged.filter(pull => pull.stage === 'live').flatMap(pull => pull.release ? (pull.includes || []).map(item => ({ ...item, key: `c${item.number}`, mergedAt: pull.mergedAt })) : [{ ...pull, key: `p${pull.number}` }]);
   const firstLive = new Map();
   for (const entry of liveEntries) { const known = firstLive.get(entry.key); if (!known || Date.parse(entry.mergedAt) < Date.parse(known.mergedAt)) firstLive.set(entry.key, entry); }
   const history = [...firstLive.values()].sort((a, b) => Date.parse(b.mergedAt) - Date.parse(a.mergedAt));
+  // In the test version and not live yet (a change that a release already took live is left out).
+  const inTest = (data?.release?.aheadBy || 0) > 0 ? merged.filter(pull => pull.stage === 'staging' && stagedNumbers.has(pull.number) && !isRemoval(pull) && !firstLive.has(`c${pull.number}`)) : [];
+  const ahead = inTest.length > 0 || (data?.release?.aheadBy || 0) > 0;
   const canAct = Boolean(data?.actor?.canMutate) && Boolean(data?.setup?.ready);
   const stagingUrl = externalUrl(data?.themes?.stagingPreviewUrl);
   const spinner = key => busy === key ? <span className="m-spinner" aria-hidden="true" /> : null;
