@@ -1,6 +1,19 @@
 {%- liquid
     assign s = section.settings
     assign section_id = 'section-' | append: section.id
+
+    comment
+        Hero height: 'full' keeps the existing aspect-ratio based height,
+        '60' and '40' make the hero that percentage of the screen height.
+    endcomment
+    case s.hero_height
+        when '60'
+            assign media_height_class = 'w-full h-[60svh]'
+        when '40'
+            assign media_height_class = 'w-full h-[40svh]'
+        else
+            assign media_height_class = 'h-full w-full aspect-[375/552] lg:aspect-[1440/657]'
+    endcase
 -%}
 {% render 'component.animation-open', section: section %}
 <div
@@ -59,7 +72,7 @@
                                     class="splide__slide relative group"
                                 >
                                     <responsive-media
-                                        class="h-full w-full aspect-[375/552] lg:aspect-[1440/657]"
+                                        class="{{ media_height_class }}"
                                         data-visible
                                     >
                                         {{
@@ -317,6 +330,31 @@
             "label": "Secondary button text color",
             "default": "#FFFFFF",
             "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "header",
+            "content": "Height"
+        },
+        {
+            "type": "select",
+            "id": "hero_height",
+            "label": "Hero height",
+            "info": "Full keeps the current height. 60% and 40% make the hero that percentage of the screen height.",
+            "options": [
+                {
+                    "value": "full",
+                    "label": "Full (current)"
+                },
+                {
+                    "value": "60",
+                    "label": "60% of screen height"
+                },
+                {
+                    "value": "40",
+                    "label": "40% of screen height"
+                }
+            ],
+            "default": "full"
         },
         {
             "type": "header",
