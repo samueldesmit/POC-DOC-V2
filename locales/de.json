@@ -44,9 +44,16 @@
       "second": "Sekunde",
       "placeholder_text": "Füge ein gültiges Enddatum hinzu, um den Countdown-Timer zu starten.",
       "countdown_label": "Countdown"
+    },
+    "announcement_bar": {
+      "label": "Ankündigung"
     }
   },
   "general": {
+    "404": {
+      "go_home": "Zur Startseite",
+      "title": "Seite nicht gefunden"
+    },
     "accessibility": {
       "skip_to_content": "Zum Inhalt springen"
     },
@@ -85,10 +92,6 @@
       "next": "Weiter",
       "previous": "Zurück",
       "page": "Seite"
-    },
-    "404": {
-      "go_home": "Zur Startseite",
-      "title": "Seite nicht gefunden"
     },
     "meta": {
       "page": "Seite {{ page }}",
