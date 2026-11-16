@@ -1,6 +1,6 @@
-node_modules/
-.vscode/
-src/
+node_modules/*
+.vscode/*
+src/*
 
 vite.config.js
 package.json
@@ -10,3 +10,5 @@ tailwind.config.js
 .gitignore
 jsconfig.json
 watch.js
+scripts/*
+design-tokens.json

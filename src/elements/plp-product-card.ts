@@ -69,6 +69,7 @@ export class PLPProductCard extends HTMLElement {
         try {
             return JSON.parse(raw.replace(/'/g, '"')) as ProductVariant[];
         } catch (error) {
+            console.error('Error parsing variants:', error);
             return null;
         }
     }
@@ -148,7 +149,7 @@ export class PLPProductCard extends HTMLElement {
                 this.productCardContainer.innerHTML = html;
             }
         } catch (error) {
-            // Ignore variant fetch errors
+            console.error('Error fetching product variant:', error);
         } finally {
             if (this.productCardContainer) {
                 this.productCardContainer.removeAttribute('data-loading');

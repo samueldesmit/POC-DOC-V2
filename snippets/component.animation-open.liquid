@@ -1,0 +1,16 @@
+{%- liquid
+    assign anim = section.settings.animation_type
+    if settings.enable_animations and anim != blank and anim != 'none'
+        capture animation_attrs
+            echo ' data-animation="'
+            echo anim
+            echo '"'
+            echo ' data-duration="'
+            echo section.settings.animation_duration | default: 0.8
+            echo '"'
+        endcapture
+        echo '<scroll-animate'
+        echo animation_attrs
+        echo '>'
+    endif
+-%}

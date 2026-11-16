@@ -48,6 +48,8 @@ export class CartForm extends HTMLElement {
                     body: JSON.stringify({
                         line: target.dataset.index,
                         quantity: target.value,
+                        sections: this.sectionId,
+                        sections_url: window.location.pathname,
                     }),
                 },
             );
@@ -63,6 +65,7 @@ export class CartForm extends HTMLElement {
                 handleCartUpdate(cartData, this.sectionId);
             }
         } catch (error) {
+            console.error('Error updating cart:', error);
             // Revert the input value on error
             const originalQuantity = target.defaultValue;
             target.value = originalQuantity;

@@ -1,0 +1,178 @@
+{
+  "article": [],
+  "blog": [],
+  "collection": [],
+  "company": [],
+  "company_location": [],
+  "location": [],
+  "market": [],
+  "order": [
+    {
+      "key": "pdf_cards",
+      "namespace": "custom",
+      "name": "PDF Cards",
+      "description": "",
+      "type": {
+        "name": "list.file_reference",
+        "category": "REFERENCE"
+      }
+    },
+    {
+      "key": "pdf_wrappers",
+      "namespace": "custom",
+      "name": "PDF Wrappers",
+      "description": "",
+      "type": {
+        "name": "list.file_reference",
+        "category": "REFERENCE"
+      }
+    },
+    {
+      "key": "pdf_wrappers-2903",
+      "namespace": "custom",
+      "name": "PDF Wrappers",
+      "description": "",
+      "type": {
+        "name": "list.file_reference",
+        "category": "REFERENCE"
+      }
+    },
+    {
+      "key": "run_date",
+      "namespace": "custom",
+      "name": "Run Date",
+      "description": "",
+      "type": {
+        "name": "date_time",
+        "category": "DATE_TIME"
+      }
+    },
+    {
+      "key": "shipping_date",
+      "namespace": "custom",
+      "name": "Shipping date",
+      "description": "",
+      "type": {
+        "name": "date",
+        "category": "DATE_TIME"
+      }
+    }
+  ],
+  "page": [],
+  "product": [
+    {
+      "key": "connected_products",
+      "namespace": "custom",
+      "name": "connected products",
+      "description": "Connect product to this product as variants ",
+      "type": {
+        "name": "list.product_reference",
+        "category": "REFERENCE"
+      }
+    },
+    {
+      "key": "origin",
+      "namespace": "custom",
+      "name": "origin",
+      "description": "",
+      "type": {
+        "name": "metaobject_reference",
+        "category": "REFERENCE"
+      }
+    },
+    {
+      "key": "cacao_percentage",
+      "namespace": "custom",
+      "name": "Cacao percentage",
+      "description": "",
+      "type": {
+        "name": "number_integer",
+        "category": "NUMBER"
+      }
+    },
+    {
+      "key": "amount_of_bars_in_bundle",
+      "namespace": "custom",
+      "name": "Amount of bars in bundle",
+      "description": "Only for pick and mix products needed ",
+      "type": {
+        "name": "number_integer",
+        "category": "NUMBER"
+      }
+    },
+    {
+      "key": "fixed_price",
+      "namespace": "bundle",
+      "name": "fixed_price",
+      "description": "test",
+      "type": {
+        "name": "number_integer",
+        "category": "NUMBER"
+      }
+    },
+    {
+      "key": "price_increase",
+      "namespace": "custom",
+      "name": "Price increase",
+      "description": "",
+      "type": {
+        "name": "number_decimal",
+        "category": "NUMBER"
+      }
+    },
+    {
+      "key": "test_richtetext",
+      "namespace": "custom",
+      "name": "test richtetext",
+      "description": "",
+      "type": {
+        "name": "rich_text_field",
+        "category": "TEXT"
+      }
+    },
+    {
+      "key": "format",
+      "namespace": "custom",
+      "name": "Format",
+      "description": "Format of product. Example: Bar",
+      "type": {
+        "name": "single_line_text_field",
+        "category": "TEXT"
+      }
+    }
+  ],
+  "variant": [
+    {
+      "key": "variant_images",
+      "namespace": "custom",
+      "name": "variant images",
+      "description": "",
+      "type": {
+        "name": "list.file_reference",
+        "category": "REFERENCE"
+      }
+    }
+  ],
+  "shop": [
+    {
+      "key": "alpine_sports",
+      "namespace": "test_data",
+      "name": "Alpine sport types",
+      "description": "The set of alpine sports that this sport shop specializes in",
+      "type": {
+        "name": "list.single_line_text_field",
+        "category": "TEXT"
+      }
+    },
+    {
+      "key": "blocks_list_checkout_static_content",
+      "namespace": "checkoutblocks",
+      "name": "Checkout Blocks: Blocks List for: checkout_static_content",
+      "description": null,
+      "type": {
+        "name": "list.metaobject_reference",
+        "category": "REFERENCE"
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {% doc %}
     Cart Item Price Component
     Displays the price of a cart item, including both the final price and compare-at price if available.
-    Shows a strikethrough price when there's a discount (compare_at_price exists).
+    Shows a strikethrough price when the line costs less than its compare-at price or its price before discounts.
 
     @param {object} item - The cart item object containing variant and product information
 
@@ -12,23 +12,39 @@
 {% enddoc %}
 
 {%- liquid
-    if item.variant.compare_at_price != blank
-        assign item_compare_at_price = item.variant.compare_at_price | times: item.quantity | money_without_trailing_zeros
-    else
-        assign item_compare_at_price = item.product.compare_at_price | times: item.quantity | money_without_trailing_zeros
+    comment
+        The struck-through price is the highest of the line's compare-at
+        total and its price before discounts, shown only when it is above
+        what the customer pays. That covers both a variant on sale and a
+        discount applied to the line (automatic or code). Only the line
+        item's own variant counts: product.compare_at_price is the lowest
+        compare-at price across all variants, so falling back to it invents
+        a discount on variants that have none.
+    endcomment
+    assign item_compare_at_line_price = item.original_line_price
+    if item.variant.compare_at_price > item.variant.price
+        assign variant_compare_at_line_price = item.variant.compare_at_price | times: item.quantity
+        if variant_compare_at_line_price > item_compare_at_line_price
+            assign item_compare_at_line_price = variant_compare_at_line_price
+        endif
     endif
+
+    assign is_discounted = false
+    if item_compare_at_line_price > item.final_line_price
+        assign is_discounted = true
+    endif
+
+    assign item_compare_at_price = item_compare_at_line_price | money_without_trailing_zeros
     assign item_final_line_price = item.final_line_price | money_without_trailing_zeros
 -%}
 
 <div class="flex space-x-2">
     <span class="">
-        {{ item_final_line_price }}
+        {%- render 'function.price-format', price: item_final_line_price -%}
     </span>
-    {%- if item.variant.compare_at_price != blank
-        or item.product.compare_at_price != blank
-    -%}
-        <span class="line-through text-surface-400">
-            {{ item_compare_at_price }}
+    {%- if is_discounted -%}
+        <span class="line-through text-secondary">
+            {%- render 'function.price-format', price: item_compare_at_price -%}
         </span>
     {%- endif -%}
 </div>

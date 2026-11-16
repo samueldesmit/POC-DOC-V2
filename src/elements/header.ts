@@ -1,363 +1,189 @@
+import { gsap } from 'gsap';
 import { customElement } from '../utilities/decorators';
+import { subscribe } from '../global.js';
+
+const SCROLL_THRESHOLD_PX = 8;
+const SHOW_DURATION = 0.45;
+const HIDE_DURATION = 0.35;
+const EASE = 'power3.out';
+const HEADER_MODALS = ['offcanvas-menu', 'cart-drawer', 'search-results'];
+
+interface ModalDialogUpdate {
+    open: boolean;
+    current?: HTMLElement;
+    previous?: HTMLElement;
+}
 
 @customElement('header-nav')
 export class HeaderNav extends HTMLElement {
     private header: HTMLElement | null = null;
-    private headerSection: HTMLElement | null = null;
+    private wrapper: HTMLElement | null = null;
     private announcementBar: HTMLElement | null = null;
-    private previousScroll: number = 0;
-    private boundScrollHandler: () => void;
-    private hamburgerObserver: MutationObserver | null = null;
-    private searchObserver: MutationObserver | null = null;
-    private megaMenuObserver: MutationObserver | null = null;
+    private previousScroll = 0;
+    private accumulatedDelta = 0;
+    private shouldDisappear = false;
+    private isHidden = false;
+    private isPinned = false;
+    private isLocked = false;
+    private rafId: number | null = null;
+    private hideTween: gsap.core.Tween | null = null;
+    private boundScrollHandler = this.onScroll.bind(this);
+    private unsubscribe: (() => void) | null = null;
     private announcementBarObserver: ResizeObserver | null = null;
-    private announcementBarMutationObserver: MutationObserver | null = null;
-    private isOverlayMode: boolean = false;
-    private isStickyEnabled: boolean = false;
-
-    constructor() {
-        super();
-        this.boundScrollHandler = this.scrollHandler.bind(this);
-    }
 
     connectedCallback(): void {
         this.header = document.getElementById('main-header-nav');
-        this.headerSection = this.header?.closest(
-            '.section--header',
-        ) as HTMLElement | null;
-        this.announcementBar = document.querySelector(
-            '[data-announcement-bar]',
-        );
+        if (!this.header) return;
 
-        if (!this.header || !this.headerSection) return;
+        this.wrapper = this.header.parentElement;
+        this.announcementBar = document.querySelector('[data-announcement-bar]');
 
-        const isHomePage =
-            this.header.getAttribute('data-is-home-page') === 'true';
-        this.isStickyEnabled =
-            this.header.getAttribute('data-make-header-disappear-on-scroll') ===
-            'true';
-        // Header always overlays on homepage (transparent bg by design)
-        this.isOverlayMode = isHomePage;
-
-        // Set announcement bar height as CSS variable
-        this.updateAnnouncementBarHeight();
-
-        // Watch for announcement bar changes (appears/disappears/resizes)
-        this.initAnnouncementBarObserver();
-
-        if (this.isStickyEnabled) {
-            // Sticky enabled - header always visible
-            if (this.isOverlayMode) {
-                // Homepage: overlay → fixed on scroll, but never hides
-                this.headerSection.classList.add('is-overlay-mode');
-                this.bindEvents();
-                this.scrollHandler();
-            } else {
-                // Other pages: pure CSS sticky, always visible
-                this.headerSection.classList.add('is-sticky');
-            }
-        } else {
-            // Sticky disabled - hide on scroll down, show on scroll up
-            if (this.isOverlayMode) {
-                this.headerSection.classList.add('is-overlay-mode');
-            } else {
-                this.headerSection.classList.add('is-sticky');
-            }
-            this.bindEvents();
-            this.scrollHandler();
+        // Publish the announcement bar height as soon as we have a reference,
+        // and keep it in sync if the bar resizes (font load, viewport resize,
+        // slide change). Transparent-mode CSS reads this via
+        // `top: var(--announcement-bar-height)`.
+        this.publishAnnouncementBarHeight();
+        if (this.announcementBar) {
+            this.announcementBarObserver = new ResizeObserver(() =>
+                this.publishAnnouncementBarHeight(),
+            );
+            this.announcementBarObserver.observe(this.announcementBar);
         }
 
-        this.initHamburgerToggle();
-        this.initSearchToggle();
-        this.initMegaMenuToggle();
+        this.shouldDisappear =
+            this.header.getAttribute('data-make-header-disappear-on-scroll') ===
+            'true';
+
+        // Intentionally do NOT pre-apply a transform here. Any transform on
+        // the wrapper creates a new containing block, which would trap the
+        // mobile menu's `<modal-dialog class="fixed inset-0">` inside the
+        // header's bounds instead of the viewport.
+        this.previousScroll = window.scrollY || 0;
+        this.update(true);
+
+        window.addEventListener('scroll', this.boundScrollHandler, {
+            passive: true,
+        });
+        window.addEventListener('resize', this.boundScrollHandler);
+
+        // While a header-attached modal is open (mobile menu, cart, search),
+        // keep the header pinned in view so the action bar / hamburger
+        // remain reachable for closing.
+        this.unsubscribe = subscribe(
+            'modalDialogUpdate',
+            ({ open, current, previous }: ModalDialogUpdate) => {
+                const dialog = open ? current : previous;
+                const id = dialog?.getAttribute('data-id') ?? '';
+                if (!HEADER_MODALS.includes(id)) return;
+                this.isLocked = !!open;
+                if (this.isLocked) this.setHidden(false, true);
+                // Recompute --header-offset/--header-height now: CSS may
+                // collapse elements above the header while a modal is open,
+                // and the drawer would stay anchored to the stale offset.
+                this.update();
+            },
+        );
     }
 
     disconnectedCallback(): void {
         window.removeEventListener('scroll', this.boundScrollHandler);
-        if (this.hamburgerObserver) {
-            this.hamburgerObserver.disconnect();
-        }
-        if (this.searchObserver) {
-            this.searchObserver.disconnect();
-        }
-        if (this.megaMenuObserver) {
-            this.megaMenuObserver.disconnect();
-        }
-        if (this.announcementBarObserver) {
-            this.announcementBarObserver.disconnect();
-        }
-        if (this.announcementBarMutationObserver) {
-            this.announcementBarMutationObserver.disconnect();
-        }
+        if (this.rafId !== null) cancelAnimationFrame(this.rafId);
+        this.hideTween?.kill();
+        this.unsubscribe?.();
+        this.announcementBarObserver?.disconnect();
     }
 
     private getAnnouncementBarHeight(): number {
-        // Re-query in case announcement bar was added/removed
-        this.announcementBar = document.querySelector(
-            '[data-announcement-bar]',
-        );
-        if (!this.announcementBar) {
-            return 0;
-        }
-        return this.announcementBar.offsetHeight;
+        return this.announcementBar?.offsetHeight ?? 0;
     }
 
-    private updateAnnouncementBarHeight(): void {
-        if (!this.headerSection) return;
-        const announcementHeight = this.getAnnouncementBarHeight();
-        this.headerSection.style.setProperty(
-            '--announcement-height',
-            `${announcementHeight}px`,
+    private publishAnnouncementBarHeight(): void {
+        document.documentElement.style.setProperty(
+            '--announcement-bar-height',
+            `${this.getAnnouncementBarHeight()}px`,
         );
     }
 
-    private initAnnouncementBarObserver(): void {
-        // Watch for announcement bar being added/removed from DOM
-        // Observe body for changes to header sections
-        this.announcementBarMutationObserver = new MutationObserver(() => {
-            // Check if announcement bar exists or was removed
-            const currentBar = document.querySelector(
-                '[data-announcement-bar]',
-            );
-            const barChanged = currentBar !== this.announcementBar;
-
-            if (barChanged) {
-                // Disconnect old resize observer if it exists
-                if (this.announcementBarObserver) {
-                    this.announcementBarObserver.disconnect();
-                    this.announcementBarObserver = null;
-                }
-
-                // Update reference
-                this.announcementBar = currentBar;
-
-                // Update height immediately
-                this.updateAnnouncementBarHeight();
-
-                // If announcement bar now exists, observe it for resize
-                if (this.announcementBar) {
-                    this.announcementBarObserver = new ResizeObserver(() => {
-                        this.updateAnnouncementBarHeight();
-                    });
-                    this.announcementBarObserver.observe(this.announcementBar);
-                }
-            }
+    private onScroll(): void {
+        if (this.rafId !== null) return;
+        this.rafId = requestAnimationFrame(() => {
+            this.rafId = null;
+            this.update();
         });
+    }
 
-        // Observe body for changes (announcement bar can be added/removed)
-        this.announcementBarMutationObserver.observe(document.body, {
-            childList: true,
-            subtree: true,
-        });
+    private update(initial = false): void {
+        if (!this.header || !this.wrapper) return;
 
-        // Watch for announcement bar resize if it exists
-        if (this.announcementBar) {
-            this.announcementBarObserver = new ResizeObserver(() => {
-                this.updateAnnouncementBarHeight();
-            });
-            this.announcementBarObserver.observe(this.announcementBar);
+        const scroll = Math.max(0, window.scrollY || 0);
+        const delta = scroll - this.previousScroll;
+        const announcementBarHeight = this.getAnnouncementBarHeight();
+        const pinned = scroll > announcementBarHeight;
+
+        // Publish the bottom of the visible header in viewport coords as
+        // `--header-offset` for the mobile menu drawer / dropdowns to anchor to.
+        const headerRect = this.header.getBoundingClientRect();
+        const headerTop = Math.max(0, headerRect.top);
+        document.documentElement.style.setProperty(
+            '--header-offset',
+            `${headerTop + headerRect.height}px`,
+        );
+        document.documentElement.style.setProperty(
+            '--header-height',
+            `${headerRect.height}px`,
+        );
+        // Transparent-mode CSS uses `top: var(--announcement-bar-height)` to
+        // sit the header below the announcement bar instead of overlapping it.
+        document.documentElement.style.setProperty(
+            '--announcement-bar-height',
+            `${announcementBarHeight}px`,
+        );
+
+        if (pinned !== this.isPinned || initial) {
+            this.isPinned = pinned;
+            this.wrapper.toggleAttribute('data-fixed', pinned);
+            this.header.toggleAttribute('data-scrolled', pinned);
         }
-    }
 
-    private bindEvents(): void {
-        window.addEventListener('scroll', this.boundScrollHandler, {
-            passive: true,
-        });
-    }
+        if (this.shouldDisappear && pinned && !this.isLocked) {
+            const sameDirection =
+                Math.sign(delta) === Math.sign(this.accumulatedDelta);
+            this.accumulatedDelta = sameDirection
+                ? this.accumulatedDelta + delta
+                : delta;
 
-    private scrollHandler(): void {
-        if (!this.header || !this.headerSection) return;
-
-        const scroll = window.scrollY || 0;
-        const scrollDirection = scroll < this.previousScroll ? 'up' : 'down';
-        const announcementHeight = this.getAnnouncementBarHeight();
-        const headerHeight = this.headerSection.offsetHeight;
-
-        if (this.isOverlayMode) {
-            // Homepage with overlay mode
-            const threshold = announcementHeight + headerHeight;
-
-            if (scroll <= announcementHeight) {
-                // At top - header absolute below announcement bar
-                this.headerSection.classList.remove(
-                    'is-fixed',
-                    'is-hidden',
-                    'has-bg',
-                );
-                this.headerSection.classList.add('is-overlay-mode');
-            } else if (scroll > threshold) {
-                this.headerSection.classList.remove('is-overlay-mode');
-                this.headerSection.classList.add('is-fixed');
-
-                if (this.isStickyEnabled) {
-                    // Sticky: always visible with background
-                    this.headerSection.classList.remove('is-hidden');
-                    this.headerSection.classList.add('has-bg');
-                } else {
-                    // Not sticky: hide on scroll down, show on scroll up
-                    if (scrollDirection === 'down') {
-                        this.headerSection.classList.add('is-hidden');
-                        this.headerSection.classList.remove('has-bg');
-                    } else {
-                        this.headerSection.classList.remove('is-hidden');
-                        this.headerSection.classList.add('has-bg');
-                    }
+            if (Math.abs(this.accumulatedDelta) >= SCROLL_THRESHOLD_PX) {
+                const shouldHide = this.accumulatedDelta > 0;
+                if (shouldHide !== this.isHidden) {
+                    this.setHidden(shouldHide);
                 }
-            } else {
-                // Between - transitioning to fixed
-                this.headerSection.classList.remove(
-                    'is-overlay-mode',
-                    'is-hidden',
-                );
-                this.headerSection.classList.add('is-fixed');
+                this.accumulatedDelta = 0;
             }
-        } else {
-            // Non-overlay pages - hide on scroll down, show on scroll up
-            if (scrollDirection === 'down' && scroll > headerHeight) {
-                this.headerSection.classList.add('is-hidden');
-                this.headerSection.classList.remove('has-bg');
-            } else if (scrollDirection === 'up' && scroll > 0) {
-                this.headerSection.classList.remove('is-hidden');
-                this.headerSection.classList.add('has-bg');
-            } else if (scroll === 0) {
-                this.headerSection.classList.remove('is-hidden', 'has-bg');
-            }
+        } else if (this.isHidden) {
+            this.setHidden(false);
+            this.accumulatedDelta = 0;
         }
 
         this.previousScroll = scroll;
     }
 
-    private updateHamburgerState(): void {
-        const modal = document.querySelector(
-            'modal-dialog[data-id="offcanvas-menu"]',
-        );
-        const hamburgerToggle = document.querySelector('.hamburger-toggle');
-        const mobileHeaderBar = document.querySelector('.mobile-header-bar');
-
-        if (modal && hamburgerToggle) {
-            const isOpen = modal.hasAttribute('data-open');
-            if (isOpen) {
-                hamburgerToggle.setAttribute('data-open', '');
-                mobileHeaderBar?.classList.add('menu-open');
-                this.announcementBar?.classList.add('menu-open');
-            } else {
-                hamburgerToggle.removeAttribute('data-open');
-                // Only remove menu-open if search modal is not also open
-                const searchModal = document.querySelector(
-                    'modal-dialog[data-id="search-results"]',
-                );
-                const searchOpen = searchModal?.hasAttribute('data-open');
-                if (!searchOpen) {
-                    if (mobileHeaderBar) {
-                        mobileHeaderBar.classList.remove('menu-open');
-                    }
-                    this.announcementBar?.classList.remove('menu-open');
-                }
-            }
-        }
-    }
-
-    private initHamburgerToggle(): void {
-        const modal = document.querySelector(
-            'modal-dialog[data-id="offcanvas-menu"]',
-        );
-
-        if (modal) {
-            // Use MutationObserver to watch for data-open attribute changes
-            this.hamburgerObserver = new MutationObserver(() =>
-                this.updateHamburgerState(),
-            );
-            this.hamburgerObserver.observe(modal, {
-                attributes: true,
-                attributeFilter: ['data-open'],
+    private setHidden(hide: boolean, instant = false): void {
+        if (!this.wrapper) return;
+        this.isHidden = hide;
+        this.hideTween?.kill();
+        if (instant) {
+            gsap.set(this.wrapper, {
+                yPercent: hide ? -100 : 0,
+                clearProps: hide ? '' : 'transform',
             });
-
-            // Initial state
-            this.updateHamburgerState();
-        } else {
-            // Retry if modal not yet available
-            setTimeout(() => this.initHamburgerToggle(), 100);
+            return;
         }
-    }
-
-    private updateSearchState(): void {
-        const modal = document.querySelector(
-            'modal-dialog[data-id="search-results"]',
-        );
-        const mobileHeaderBar = document.querySelector('.mobile-header-bar');
-
-        if (modal && mobileHeaderBar) {
-            const isOpen = modal.hasAttribute('data-open');
-            if (isOpen) {
-                mobileHeaderBar.classList.add('menu-open');
-                this.announcementBar?.classList.add('menu-open');
-            } else {
-                // Only remove if hamburger menu is not also open
-                const hamburgerModal = document.querySelector(
-                    'modal-dialog[data-id="offcanvas-menu"]',
-                );
-                const hamburgerOpen = hamburgerModal?.hasAttribute('data-open');
-                if (!hamburgerOpen) {
-                    mobileHeaderBar.classList.remove('menu-open');
-                    this.announcementBar?.classList.remove('menu-open');
-                }
-            }
-        }
-    }
-
-    private initSearchToggle(): void {
-        const modal = document.querySelector(
-            'modal-dialog[data-id="search-results"]',
-        );
-
-        if (modal) {
-            this.searchObserver = new MutationObserver(() =>
-                this.updateSearchState(),
-            );
-            this.searchObserver.observe(modal, {
-                attributes: true,
-                attributeFilter: ['data-open'],
-            });
-
-            this.updateSearchState();
-        } else {
-            setTimeout(() => this.initSearchToggle(), 100);
-        }
-    }
-
-    private updateMegaMenuState(): void {
-        const megaMenu = document.querySelector('mega-menu');
-
-        if (megaMenu && this.headerSection) {
-            const isOpen = megaMenu.hasAttribute('data-open');
-            if (isOpen) {
-                this.headerSection.classList.add('desktop-menu-open');
-                this.announcementBar?.classList.add('desktop-menu-open');
-            } else {
-                this.headerSection.classList.remove('desktop-menu-open');
-                this.announcementBar?.classList.remove('desktop-menu-open');
-            }
-        }
-    }
-
-    private initMegaMenuToggle(): void {
-        const megaMenu = document.querySelector('mega-menu');
-
-        if (megaMenu) {
-            // Use MutationObserver to watch for data-open attribute changes
-            this.megaMenuObserver = new MutationObserver(() =>
-                this.updateMegaMenuState(),
-            );
-            this.megaMenuObserver.observe(megaMenu, {
-                attributes: true,
-                attributeFilter: ['data-open'],
-            });
-
-            // Initial state
-            this.updateMegaMenuState();
-        } else {
-            // Retry if mega menu not yet available
-            setTimeout(() => this.initMegaMenuToggle(), 100);
-        }
+        this.hideTween = gsap.to(this.wrapper, {
+            yPercent: hide ? -100 : 0,
+            duration: hide ? HIDE_DURATION : SHOW_DURATION,
+            ease: EASE,
+            overwrite: 'auto',
+            clearProps: hide ? '' : 'transform',
+        });
     }
 }

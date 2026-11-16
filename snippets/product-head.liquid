@@ -10,10 +10,19 @@
     itemprop="brand"
     content="{{ product.vendor }}"
 >
-<meta
-    itemprop="image"
-    content="{{ shop.url }}{{ product.selected_or_first_available_variant.featured_image  | image_url: width: 600, height: 600 }}"
->
+{%- comment -%}
+    Not every colour is photographed, and `image_url` errors on a variant
+    without one, printing the failure into the tag. The product image stands in.
+{%- endcomment -%}
+{%- assign head_image = product.selected_or_first_available_variant.featured_image
+    | default: product.featured_image
+-%}
+{%- if head_image != blank -%}
+    <meta
+        itemprop="image"
+        content="{{ shop.url }}{{ head_image | image_url: width: 600, height: 600 }}"
+    >
+{%- endif -%}
 <meta
     itemprop="description"
     content="{{ product.description | strip_html | escape }}"
@@ -24,30 +33,25 @@
       "@context": "http://schema.org/",
       "@type": "Product",
       "name": "{{ product.title }}",
-      "url": "{{ shop.url }}{{ product.selected_or_first_available_variant.url }}",
-      "image": "{{ product.featured_image | image_url: width: 600 }}",
+      "url": "{{request.origin}}{{ product.selected_or_first_available_variant.url }}",
+      "image": "{{ product.featured_image | image_url: width: 600 | replace: '//w', 'https://w'}}",
       "description": "{{ product.description | strip_html | escape }}",
       "brand": {
-        "@type": "Thing",
+        "@type": "Brand",
         "name": "{{ product.vendor }}"
       },
       "offers": [
         {
           "@type": "Offer",
           "availability": "http://schema.org/{% if product.selected_or_first_available_variant.available %}InStock{% else %}OutOfStock{% endif %}",
-          "price": {{ product.selected_or_first_available_variant.price | divided_by: 100.00 }},
+          "price": {{ product.selected_or_first_available_variant.unit_price | divided_by: 100.00 }},
           "priceCurrency": "{{ shop.currency }}",
-          "url": "{{ shop.url }}{{ product.selected_or_first_available_variant.url }}",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "{{ product.title }}",
-            "sku": "{{ product.selected_or_first_available_variant.sku }}",
-            "image": "{{ shop.url }}{{ product.selected_or_first_available_variant.featured_image | image_url: width: 600, height: 600 }}",
-            "description": "{{ product.description | strip_html | escape }}",
-            "brand": {
-              "@type": "Thing",
-              "name": "{{ product.vendor }}"
-            }
+          "url": "{{request.origin}}{{ product.selected_or_first_available_variant.url }}",
+          "sku": "{{ product.selected_or_first_available_variant.sku }}",
+          "image": "{{ product.featured_image | image_url: width: 600, height: 600 | replace: '//w', 'https://w'}}",
+          "brand": {
+            "@type": "Brand",
+            "name": "{{ product.vendor }}"
           }
         }
       ]
@@ -62,7 +66,7 @@
       "variants": [{% for variant in product.variants %}{
         "id": {{ variant.id }},
         "title": {{ variant.title | json }},
-        "image": {% if variant.image %}{{ variant.image | image_url: width: 500 | json }}{% else %}null{% endif %},
+        "image": {% if variant.image %}{{ variant.image | img_url: '500x' | json }}{% else %}null{% endif %},
         "available": {{ variant.available }},
         "price": {{ variant.price }},
         "compare_at_price": {% if variant.compare_at_price != blank %}{{ variant.compare_at_price }}{% else %}null{% endif %}

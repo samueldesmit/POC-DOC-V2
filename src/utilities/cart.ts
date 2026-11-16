@@ -34,34 +34,30 @@ function dispatchCartEvent(
 }
 
 /**
- * Updates UI sections after cart changes
+ * Updates UI sections after cart changes. Uses the section HTML that came
+ * back with the cart request when there is one, so the drawer is not fetched
+ * a second time.
  */
 export async function handleCartUpdate(
     cartData: CartResponse,
     sectionId?: string,
     source?: 'add-to-cart',
 ): Promise<void> {
-    // If item_count is missing (e.g. /cart/add.js response), fetch full cart data
-    if (typeof cartData.item_count !== 'number') {
-        const cartResponse = await fetch(`${window.routes.cart_url}.js`, {
-            headers: { Accept: 'application/json' },
-        });
-        if (cartResponse.ok) {
-            const fullCart = (await cartResponse.json()) as CartResponse;
-            cartData.item_count = fullCart.item_count;
-        }
-    }
-
     dispatchCartEvent(cartData, source);
 
-    const promises: Promise<void>[] = [];
-    if (sectionId) promises.push(refreshCartSection(sectionId));
+    if (!sectionId) return;
 
-    if (promises.length > 0) await Promise.all(promises);
+    const markup = cartData.sections?.[sectionId];
+    if (markup) {
+        applyCartSection(markup);
+    } else {
+        await refreshCartSection(sectionId);
+    }
 }
 
 /**
- * Refreshes the cart drawer section content
+ * Fetches the cart drawer section and swaps it in. Only needed when the cart
+ * request did not ask for the section itself.
  */
 export async function refreshCartSection(sectionId: string): Promise<void> {
     const sectionsResponse = await fetch(
@@ -73,14 +69,18 @@ export async function refreshCartSection(sectionId: string): Promise<void> {
     }
 
     const sections = await sectionsResponse.json();
+    applyCartSection(sections[sectionId]);
+}
 
-    // Parse and replace the entire cart form
+/**
+ * Replaces the cart form with the one from the section HTML
+ */
+function applyCartSection(markup: string): void {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(sections[sectionId], 'text/html');
+    const doc = parser.parseFromString(markup, 'text/html');
     const newCartForm = doc.querySelector('cart-form');
 
     if (newCartForm) {
-        // Find and replace the existing cart form
         const existingCartForm = document.querySelector('cart-form');
         if (existingCartForm) {
             existingCartForm.replaceWith(newCartForm);
@@ -123,12 +123,14 @@ export async function updateCart(options: {
 
     const cartData = (await response.json()) as CartResponse;
 
-    dispatchCartEvent(cartData, source);
-
+    // handleCartUpdate dispatches the event itself; dispatch it here only
+    // when there is no section to refresh, so listeners run once per change.
     if (sectionId) {
-        handleCartUpdate(cartData, sectionId, source).catch(() => {
-            // Ignore UI update errors
+        handleCartUpdate(cartData, sectionId, source).catch((error) => {
+            console.error('Error updating UI:', error);
         });
+    } else {
+        dispatchCartEvent(cartData, source);
     }
 
     return cartData;

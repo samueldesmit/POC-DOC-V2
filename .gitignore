@@ -11,9 +11,9 @@ Thumbs.db
 node_modules/
 *.local
 **/settings_data.json
-.shopify
+templates
 .cursor*
 .claude/
+/assets/
 .kickstarter/
-.planning/
 .playwright-mcp/

@@ -8,29 +8,26 @@
         assign images = product.images
         assign images_count = product.images.size
     endif
+
+    assign product_images_arrow_classes = 'text-primary transition hover:opacity-75 cursor-pointer disabled:invisible disabled:opacity-0 disabled:pointer-events-none'
+    assign main_gallery_prev_arrow_class = 'swiper-button-prev ' | append: product_images_arrow_classes
+    assign main_gallery_next_arrow_class = 'swiper-button-next ' | append: product_images_arrow_classes
+
+    assign aria_prev_slide = 'products.product.gallery.prev_slide' | t
+    assign aria_next_slide = 'products.product.gallery.next_slide' | t
 %}
 
-<gsap-elements>
-    {% liquid
-        assign product_images_arrow_classes = 'text-brand-200 transition hover:opacity-75 cursor-pointer disabled:invisible disabled:opacity-0 disabled:pointer-events-none'
-        assign main_gallery_prev_arrow_class = 'swiper-button-prev ' | append: product_images_arrow_classes
-        assign main_gallery_next_arrow_class = 'swiper-button-next ' | append: product_images_arrow_classes
-
-        assign aria_prev_slide = 'products.product.gallery.prev_slide' | t
-        assign aria_next_slide = 'products.product.gallery.next_slide' | t
-    %}
+<div class="product-gallery" data-active-slide="0">
     {% if images != blank %}
-        <product-images-swiper
-            class=""
-        >
+        <product-images-swiper class="">
             <div class="swiper-zoom-cursor">
                 {% render 'component.icon',
                     type: 'zoom_in',
                     class: 'w-6 h-6 text-white'
                 %}
             </div>
-            <div class="swiper main-slider relative overflow-hidden ">
-                <div class="swiper-wrapper flex w-full gsap-element-left-right opacity-0">
+            <div class="swiper main-slider relative overflow-hidden">
+                <div class="swiper-wrapper flex w-full">
                     {%- for image in images -%}
                         <div
                             class="swiper-slide w-full min-w-full p-5 lg:p-10"
@@ -43,7 +40,7 @@
                                     width="{{ image.width }}"
                                     height="{{ image.height }}"
                                     loading="eager"
-                                    class="object-contain w-full aspect-square"
+                                    class="object-contain w-full aspect-square lg:max-h-[80dvh] mix-blend-multiply"
                                 >
                             </div>
                         </div>
@@ -51,21 +48,21 @@
                 </div>
                 {% if images_count > 1 %}
                     <button
-                        class="swiper-button-prev {{ main_gallery_prev_arrow_class }} pointer-events-auto bg-brand-200/10 p-4"
+                        class="{{ main_gallery_prev_arrow_class }} pointer-events-auto bg-primary/10 p-4"
                         aria-label="{{ aria_prev_slide }}"
                     >
                         {% render 'component.icon',
                             type: 'chevron',
-                            class: 'rotate-180 size-3 md:size-5 text-brand-200'
+                            class: 'rotate-180 size-3 md:size-5 text-primary'
                         %}
                     </button>
                     <button
-                        class="swiper-button-next {{ main_gallery_next_arrow_class }} pointer-events-auto bg-brand-200/10 p-4"
+                        class="{{ main_gallery_next_arrow_class }} pointer-events-auto bg-primary/10 p-4"
                         aria-label="{{ aria_next_slide }}"
                     >
                         {% render 'component.icon',
                             type: 'chevron',
-                            class: 'w-3 md:size-5 text-brand-200'
+                            class: 'w-3 md:size-5 text-primary'
                         -%}
                     </button>
                 {% endif %}
@@ -80,4 +77,4 @@
             }}
         </div>
     {% endif %}
-</gsap-elements>
+</div>

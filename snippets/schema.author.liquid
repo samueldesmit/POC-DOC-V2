@@ -1,0 +1,25 @@
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": {{ metaobject.name.value | json }},
+        "url": "{{ metaobject.system.url }}",
+        {% if metaobject.job_title.value != blank %}
+            "jobTitle": {{ metaobject.job_title.value | json }},
+        {% endif %}
+        {% if metaobject.biography_text.value != blank %}
+            "description": {{ metaobject.biography_text.value | strip_html | truncate: 300 | json }},
+        {% endif %}
+        {% if metaobject.photo.value != blank %}
+            "image": "{{ metaobject.photo.value | image_url: width: 800 }}",
+        {% endif %}
+        {% if metaobject.social_link.value != blank %}
+            "sameAs": [{{ metaobject.social_link.value | json }}],
+        {% endif %}
+        "worksFor": {
+            "@type": "Organization",
+            "name": {{ shop.name | json }},
+            "url": "{{ shop.url }}"
+        }
+    }
+</script>

@@ -37,12 +37,6 @@ customElements.define(
                         getComputedStyle(e).display !== 'none',
                 );
 
-                // Ensure video poster images have alt attributes for accessibility
-                this.querySelectorAll('video img:not([alt])').forEach((img) => {
-                    const parentVideo = img.closest('video');
-                    img.setAttribute('alt', parentVideo?.getAttribute('aria-label') || '');
-                });
-
                 // Video loading state (load by playing)
                 visible(this, { rootMargin: '450px' }).then(() => {
                     if (video && video.hasAttribute('data-loading')) {

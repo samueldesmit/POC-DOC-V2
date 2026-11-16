@@ -7,79 +7,48 @@ interface AccordionTargets {
 
 @customElement('accordion-component')
 export class AccordionComponent extends HTMLElement {
-    private boundClickOutside: (e: MouseEvent) => void;
+    private button: HTMLElement | null = null;
 
-    constructor() {
-        super();
-        this.boundClickOutside = this.handleClickOutside.bind(this);
-    }
+    // connectedCallback runs again whenever the element is moved, e.g. when
+    // a modal-dialog portals itself to <body>. The handler is removed on
+    // disconnect so a move does not leave two listeners that cancel out.
+    private handleClick = (): void => {
+        const button = this.button;
+        if (!button) return;
+
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', (!isExpanded).toString());
+
+        // close others in group
+        const group = this.getAttribute('data-group');
+        if (group) {
+            const groupSelector = `accordion-component[data-group="${group}"]`;
+            const groupAccordions = Array.from(
+                document.querySelectorAll<AccordionComponent>(groupSelector),
+            );
+
+            groupAccordions
+                .filter((accordion) => accordion !== this)
+                .forEach((accordion) => {
+                    const { button: [groupButton] = [] } =
+                        getTargets<AccordionTargets>(accordion);
+                    if (groupButton) {
+                        groupButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+        }
+    };
 
     connectedCallback(): void {
         const { button: [button] = [] } = getTargets<AccordionTargets>(this);
         if (!button) return;
 
-        const group = this.getAttribute('data-group');
-
-        button.addEventListener('click', () => {
-            const isExpanded = button.getAttribute('aria-expanded') === 'true';
-            const newState = !isExpanded;
-            button.setAttribute('aria-expanded', newState.toString());
-
-            if (group === 'plp-filters') {
-                if (newState) {
-                    setTimeout(() => {
-                        document.addEventListener(
-                            'click',
-                            this.boundClickOutside,
-                        );
-                    }, 0);
-                } else {
-                    document.removeEventListener(
-                        'click',
-                        this.boundClickOutside,
-                    );
-                }
-            }
-
-            // close others in group
-            if (group) {
-                const groupSelector = `accordion-component[data-group="${group}"]`;
-                const groupAccordions = Array.from(
-                    document.querySelectorAll<AccordionComponent>(
-                        groupSelector,
-                    ),
-                );
-
-                groupAccordions
-                    .filter((accordion) => accordion !== this)
-                    .forEach((accordion) => {
-                        const { button: [groupButton] = [] } =
-                            getTargets<AccordionTargets>(accordion);
-                        if (groupButton) {
-                            groupButton.setAttribute('aria-expanded', 'false');
-                        }
-                        // Remove click outside listener from closed accordions
-                        document.removeEventListener(
-                            'click',
-                            (accordion as AccordionComponent).boundClickOutside,
-                        );
-                    });
-            }
-        });
+        this.button = button;
+        button.addEventListener('click', this.handleClick);
     }
 
     disconnectedCallback(): void {
-        document.removeEventListener('click', this.boundClickOutside);
-    }
-
-    private handleClickOutside(e: MouseEvent): void {
-        if (!this.contains(e.target as Node)) {
-            const { button: [button] = [] } =
-                getTargets<AccordionTargets>(this);
-            if (button) {
-                button.setAttribute('aria-expanded', 'false');
-            }
-            document.removeEventListener('click', this.boundClickOutside);
-        }
+        this.button?.removeEventListener('click', this.handleClick);
+        this.button = null;
     }
 }

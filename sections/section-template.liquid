@@ -1,30 +1,8 @@
-{%- liquid
+{% liquid
     assign s = section.settings
-    assign section_id = 'section-' | append: section.id
+%}
 
-    assign show_section = true
-
-    if s.visibility_audience == 'premium_only'
-        assign show_section = false
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = true
-            endif
-        endif
-    elsif s.visibility_audience == 'non_premium_only'
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = false
-            endif
-        endif
-    endif
--%}
-
-{% if show_section %}
-<div
-    class="{{ s.mobile_margin }} {{ s.desktop_margin }}"
-    id="{{ section_id }}"
->
+<div class="{{ s.mobile_margin }} {{ s.desktop_margin }}">
     {% render 'section-colors', current_section: section %}
     <div
         class="{{ s.mobile_padding }} {{ s.desktop_padding }}"
@@ -32,7 +10,6 @@
         <h1>Section Here</h1>
     </div>
 </div>
-{% endif %}
 
 {% schema %}
 {
@@ -40,35 +17,6 @@
     "tag": "section",
     "class": "section-name",
     "settings": [
-        {
-            "type": "header",
-            "content": "Visibility"
-        },
-        {
-            "type": "select",
-            "id": "visibility_audience",
-            "label": "Visibility (audience)",
-            "options": [
-                {
-                    "value": "everyone",
-                    "label": "Everyone"
-                },
-                {
-                    "value": "premium_only",
-                    "label": "Only premium-club customers"
-                },
-                {
-                    "value": "non_premium_only",
-                    "label": "Only non premium-club customers"
-                }
-            ],
-            "default": "everyone"
-        },
-        {
-            "type": "header",
-            "content": "Documentation for this section",
-            "info": "Click [here](https://strix-net.atlassian.net/wiki/spaces/TWL/pages/3720183810/Section+Winery+Selection) for more information."
-        },
         {
             "type": "header",
             "content": "Section Styling"
@@ -79,6 +27,11 @@
             "label": "Add styling to section",
             "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
             "default": false
+        },
+        {
+            "type": "header",
+            "content": "Section Color Scheme",
+            "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "header",
@@ -97,31 +50,15 @@
                 },
                 {
                     "value": "py-2",
-                    "label": "S - 8px"
+                    "label": "Small - 8px"
                 },
                 {
                     "value": "py-4",
-                    "label": "M - 16px"
+                    "label": "Medium - 16px"
                 },
                 {
                     "value": "py-6",
-                    "label": "L - 24px"
-                },
-                {
-                    "value": "py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 24px"
                 }
             ],
             "default": "py-0"
@@ -137,35 +74,19 @@
                     "label": "None"
                 },
                 {
-                    "value": "lg:py-2",
-                    "label": "S - 8px"
-                },
-                {
                     "value": "lg:py-4",
-                    "label": "M - 16px"
+                    "label": "Small - 16px"
                 },
                 {
                     "value": "lg:py-6",
-                    "label": "L - 24px"
+                    "label": "Medium - 24px"
                 },
                 {
                     "value": "lg:py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "lg:py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "lg:py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "lg:py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 32px"
                 }
             ],
-            "default": "lg:py-0"
+            "default": "lg:py-4"
         },
         {
             "type": "header",
@@ -238,42 +159,42 @@
             "type": "color",
             "id": "primary_text_color",
             "label": "Primary text color",
-            "default": "#525252",
+            "default": "#000000",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "secondary_text_color",
             "label": "Secondary text color",
-            "default": "#525252",
+            "default": "#000000",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "primary_button_color",
             "label": "Primary button background color",
-            "default": "#525252",
+            "default": "#FFFFFF",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "primary_button_text_color",
             "label": "Primary button text color",
-            "default": "#FFFFFF",
+            "default": "#000000",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "secondary_button_color",
             "label": "Secondary button background color",
-            "default": "#FFFFFF",
+            "default": "#000000",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "secondary_button_text_color",
             "label": "Secondary button text color",
-            "default": "#525252",
+            "default": "#FFFFFF",
             "visible_if": "{{ section.settings.section_styling == true }}"
         }
     ],

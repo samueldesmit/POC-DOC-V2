@@ -179,11 +179,13 @@ export class ATCQuantityInput extends HTMLElement {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         updates: { [variantId]: value },
+                        sections: 'cart-drawer',
+                        sections_url: window.location.pathname,
                     }),
                     sectionId: 'cart-drawer',
                 });
             } catch (error) {
-                // Ignore stock update errors
+                console.error('Error updating stock info:', error);
             } finally {
                 loadingElement?.removeAttribute('data-loading');
             }

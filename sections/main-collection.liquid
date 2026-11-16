@@ -1,37 +1,17 @@
 {%- liquid
     assign s = section.settings
-    assign promo_cards = collection.metafields.custom.promo_cards.value
-    assign promo_positions = collection.metafields.custom.promo_card_positions.value
 -%}
 
-<div class="container pt-4">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-[3rem]">
-        <h1 class="font-cormorant-garamond text-[40px] lg:text-[52px] font-medium leading-tight shrink-0">
-            {{- collection.title -}}
-        </h1>
+{% render 'component.animation-open', section: section %}
 
-        {%- if collection.description != blank -%}
-            <div
-                class="w-full h-px lg:w-px lg:h-[5rem] bg-brand-400 opacity-50 shrink-0 my-[1.25rem] lg:my-0"
-            ></div>
-            <div class="w-full font-inter text-[16px] leading-tight lg:pr-[3rem] max-w-[50rem]">
-                {%- if collection.description != blank -%}
-                    {{- collection.description -}}
-                {%- endif -%}
-            </div>
-        {%- endif -%}
-    </div>
-</div>
-
-<div class="container mt-8 lg:mt-16">
+<div class="mt-12 mb-10">
     {%- render 'products-listing-grid',
         products_per_page: s.products_per_page,
-        collection_description: s.collection_description,
-        promo_cards: promo_cards,
-        promo_positions: promo_positions,
-        show_quick_add: s.show_quick_add
+        collection_description: s.collection_description
     -%}
 </div>
+
+{% render 'component.animation-close', section: section %}
 
 {% schema %}
 {
@@ -44,11 +24,70 @@
             "default": 15
         },
         {
-            "type": "checkbox",
-            "id": "show_quick_add",
-            "label": "Show quick add to cart",
-            "default": false
+            "type": "richtext",
+            "id": "collection_description",
+            "label": "Collection description",
+            "info": "Manually add the collection description or select the collection description using dynamic source"
+        },
+        {
+            "type": "header",
+            "content": "Animation"
+        },
+        {
+            "type": "select",
+            "id": "animation_type",
+            "label": "Animation",
+            "options": [
+                {
+                    "value": "none",
+                    "label": "None"
+                },
+                {
+                    "value": "fade-in",
+                    "label": "Fade in"
+                },
+                {
+                    "value": "fade-up",
+                    "label": "Fade up"
+                },
+                {
+                    "value": "fade-down",
+                    "label": "Fade down"
+                },
+                {
+                    "value": "fade-left",
+                    "label": "Fade in from left"
+                },
+                {
+                    "value": "fade-right",
+                    "label": "Fade in from right"
+                },
+                {
+                    "value": "zoom-in",
+                    "label": "Zoom in"
+                },
+                {
+                    "value": "zoom-out",
+                    "label": "Zoom out"
+                },
+                {
+                    "value": "stagger",
+                    "label": "Stagger"
+                }
+            ],
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
         }
+    
     ],
     "blocks": []
 }

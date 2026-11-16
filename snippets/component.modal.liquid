@@ -48,30 +48,32 @@
     assign modal_dialog_class = modal_dialog_class | default: 'z-90'
     assign content_container_class = ''
     if is_popup
-        assign content_container_class = 'w-[min(100%,20rem)] scale-75 rounded-md bg-white opacity-0 transition-all ease-out data-[leave]:scale-75 data-[open]:scale-100 data-[open]:opacity-100 data-[leave]:duration-75 data-[open]:duration-150 data-[leave]:ease-in-out p-8' | append: ' ' | append: content_class
+        assign content_container_class = 'w-[min(100%,20rem)] scale-75 bg-background opacity-0 transition-all ease-out data-[leave]:scale-75 data-[open]:scale-100 data-[open]:opacity-100 data-[leave]:duration-75 data-[open]:duration-150 data-[leave]:ease-in-out p-8' | append: ' ' | append: content_class
     endif
     if is_drawer
         if drawer_from_right
-            assign content_container_class = 'h-full w-full translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-white' | append: ' ' | append: content_class
+            assign content_container_class = 'h-full w-full translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-background' | append: ' ' | append: content_class
         else
-            assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-white' | append: ' ' | append: content_class
+            assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-background' | append: ' ' | append: content_class
         endif
     endif
     if desktop_popup_mobile_drawer
-        assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-white lg:h-auto lg:translate-x-0 lg:scale-75 lg:rounded-md lg:opacity-0 lg:transition-all lg:ease-out lg:data-[leave]:scale-75 lg:data-[open]:scale-100 lg:data-[open]:opacity-100 lg:data-[leave]:duration-75 lg:data-[open]:duration-150 lg:data-[leave]:ease-in-out ' | append: ' ' | append: content_class
+        assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-background lg:h-auto lg:translate-x-0 lg:scale-75 lg:opacity-0 lg:transition-all lg:ease-out lg:data-[leave]:scale-75 lg:data-[open]:scale-100 lg:data-[open]:opacity-100 lg:data-[leave]:duration-75 lg:data-[open]:duration-150 lg:data-[leave]:ease-in-out ' | append: ' ' | append: content_class
     endif
     if is_top_zero
-        assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-white lg:h-auto lg:translate-x-0 lg:scale-75 lg:rounded-md lg:opacity-0 lg:transition-all lg:ease-out lg:data-[leave]:scale-75 lg:data-[open]:scale-100 lg:data-[open]:opacity-100 lg:data-[leave]:duration-75 lg:data-[open]:duration-150 lg:data-[leave]:ease-in-out ' | append: ' ' | append: content_class
+        assign content_container_class = 'h-full w-full -translate-x-full data-[open]:translate-x-0 data-[leave]:duration-300 duration-300 ease-out pointer-events-auto bg-background lg:h-auto lg:translate-x-0 lg:scale-75 lg:opacity-0 lg:transition-all lg:ease-out lg:data-[leave]:scale-75 lg:data-[open]:scale-100 lg:data-[open]:opacity-100 lg:data-[leave]:duration-75 lg:data-[open]:duration-150 lg:data-[leave]:ease-in-out ' | append: ' ' | append: content_class
     endif
 
     assign modal_group = modal_group | default: ''
     assign backdrop_extra_class = backdrop_extra_class | default: ''
-    assign backdrop_class = 'absolute inset-0 -z-10 bg-surface-200/30 opacity-0 data-[open]:opacity-100 data-[leave]:duration-75 data-[open]:duration-150'
+    assign backdrop_base_class = 'absolute inset-0 -z-10 opacity-0 data-[open]:opacity-100 data-[leave]:duration-75 data-[open]:duration-150'
+    if backdrop_extra_class != ''
+        assign backdrop_class = backdrop_base_class | append: ' ' | append: backdrop_extra_class
+    else
+        assign backdrop_class = backdrop_base_class | append: ' bg-primary-background/30'
+    endif
     if blur
         assign backdrop_class = backdrop_class | append: ' backdrop-blur-sm'
-    endif
-    if backdrop_extra_class != ''
-        assign backdrop_class = backdrop_class | append: ' ' | append: backdrop_extra_class
     endif
 -%}
 

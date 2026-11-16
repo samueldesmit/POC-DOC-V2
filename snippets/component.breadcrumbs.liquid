@@ -43,12 +43,6 @@
                     endfor
                 endfor
             endfor
-
-            if second_link == blank
-                assign second_link = collection.url
-                assign second_link_title = collection.title
-                assign active_link = collection.url
-            endif
         when 'product'
             assign current_handle = product.handle
 
@@ -125,60 +119,51 @@
 
     endcase
 
-    if second_link == blank and custom_parent_url != blank
-        assign second_link = custom_parent_url
-        assign second_link_title = custom_parent_title
-        assign third_link = request.path
-        assign third_link_title = custom_current_title | default: page_title
-        assign active_link = request.path
-    endif
-
     assign links_array = first_link | append: ',' | append: second_link | append: ',' | append: third_link | append: ',' | append: fourth_link | append: fifth_link | split: ',' | compact
     assign titles_array = first_link_title | append: ',' | append: second_link_title | append: ',' | append: third_link_title | append: ',' | append: fourth_link_title | append: fifth_link_title | split: ',' | compact
 -%}
 
 {%- if links_array.size > 1 -%}
-    <nav aria-label="Breadcrumb">
-        <ol class="flex flex-wrap items-center justify-start">
-            {%- for link in links_array -%}
-                {%- if link == '' -%}
-                    {%- continue -%}
-                {%- endif -%}
-                {%- unless forloop.first -%}
-                    <li
-                        class="mx-4"
-                        aria-hidden="true"
-                    >
-                        {% render 'component.icon',
-                            type: 'chevron',
-                            class: 'text-current w-3 aspect-square'
-                        %}
-                    </li>
-                {%- endunless -%}
-                <li>
-                    {%- liquid
-                        assign styling = 'font-inter text-xs font-normal'
-
-                        if link == active_link
-                            assign tag = 'span'
-                            assign styling = styling | append: ''
-                            assign attributes = 'aria-current="page"'
-                        else
-                            assign tag = 'a'
-                            assign styling = styling | append: ''
-                            assign attributes = 'href="' | append: link | append: '" '
-                        endif
-                    -%}
-                    <{{ tag }}
-                        class="{{ styling }}"
-                        {{ attributes }}
-                    >
-                        {{- titles_array[forloop.index0] -}}
-                    </{{ tag }}>
+    {%- comment -%}
+        One line, always: the trail keeps its full width on desktop, and where
+        it would not fit — a long article or product title on a phone — the
+        current page truncates instead of wrapping the crumbs over four lines.
+    {%- endcomment -%}
+    <ol class="container flex flex-nowrap items-center justify-start">
+        {%- for link in links_array -%}
+            {%- if link == '' -%}
+                {%- continue -%}
+            {%- endif -%}
+            {%- unless forloop.first -%}
+                <li class="mx-4 shrink-0">
+                    {% render 'component.icon',
+                        type: 'chevron',
+                        class: 'text-current w-3 aspect-square'
+                    %}
                 </li>
-            {%- endfor -%}
-        </ol>
-    </nav>
+            {%- endunless -%}
+            <li class="{% if link == active_link %}min-w-0{% else %}shrink-0{% endif %}">
+                {%- liquid
+                    assign styling = 'font-open link'
+
+                    if link == active_link
+                        assign tag = 'span'
+                        assign styling = styling | append: ' block truncate underline opacity-50'
+                    else
+                        assign tag = 'a'
+                        assign styling = styling | append: ' hover:opacity-50 transition-opacity duration-400'
+                        assign attributes = 'href="' | append: link | append: '" '
+                    endif
+                -%}
+                <{{ tag }}
+                    class="{{ styling }}"
+                    {{ attributes }}
+                >
+                    {{- titles_array[forloop.index0] -}}
+                </{{ tag }}>
+            </li>
+        {%- endfor -%}
+    </ol>
 {%- endif -%}
 
 {%- if links_array.size > 1 -%}

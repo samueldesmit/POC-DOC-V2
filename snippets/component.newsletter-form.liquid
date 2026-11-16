@@ -1,0 +1,98 @@
+{% liquid
+    assign email_id = 'NewsletterForm--' | append: section.id
+    assign email_placeholder = 'newsletter.label' | t
+    assign privacy_label = 'privacy.label' | t
+    assign submit_aria_label = 'newsletter.button_label' | t
+%}
+
+{% capture email_attributes %}
+    aria-required="true"
+    autocorrect="off"
+    autocapitalize="off"
+    autocomplete="email"
+    {% if form.errors %}
+        autofocus
+        aria-invalid="true"
+        aria-describedby="ContactFooter-error"
+    {% elsif form.posted_successfully? %}
+        aria-describedby="ContactFooter-success"
+    {% endif %}
+{% endcapture %}
+
+{% capture email_icon %}
+    {% render 'component.icon', type: 'arrow-right' %}
+{% endcapture %}
+
+{% capture opt_in_el %}
+    {% render 'component.checkbox'
+        id: 'accepts_marketing',
+        name: 'accepts_marketing',
+        label: privacy_label,
+        value: 'yes',
+        required: true,
+        class: ' mt-4',
+        attributes: ''
+
+    %}
+{% endcapture %}
+
+{%- form 'customer', id: 'ContactFooter', class: 'space-y-6' -%}
+    <input
+        type="hidden"
+        name="contact[tags]"
+        value="newsletter"
+    >
+
+    <div class="relative">
+        {%- render 'component.input',
+            id: email_id,
+            name: 'contact[email]',
+            label: '',
+            label_class: '',
+            input_class: 'text-primary',
+            type: 'email',
+            placeholder: email_placeholder,
+            required: true,
+            autocomplete: 'email',
+            autocapitalize: 'off',
+            autocorrect: 'off',
+            spellcheck: false,
+            default_value: '',
+            class: '',
+            attributes: email_attributes
+        -%}
+        {{ opt_in_el }}
+
+        {% render 'component.button',
+            title: submit_aria_label,
+            class: 'absolute right-0 top-0 !p-0 h-[50px] w-[50px]',
+            id: 'Subscribe',
+            type: 'submit',
+            aria_label: submit_aria_label,
+            variant: 'primary',
+            icon: 'full_long_arrow',
+            icon_position: 'right',
+            icon_class: 'w-6 h-6'
+        %}
+    </div>
+    {%- if form.errors -%}
+        <small
+            class="newsletter-form__message form__message"
+            id="ContactFooter-error"
+        >
+            {{- form.errors.translated_fields.email | capitalize }}
+            {{ form.errors.messages.email -}}
+        </small>
+    {%- endif -%}
+
+    {%- if form.posted_successfully? -%}
+        <h3
+            class="newsletter-form__message newsletter-form__message--success form__message"
+            id="ContactFooter-success"
+            tabindex="-1"
+            autofocus
+        >
+            {{- 'newsletter.success' | t }}
+        </h3>
+    {%- endif -%}
+{%- endform -%}

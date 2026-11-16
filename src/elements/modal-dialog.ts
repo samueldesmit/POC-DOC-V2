@@ -1,6 +1,23 @@
 import { subscribe, getTargets, publish } from '../global.js';
-import { disablePageScroll, enablePageScroll } from '@fluejs/noscroll';
 import { customElement } from 'lit/decorators.js';
+
+// Simple body scroll lock that just toggles `data-modal-open` on <html>.
+// CSS handles the rest (overflow:hidden, no scrollbar-width measurement,
+// no body shifting). Reference-counted so nested/sibling modals don't
+// release the lock prematurely.
+let scrollLockCount = 0;
+function disablePageScroll(): void {
+    if (scrollLockCount === 0) {
+        document.documentElement.setAttribute('data-modal-open', '');
+    }
+    scrollLockCount += 1;
+}
+function enablePageScroll(): void {
+    scrollLockCount = Math.max(0, scrollLockCount - 1);
+    if (scrollLockCount === 0) {
+        document.documentElement.removeAttribute('data-modal-open');
+    }
+}
 
 interface ModalDialogEventDetail {
     open?: boolean;
@@ -23,6 +40,23 @@ export class ModalDialog extends HTMLElement {
     private previous?: HTMLElement;
 
     connectedCallback(): void {
+        // Portal to <body> so the modal's `position: fixed` is never trapped
+        // by an ancestor with a transform (e.g. the hide-on-scroll header).
+        if (this.parentElement && this.parentElement !== document.body) {
+            // Sections that re-render — the PDP swaps its whole form on every
+            // variant pick — hand us a fresh copy of a modal already parked in
+            // <body>. Both would answer the same toggle, so the old one goes.
+            const id = this.getAttribute('data-id');
+            if (id) {
+                document.body
+                    .querySelectorAll(`:scope > modal-dialog[data-id="${id}"]`)
+                    .forEach((existing) => existing.remove());
+            }
+
+            document.body.appendChild(this);
+            return;
+        }
+
         const { content: [content] = [] } = getTargets(this);
         const id = this.getAttribute('data-id');
 
@@ -33,10 +67,12 @@ export class ModalDialog extends HTMLElement {
         const header = document.querySelector(
             '#main-header-nav',
         ) as HTMLElement;
-        document.body.style.setProperty(
-            '--header-height',
-            `${header.getBoundingClientRect().height}px`,
-        );
+        if (header) {
+            document.body.style.setProperty(
+                '--header-height',
+                `${header.getBoundingClientRect().height}px`,
+            );
+        }
 
         this.handlers.escapeKeydown = (e: KeyboardEvent) => {
             if (
@@ -67,19 +103,6 @@ export class ModalDialog extends HTMLElement {
                         ].filter(Boolean) as HTMLElement[];
 
                         if (open) {
-                            // Close other modals in the same group
-                            const group = this.getAttribute('data-modal-group');
-                            if (group) {
-                                document.querySelectorAll(
-                                    `${this.tagName}[data-modal-group="${group}"][data-open]:not([data-id="${id}"])`,
-                                ).forEach((sibling) => {
-                                    const siblingId = sibling.getAttribute('data-id');
-                                    if (siblingId) {
-                                        publish('modalToggle', { open: false, id: siblingId, instant: true });
-                                    }
-                                });
-                            }
-
                             this.toggleAttribute('data-open', true);
 
                             document.addEventListener(
@@ -178,9 +201,9 @@ export class ModalDialog extends HTMLElement {
 
                                 if (!open) {
                                     this.style.removeProperty('z-index');
+                                    enablePageScroll();
 
                                     if (!this.previous) {
-                                        enablePageScroll();
                                         publish('modalDialogUpdate', {
                                             open: false,
                                             previous: this,
@@ -248,7 +271,7 @@ export class ModalDialog extends HTMLElement {
     private trapFocus(): void {
         const getFirstAndLastFocusableElements = () => {
             const focusableElements = this.querySelectorAll(
-                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+                'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
             );
 
             return {

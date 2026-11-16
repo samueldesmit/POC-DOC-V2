@@ -39,6 +39,13 @@ export class PDPDetailsBox extends HTMLElement {
         this.setOptionsLoadingState(true);
         const pickedVariant = this.productGetPickedVariant();
 
+        // No variant exists for this option combination
+        if (!pickedVariant) {
+            this.setUnavailableState();
+            this.setOptionsLoadingState(false);
+            return;
+        }
+
         this.updateElements(pickedVariant);
         this.updateUrl(pickedVariant.id);
 
@@ -69,11 +76,17 @@ export class PDPDetailsBox extends HTMLElement {
         return pickedVariantData;
     }
 
-    private getAllProductVariantsJSON() {
-        const allVariants = JSON.parse(
-            this.querySelector('script').textContent,
-        ) as ProductVariant[];
-        return allVariants;
+    private getAllProductVariantsJSON(): ProductVariant[] {
+        // Match the variant data explicitly: apps and JSON-LD may place other
+        // <script> tags inside the form.
+        const script = this.querySelector('script[type="application/json"]');
+        if (!script?.textContent) return [];
+
+        try {
+            return JSON.parse(script.textContent) as ProductVariant[];
+        } catch {
+            return [];
+        }
     }
 
     private updateUrl(variantID: string | number): void {
@@ -109,7 +122,26 @@ export class PDPDetailsBox extends HTMLElement {
         this.setOptionsLoadingState(false);
     }
 
+    // The hidden id input still holds the previously picked variant, so the
+    // add to cart buttons are disabled to keep it from being added instead.
+    // The next valid pick re-renders the form and restores them.
+    private setUnavailableState(): void {
+        this.querySelectorAll<HTMLButtonElement>('[data-atc-button]').forEach(
+            (button) => {
+                button.disabled = true;
+
+                const label = button.dataset.labelUnavailable;
+                if (!label) return;
+
+                const labelElement = button.querySelector('span') ?? button;
+                labelElement.textContent = label;
+            },
+        );
+    }
+
     private setOptionsLoadingState(isLoading: boolean = false): void {
+        this.toggleAttribute('data-loading', isLoading);
+
         if (this.options === null) return;
 
         isLoading

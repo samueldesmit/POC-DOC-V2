@@ -1,0 +1,405 @@
+{% render 'component.animation-open', section: section %}
+
+{% comment %}
+    Requirements:
+    - Add a `countdown_visibility` metaobject with a boolean `visible` field and expose it in this section’s settings.
+    - Create a Flow that schedules a `metaobjectUpsert` call (see snippet below) to flip `visible` to `true/false` at the desired time.
+        {
+            "handle": {
+                "type": "countdown_visibility",
+                "handle": "countdown-visibility"
+            },
+            "metaobject": {
+                "fields": [
+                    {
+                        "key": "visible",
+                        "value": "false"
+                    }
+                ]
+            }
+        }
+{% endcomment %}
+{% liquid
+    assign s = section.settings
+    assign section_id = 'section-' | append: section.id
+    assign end_datetime = s.end_datetime | strip
+    assign is_design_mode = request.design_mode
+    assign show_placeholder = false
+
+    if is_design_mode and end_datetime == blank
+        assign show_placeholder = true
+    endif
+
+    assign has_countdown = false
+    if end_datetime != blank
+        assign has_countdown = true
+    endif
+
+    assign countdown_visibility = true
+    if s.countdown_visibility != blank
+        assign visibility_metaobject = metaobjects.countdown_visibility[s.countdown_visibility]
+        assign countdown_visibility = visibility_metaobject.visible.value
+    endif
+
+    assign should_show = false
+    if countdown_visibility
+        if has_countdown or show_placeholder
+            assign should_show = true
+        endif
+    endif
+%}
+
+{% if should_show %}
+    <div
+        id="{{ section_id }}"
+        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
+        data-countdown-container
+    >
+        {% render 'section-colors', current_section: section %}
+        <div class="{{ s.mobile_padding }} {{ s.desktop_padding }}">
+            <section
+                class="container text-center text-primary"
+                aria-live="polite"
+            >
+                {% if s.title != blank %}
+                    {% render 'component.heading',
+                        tag: 'h2',
+                        variant: 'sm',
+                        content: s.title,
+                        class: 'mb-4 text-primary'
+                    %}
+                {% endif %}
+
+                {% if show_placeholder %}
+                    <div class="mx-auto max-w-lg border border-dashed border-primary/30 bg-background/60 p-6 text-secondary">
+                        {{ 'sections.countdown_banner.placeholder_text' | t }}
+                    </div>
+                {% else %}
+                    <countdown-banner
+                        class="inline-grid grid-cols-4 items-stretch gap-2 sm:gap-3"
+                        role="group"
+                        aria-label="{{ 'sections.countdown_banner.countdown_label' | t }}"
+                        data-end="{{ end_datetime | escape }}"
+                    >
+                        <div class="min-w-[60px] border border-primary/20 px-3 py-2">
+                            <span
+                                class="block tabular-nums text-lg font-semibold leading-tight sm:text-xl"
+                                data-countdown-unit="days"
+                            >
+                                0
+                            </span>
+                            <span
+                                class="block text-xs sm:text-2xs uppercase tracking-[.1em] text-secondary"
+                                data-countdown-label="days"
+                                data-label-singular="{{ 'sections.countdown_banner.day' | t }}"
+                                data-label-plural="{{ 'sections.countdown_banner.days' | t }}"
+                            >
+                                {{- 'sections.countdown_banner.days' | t -}}
+                            </span>
+                        </div>
+                        <div class="min-w-[60px] border border-primary/20 px-3 py-2">
+                            <span
+                                class="block tabular-nums text-lg font-semibold leading-tight sm:text-xl"
+                                data-countdown-unit="hours"
+                            >
+                                00
+                            </span>
+                            <span
+                                class="block text-xs sm:text-2xs uppercase tracking-[.1em] text-secondary"
+                                data-countdown-label="hours"
+                                data-label-singular="{{ 'sections.countdown_banner.hour' | t }}"
+                                data-label-plural="{{ 'sections.countdown_banner.hours' | t }}"
+                            >
+                                {{- 'sections.countdown_banner.hours' | t -}}
+                            </span>
+                        </div>
+                        <div class="min-w-[60px] border border-primary/20 px-3 py-2">
+                            <span
+                                class="block tabular-nums text-lg font-semibold leading-tight sm:text-xl"
+                                data-countdown-unit="minutes"
+                            >
+                                00
+                            </span>
+                            <span
+                                class="block text-xs sm:text-2xs uppercase tracking-[.1em] text-secondary"
+                                data-countdown-label="minutes"
+                                data-label-singular="{{ 'sections.countdown_banner.minute' | t }}"
+                                data-label-plural="{{ 'sections.countdown_banner.minutes' | t }}"
+                            >
+                                {{- 'sections.countdown_banner.minutes' | t -}}
+                            </span>
+                        </div>
+                        <div class="min-w-[60px] border border-primary/20 px-3 py-2">
+                            <span
+                                class="block tabular-nums text-lg font-semibold leading-tight sm:text-xl"
+                                data-countdown-unit="seconds"
+                            >
+                                00
+                            </span>
+                            <span
+                                class="block text-xs sm:text-2xs uppercase tracking-[.1em] text-secondary"
+                                data-countdown-label="seconds"
+                                data-label-singular="{{ 'sections.countdown_banner.second' | t }}"
+                                data-label-plural="{{ 'sections.countdown_banner.seconds' | t }}"
+                            >
+                                {{- 'sections.countdown_banner.seconds' | t -}}
+                            </span>
+                        </div>
+                    </countdown-banner>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+{% endif %}
+
+{% render 'component.animation-close', section: section %}
+
+{% schema %}
+{
+    "name": "Countdown banner",
+    "tag": "section",
+    "class": "section-countdown-banner",
+    "settings": [
+        {
+            "type": "header",
+            "content": "Section Styling"
+        },
+        {
+            "type": "checkbox",
+            "id": "section_styling",
+            "label": "Add styling to section",
+            "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
+            "default": false
+        },
+        {
+            "type": "header",
+            "content": "Section Color Scheme",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "header",
+            "content": "Section Spacing",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "select",
+            "id": "mobile_padding",
+            "label": "Mobile padding",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "py-0",
+                    "label": "None"
+                },
+                {
+                    "value": "py-2",
+                    "label": "Small - 8px"
+                },
+                {
+                    "value": "py-4",
+                    "label": "Medium - 16px"
+                },
+                {
+                    "value": "py-6",
+                    "label": "Large - 24px"
+                }
+            ],
+            "default": "py-0"
+        },
+        {
+            "type": "select",
+            "id": "desktop_padding",
+            "label": "Desktop padding",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "lg:py-0",
+                    "label": "None"
+                },
+                {
+                    "value": "lg:py-4",
+                    "label": "Small - 16px"
+                },
+                {
+                    "value": "lg:py-6",
+                    "label": "Medium - 24px"
+                },
+                {
+                    "value": "lg:py-8",
+                    "label": "Large - 32px"
+                }
+            ],
+            "default": "lg:py-4"
+        },
+        {
+            "type": "header",
+            "content": "Section Margin",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "select",
+            "id": "mobile_margin",
+            "label": "Mobile Section margin",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "mb-0",
+                    "label": "None"
+                },
+                {
+                    "value": "mb-4",
+                    "label": "Small - 16px"
+                },
+                {
+                    "value": "mb-8",
+                    "label": "Medium - 32px"
+                },
+                {
+                    "value": "mb-12",
+                    "label": "Large - 48px"
+                }
+            ],
+            "default": "mb-0"
+        },
+        {
+            "type": "select",
+            "id": "desktop_margin",
+            "label": "Desktop Section margin",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "lg:mb-0",
+                    "label": "None"
+                },
+                {
+                    "value": "lg:mb-8",
+                    "label": "Small - 32px"
+                },
+                {
+                    "value": "lg:mb-12",
+                    "label": "Medium - 48px"
+                },
+                {
+                    "value": "lg:mb-16",
+                    "label": "Large - 64px"
+                }
+            ],
+            "default": "lg:mb-0"
+        },
+        {
+            "type": "header",
+            "content": "Colors",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "background",
+            "label": "Section background color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_text_color",
+            "label": "Primary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_text_color",
+            "label": "Secondary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_button_color",
+            "label": "Primary button background color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_button_text_color",
+            "label": "Primary button text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_button_color",
+            "label": "Secondary button background color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_button_text_color",
+            "label": "Secondary button text color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "header",
+            "content": "Banner content"
+        },
+        {
+            "type": "text",
+            "id": "title",
+            "label": "Heading",
+            "default": "New collection coming in:"
+        },
+        {
+            "type": "text",
+            "id": "end_datetime",
+            "label": "End date and time",
+            "info": "Use ISO 8601 format, e.g. 2025-11-15T09:00:00+01:00 or 2025-11-15."
+        },
+        {
+            "type": "metaobject",
+            "id": "countdown_visibility",
+            "label": "Countdown visibility",
+            "metaobject_type": "countdown_visibility",
+            "info": "Select a metaobject to control visibility. If visibility is set to false, the countdown banner will be hidden."
+        },
+        {
+            "type": "header",
+            "content": "Animation"
+        },
+        {
+            "type": "select",
+            "id": "animation_type",
+            "label": "Animation",
+            "options": [
+                { "value": "none", "label": "None" },
+                { "value": "fade-in", "label": "Fade in" },
+                { "value": "fade-up", "label": "Fade up" },
+                { "value": "fade-down", "label": "Fade down" },
+                { "value": "fade-left", "label": "Fade in from left" },
+                { "value": "fade-right", "label": "Fade in from right" },
+                { "value": "zoom-in", "label": "Zoom in" },
+                { "value": "zoom-out", "label": "Zoom out" },
+                { "value": "stagger", "label": "Stagger" }
+            ],
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
+        }
+    ],
+    "blocks": [],
+    "presets": [
+        {
+            "name": "Countdown banner"
+        }
+    ]
+}
+{% endschema %}

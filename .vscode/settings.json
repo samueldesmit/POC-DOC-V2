@@ -1,28 +1,22 @@
 {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "tailwindCSS.includeLanguages": {
-        "liquid": "html"
+    "[javascript]": {
+        // for `@apply bg-black` in tailwind config
+        "tailwindCSS.experimental.classRegex": ["'@apply([^']*)':"]
     },
-    "tailwindCSS.experimental.classRegex": [
-        ".+?(?:classe?s?|\"class\")\\s*(?:=|:)\\s*(?:'|\"){1}([^'\"]+?)(?:'|\"){1}",
-        "class:\\s*['\"]([^'\"]*)['\"]"
-    ],
-    "tailwindCSS.files.exclude": [
-        "**/.git/**",
-        "**/node_modules/**",
-        "**/.hg/**",
-        "**/.svn/**"
-    ],
     "[liquid]": {
+        // `class: 'bg-black'` variables in liquid
+        "tailwindCSS.experimental.classRegex": [
+            ".+?(?:classe?s?|\"class\")\\s*(?:=|:)\\s*(?:'|\"){1}([^'\"]+?)(?:'|\"){1}"
+        ],
         "editor.defaultFormatter": "Shopify.theme-check-vscode"
     },
     "files.associations": {
-        "**/src/*.css": "tailwindcss",
-        "*.liquid": "liquid"
+        "**/src/*.css": "tailwindcss"
     },
-    "javascript.preferences.importModuleSpecifier": "non-relative",
-    "javascript.preferences.importModuleSpecifierEnding": "minimal",
+    "javascript.preferences.importModuleSpecifier": "non-relative", // use alias (@/)
+    "javascript.preferences.importModuleSpecifierEnding": "minimal", // no extension
     "emmet.includeLanguages": {
         "liquid": "html"
     }
