@@ -1,12 +1,12 @@
 <add-to-cart-quantity-input
     data-quantity-input
-    class="flex border border-[#63666F] min-w-[120px] justify-between"
+    class="flex border border-primary "
 >
     <button
         data-action="decrease"
         type="button"
         name="decrease"
-        aria-label="{{- 'accessibility.decrease_quantity' | t -}}"
+        aria-label="{{- 'sections.cart.accessibility.decrease_quantity' | t -}}"
         disabled
         class="inline-flex items-center justify-center p-2 align-middle disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition"
     >
@@ -16,7 +16,7 @@
         for="PDPQuantity-{{ section.id }}"
         class="sr-only"
     >
-        {{- 'accessibility.quantity_label' | t -}}
+        {{- 'products.product.quantity.label' | t -}}
     </label>
     <input
         data-input
@@ -41,7 +41,7 @@
         data-action="increase"
         type="button"
         name="increase"
-        aria-label="{{- 'accessibility.increase_quantity' | t -}}"
+        aria-label="{{- 'sections.cart.accessibility.increase_quantity' | t -}}"
         class="inline-flex items-center justify-center p-2 align-middle disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition"
     >
         {%- render 'component.icon', type: 'plus', class: 'text-primary' -%}

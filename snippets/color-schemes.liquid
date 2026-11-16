@@ -1,0 +1,69 @@
+{% doc %}
+    Outputs the CSS custom properties for every color scheme in the theme
+    settings. Sections apply a scheme with `color-{{ section.settings.color_scheme }}`
+    and read it through the Tailwind colors (`bg-background`, `text-primary`, ...).
+    All 16 scheme keys are output; the default schemes come from design-tokens.json (npm run tokens).
+
+    The first scheme also applies to :root, so elements outside a section
+    (e.g. modals portaled to <body>) and sections without their own colors
+    get defined values.
+
+    Responsive override from the `lg` breakpoint:
+    `color-{{ mobile_scheme }} lg:color-{{ desktop_scheme }}`
+
+    @example
+    {% render 'color-schemes' %}
+{% enddoc %}
+
+{%- comment -%}
+    All base rules are emitted first and all `lg:` rules after, in one media
+    query. `.color-X` and `.lg\:color-Y` have the same specificity, so with
+    interleaved output the winner at lg depended on the order of the schemes
+    in the settings instead of on the classes a section asked for.
+{%- endcomment -%}
+{% style %}
+    {%- for scheme in settings.color_schemes -%}
+        {%- if forloop.first %}:root,{% endif %}
+        .color-{{ scheme.id }} {
+            --color-background: {{ scheme.settings.background }};
+            --color-primary: {{ scheme.settings.text }};
+            --color-secondary: {{ scheme.settings.text }};
+            --color-primary-background: {{ scheme.settings.primary_background }};
+            --color-primary-foreground: {{ scheme.settings.primary_foreground }};
+            --color-secondary-background: {{ scheme.settings.secondary_background }};
+            --color-secondary-foreground: {{ scheme.settings.secondary_foreground }};
+            --color-arrows: {{ scheme.settings.arrows_color }};
+            --color-svg-background: {{ scheme.settings.svg_background }};
+            --color-shadow: {{ scheme.settings.shadow }};
+            --color-disabled-background: {{ scheme.settings.disabled_background }};
+            --color-disabled-foreground: {{ scheme.settings.disabled_foreground }};
+            --color-info: {{ scheme.settings.info_color }};
+            --color-success: {{ scheme.settings.success_color }};
+            --color-warning: {{ scheme.settings.warning_color }};
+            --color-error: {{ scheme.settings.error_color }};
+        }
+    {%- endfor -%}
+
+    @media (min-width: 1024px) {
+        {%- for scheme in settings.color_schemes -%}
+            .lg\:color-{{ scheme.id }} {
+                --color-background: {{ scheme.settings.background }};
+                --color-primary: {{ scheme.settings.text }};
+                --color-secondary: {{ scheme.settings.text }};
+                --color-primary-background: {{ scheme.settings.primary_background }};
+                --color-primary-foreground: {{ scheme.settings.primary_foreground }};
+                --color-secondary-background: {{ scheme.settings.secondary_background }};
+                --color-secondary-foreground: {{ scheme.settings.secondary_foreground }};
+                --color-arrows: {{ scheme.settings.arrows_color }};
+                --color-svg-background: {{ scheme.settings.svg_background }};
+                --color-shadow: {{ scheme.settings.shadow }};
+                --color-disabled-background: {{ scheme.settings.disabled_background }};
+                --color-disabled-foreground: {{ scheme.settings.disabled_foreground }};
+                --color-info: {{ scheme.settings.info_color }};
+                --color-success: {{ scheme.settings.success_color }};
+                --color-warning: {{ scheme.settings.warning_color }};
+                --color-error: {{ scheme.settings.error_color }};
+            }
+        {%- endfor -%}
+    }
+{% endstyle %}

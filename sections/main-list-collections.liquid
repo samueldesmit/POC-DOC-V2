@@ -2,75 +2,86 @@
     assign s = section.settings
 -%}
 
+{% render 'component.animation-open', section: section %}
+
 <div
     id="section-{{ section.id }}"
     class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
 >
     {% render 'section-colors', current_section: section %}
-    <div class="{{ s.mobile_padding }} {{ s.desktop_padding }}">
-        <div class="container">
-            {% if s.title != blank %}
-                <div class="mb-8 lg:mb-12">
-                    {% render 'component.heading',
-                        tag: 'h1',
-                        variant: 'xl',
-                        class: 'font-cormorant-garamond text-primary text-center',
-                        content: s.title
-                    %}
-                </div>
-            {% endif %}
-            {%- paginate collections by s.collections_per_page -%}
-                <ul
-                    class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-12"
-                    role="list"
-                >
-                    {%- for collection in collections -%}
-                        <li>
-                            <a
-                                class="group block"
-                                href="{{ collection.url }}"
-                            >
-                                <responsive-media class="w-full aspect-[312/360] overflow-hidden mb-4 p-4">
-                                    {% if collection.image != blank %}
-                                        {{
-                                            collection.image
-                                            | image_url: width: 800
-                                            | image_tag:
-                                                class: 'w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-105',
-                                                loading: 'lazy',
-                                                widths: '312,400,624,800',
-                                                sizes: '(min-width: 1024px) 33vw, 50vw'
-                                        -}}
-                                    {% else %}
-                                        <div class="w-full h-full flex items-center justify-center">
-                                            {{
-                                                'collection-1'
-                                                | placeholder_svg_tag: 'placeholder-svg w-full h-full bg-gray-100 text-white'
-                                            }}
-                                        </div>
-                                    {% endif %}
-                                </responsive-media>
-                                <h2 class="font-cormorant-garamond text-primary text-base lg:text-[20px] text-center">
-                                    {{ collection.title }}
-                                </h2>
-                            </a>
-                        </li>
-                    {%- endfor -%}
-                </ul>
-                {% render 'component.pagination',
-                    paginate: paginate,
-                    anchor: ''
+    <div class="container {{ s.mobile_padding }} {{ s.desktop_padding }}">
+        {% if s.title != blank %}
+            <div class="mb-8 lg:mb-12">
+                {% render 'component.heading',
+                    tag: 'h1',
+                    variant: s.heading_size,
+                    class: 'text-primary text-center',
+                    content: s.title
                 %}
-            {%- endpaginate -%}
-        </div>
+            </div>
+        {% endif %}
+        {%- paginate collections by s.collections_per_page -%}
+            <ul
+                class="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-8 lg:gap-x-6 lg:gap-y-12"
+                role="list"
+            >
+                {%- for collection in collections -%}
+                    <li>
+                        <a
+                            class="group block"
+                            href="{{ collection.url }}"
+                        >
+                            <responsive-media class="w-full aspect-[312/360] overflow-hidden mb-4 p-4">
+                                {% if collection.image != blank %}
+                                    {{
+                                        collection.image
+                                        | image_url: width: 800
+                                        | image_tag:
+                                            class: 'w-full h-full object-contain transition-transform duration-300 ease-in-out group-hover:scale-105',
+                                            loading: 'lazy',
+                                            widths: '312,400,624,800',
+                                            sizes: '(min-width: 1024px) 33vw, 50vw'
+                                    -}}
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        {{
+                                            'collection-1'
+                                            | placeholder_svg_tag: 'placeholder-svg w-full h-full bg-gray-100 text-white'
+                                        }}
+                                    </div>
+                                {% endif %}
+                            </responsive-media>
+                            {% render 'component.heading',
+                                tag: 'h2',
+                                variant: s.collection_title_size,
+                                class: 'text-primary text-center',
+                                content: collection.title
+                            %}
+                        </a>
+                    </li>
+                {%- endfor -%}
+            </ul>
+            {% render 'component.pagination',
+                paginate: paginate,
+                anchor: ''
+            %}
+        {%- endpaginate -%}
     </div>
 </div>
 
+{% render 'component.animation-close', section: section %}
+
 {% schema %}
 {
-    "name": "Collection List",
+    "name": "Main Collection List",
     "tag": "section",
-    "class": "section_collection_list",
+    "class": "section",
+    "disabled_on": {
+        "groups": [
+            "header",
+            "footer"
+        ]
+    },
     "settings": [
         {
             "type": "header",
@@ -220,7 +231,59 @@
             "type": "text",
             "id": "title",
             "label": "Section title",
-            "default": "Onze Collecties"
+            "default": "Collections"
+        },
+        {
+            "type": "select",
+            "id": "heading_size",
+            "label": "Heading size",
+            "options": [
+                {
+                    "value": "2xl",
+                    "label": "2XL"
+                },
+                {
+                    "value": "xl",
+                    "label": "XL"
+                },
+                {
+                    "value": "lg",
+                    "label": "Large"
+                },
+                {
+                    "value": "md",
+                    "label": "Medium"
+                },
+                {
+                    "value": "sm",
+                    "label": "Small"
+                }
+            ],
+            "default": "xl"
+        },
+        {
+            "type": "select",
+            "id": "collection_title_size",
+            "label": "Collection title size",
+            "options": [
+                {
+                    "value": "md",
+                    "label": "Medium"
+                },
+                {
+                    "value": "sm",
+                    "label": "Small"
+                },
+                {
+                    "value": "xs",
+                    "label": "Extra small"
+                },
+                {
+                    "value": "2xs",
+                    "label": "2XS"
+                }
+            ],
+            "default": "xs"
         },
         {
             "type": "number",

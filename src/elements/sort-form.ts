@@ -121,7 +121,7 @@ customElements.define(
                             finalUrl,
                         );
                     } catch (error) {
-                        // Ignore product/URL update errors
+                        console.error('Error updating products or URL:', error);
                     }
                 },
             );

@@ -92,7 +92,11 @@ export class CartDiscountComponent extends HTMLElement {
             discountCode &&
             this.errorDiscountCode
         ) {
-            this.errorDiscountCode.textContent = `The discount code '${discountCode}' is not valid`;
+            // The translated message is rendered by Liquid with a [code] placeholder
+            const template = this.errorDiscountCode.dataset.errorTemplate;
+            this.errorDiscountCode.textContent = template
+                ? template.replace('[code]', discountCode)
+                : `The discount code '${discountCode}' is not valid`;
         }
     }
 
@@ -202,7 +206,9 @@ export class CartDiscountComponent extends HTMLElement {
                 await handleCartUpdate(data, this.sectionId);
             }
         } catch (error) {
-            // Ignore non-abort errors
+            if (error instanceof Error && error.name !== 'AbortError') {
+                console.error('Error applying discount:', error);
+            }
         } finally {
             this.abortController = null;
         }
@@ -239,7 +245,9 @@ export class CartDiscountComponent extends HTMLElement {
                 await handleCartUpdate(data, this.sectionId);
             }
         } catch (error) {
-            // Ignore non-abort errors
+            if (error instanceof Error && error.name !== 'AbortError') {
+                console.error('Error removing discount:', error);
+            }
         } finally {
             this.abortController = null;
         }
@@ -248,6 +256,9 @@ export class CartDiscountComponent extends HTMLElement {
     connectedCallback(): void {
         this.sectionId = this.getAttribute('data-section-id');
         if (!this.sectionId) {
+            console.warn(
+                'cart-discount-component: Missing data-section-id attribute',
+            );
             return;
         }
 
@@ -256,6 +267,7 @@ export class CartDiscountComponent extends HTMLElement {
         this.discountInput = this.querySelector('input[name="discount"]');
 
         if (!this.form || !this.discountInput) {
+            console.warn('cart-discount-component: Form or input not found');
             return;
         }
 

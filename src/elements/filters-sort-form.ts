@@ -21,7 +21,6 @@ function typeSafeDebounce<T extends (...args: any[]) => any>(
 
 class FiltersForm extends HTMLElement {
     private unsubscribe?: () => void;
-    private abortController?: AbortController;
 
     connectedCallback(): void {
         const isMobile: boolean = this.hasAttribute('data-mobile');
@@ -110,133 +109,30 @@ class FiltersForm extends HTMLElement {
                                 element.replaceWith(newClearWholeFilter[i]);
                             }
                         });
-
-                        // MOBILE: Update filter options by filter param
-                        const mobileFilterItems = this.querySelectorAll('[data-filter-param]');
-                        const newMobileFilterItems = newFiltersForm.querySelectorAll('[data-filter-param]');
-
-                        mobileFilterItems.forEach((filterItem) => {
-                            const filterParam = filterItem.getAttribute('data-filter-param');
-                            const newFilterItem = Array.from(newMobileFilterItems).find(
-                                (item) => item.getAttribute('data-filter-param') === filterParam
-                            );
-
-                            if (!newFilterItem) return;
-
-                            // Replace filter options (the ul containing checkboxes)
-                            const filterOptions = filterItem.querySelector('[data-target="filters-form.filter-options"]');
-                            const newFilterOptions = newFilterItem.querySelector('[data-target="filters-form.filter-options"]');
-
-                            if (filterOptions && newFilterOptions) {
-                                filterOptions.innerHTML = newFilterOptions.innerHTML;
-                            }
-                        });
                     } else {
-                        const filterAccordions = this.querySelectorAll(
-                            'accordion-component[data-filter-param]',
-                        );
-                        const newFilterAccordions =
-                            newFiltersForm.querySelectorAll(
-                                'accordion-component[data-filter-param]',
-                            );
+                        const {
+                            title: [title] = [],
+                            'filter-title': filterTitles = [],
+                            header: [header] = [],
+                        } = getTargets(this);
+                        const {
+                            title: [newTitle] = [],
+                            'filter-title': newFilterTitles = [],
+                            header: [newHeader] = [],
+                        } = getTargets(newFiltersForm);
 
-                        filterAccordions.forEach((accordion) => {
-                            const filterParam =
-                                accordion.getAttribute('data-filter-param');
-                            const newAccordion = Array.from(
-                                newFilterAccordions,
-                            ).find(
-                                (a) =>
-                                    a.getAttribute('data-filter-param') ===
-                                    filterParam,
-                            );
+                        // Update total count
+                        if (title && newTitle) {
+                            title.replaceWith(newTitle);
+                        }
 
-                            if (!newAccordion) return;
-
-                            // Update filter title
-                            const filterTitle = accordion.querySelector(
-                                '[data-target="filters-form.filter-title"]',
-                            );
-                            const newFilterTitle = newAccordion.querySelector(
-                                '[data-target="filters-form.filter-title"]',
-                            );
-                            if (filterTitle && newFilterTitle) {
-                                filterTitle.innerHTML =
-                                    newFilterTitle.innerHTML;
-                            }
-
-                            // For list filters: replace entire options container
-                            const optionsContainer = accordion.querySelector(
-                                '[data-filter-options-container]',
-                            );
-                            const newOptionsContainer =
-                                newAccordion.querySelector(
-                                    '[data-filter-options-container]',
-                                );
-
-                            if (optionsContainer && newOptionsContainer) {
-                                // Save search input state
-                                const searchInput = accordion.querySelector(
-                                    '[data-filter-search]',
-                                ) as HTMLInputElement | null;
-                                const searchValue = searchInput?.value || '';
-                                const scrollTop = optionsContainer.scrollTop;
-
-                                // Replace options container
-                                optionsContainer.innerHTML =
-                                    newOptionsContainer.innerHTML;
-
-                                // Restore scroll position
-                                optionsContainer.scrollTop = scrollTop;
-
-                                // Re-apply search filter if there was a search value
-                                if (searchValue) {
-                                    const options =
-                                        optionsContainer.querySelectorAll(
-                                            '[data-filter-option]',
-                                        );
-                                    const normalizedQuery = searchValue
-                                        .toLowerCase()
-                                        .trim();
-                                    options.forEach((option) => {
-                                        const label =
-                                            option.textContent?.toLowerCase() ||
-                                            '';
-                                        if (
-                                            normalizedQuery === '' ||
-                                            label.includes(normalizedQuery)
-                                        ) {
-                                            option.classList.remove('hidden');
-                                        } else {
-                                            option.classList.add('hidden');
-                                        }
-                                    });
-                                }
-                            }
-
-                            // For price range: update if not being edited
-                            const priceRangeInputs = accordion.querySelector(
-                                '[data-target="filters-form.price-range-inputs"]',
-                            );
-                            const newPriceRangeInputs =
-                                newAccordion.querySelector(
-                                    '[data-target="filters-form.price-range-inputs"]',
-                                );
-                            if (priceRangeInputs && newPriceRangeInputs) {
-                                const activeElement = document.activeElement;
-                                const isEditingPriceRange =
-                                    priceRangeInputs.contains(activeElement);
-                                if (!isEditingPriceRange) {
-                                    priceRangeInputs.innerHTML =
-                                        newPriceRangeInputs.innerHTML;
-                                }
+                        // Update filter counts
+                        filterTitles.forEach((input, i) => {
+                            if (newFilterTitles[i]) {
+                                input.replaceWith(newFilterTitles[i]);
                             }
                         });
 
-                        // Update header disabled state if exists
-                        const { header: [header] = [] } = getTargets(this);
-                        const { header: [newHeader] = [] } =
-                            getTargets(newFiltersForm);
                         if (header && newHeader) {
                             header.toggleAttribute(
                                 'data-disabled',
@@ -245,12 +141,17 @@ class FiltersForm extends HTMLElement {
                         }
                     }
 
-                    const { 'active-filters': [activeFilters] = [] } =
-                        getTargets(this);
+                    const {
+                        input: inputs = [],
+                        'active-filters': [activeFilters] = [],
+                        'price-range-inputs': [priceRangeInputs] = [],
+                    } = getTargets(this);
 
                     const {
+                        input: newInputs = [],
                         'clear-all': newClearAll = [],
                         'active-filters': [newActiveFilters] = [],
+                        'price-range-inputs': [newPriceRangeInputs] = [],
                     } = getTargets(newFiltersForm);
 
                     // Update active filters
@@ -274,13 +175,24 @@ class FiltersForm extends HTMLElement {
                         );
                     }
 
+                    // Update price range inputs
+                    if (priceRangeInputs && newPriceRangeInputs) {
+                        priceRangeInputs.replaceWith(newPriceRangeInputs);
+                    }
+
+                    // Update inputs states
+                    inputs.forEach((input, i) => {
+                        if (newInputs[i]) {
+                            input.replaceWith(newInputs[i]);
+                        }
+                    });
+
                     clearAll.forEach((clearAllSingle, i) => {
                         if (newClearAll[i]) {
                             clearAllSingle.toggleAttribute(
                                 'data-disabled',
                                 newClearAll[i].hasAttribute('data-disabled'),
                             );
-                            clearAllSingle.innerHTML = newClearAll[i].innerHTML;
                         }
                     });
 
@@ -313,13 +225,8 @@ class FiltersForm extends HTMLElement {
             },
         );
 
-        const handleInput = async (e: Event): Promise<void> => {
+        async function handleInput(this: FiltersForm, e: Event): Promise<void> {
             e.preventDefault();
-
-            if (this.abortController) {
-                this.abortController.abort();
-            }
-            this.abortController = new AbortController();
 
             // Show loading state
             toggleLoadingState(true);
@@ -398,11 +305,9 @@ class FiltersForm extends HTMLElement {
             }
 
             try {
-                const response = await fetch(
+                const sections = await fetch(
                     `${finalUrl}${finalUrl.includes('?') ? '&' : '?'}sections=${sectionId}`,
-                    { signal: this.abortController.signal },
-                );
-                const sections = await response.json();
+                ).then((r) => r.json());
 
                 publish('productsUpdate', { sections });
 
@@ -413,19 +318,19 @@ class FiltersForm extends HTMLElement {
                     finalUrl,
                 );
             } catch (error) {
-                if (error instanceof Error && error.name === 'AbortError') {
-                    return;
-                }
-                // Error handled silently
-                toggleLoadingState(false);
+                console.error('Error updating products or URL:', error);
             }
-        };
+        }
 
-        const debouncedHandleInput = typeSafeDebounce((e: Event): void => {
-            handleInput(e);
-        }, 500);
+        // Create a type-safe debounced version of handleInput
+        const debouncedHandleInput = typeSafeDebounce(
+            function (this: FiltersForm, e: Event): void {
+                handleInput.call(this, e);
+            }.bind(this),
+            500,
+        );
 
-        const handleRangeInput = (e: Event): void => {
+        function handleRangeInput(this: FiltersForm, e: Event): void {
             const currentInput = e.target as HTMLInputElement;
             const priceMinNumberInput = this.querySelector(
                 '[id="filter-filter.v.price.gte"]',
@@ -476,7 +381,7 @@ class FiltersForm extends HTMLElement {
             }
 
             debouncedHandleInput(e);
-        };
+        }
 
         const form = this.querySelector('form');
         if (form) {
@@ -484,31 +389,12 @@ class FiltersForm extends HTMLElement {
                 const target = e.target as HTMLInputElement;
                 const targetType = target.type;
 
-                // Handle filter search inputs separately (don't trigger filter reload)
-                if (target.hasAttribute('data-filter-search')) {
-                    e.stopPropagation();
-                    const accordion = target.closest('accordion-component');
-                    if (accordion) {
-                        const options = accordion.querySelectorAll('[data-filter-option]');
-                        const query = target.value.toLowerCase().trim();
-                        options.forEach((option) => {
-                            const label = option.textContent?.toLowerCase() || '';
-                            if (query === '' || label.includes(query)) {
-                                option.classList.remove('hidden');
-                            } else {
-                                option.classList.add('hidden');
-                            }
-                        });
-                    }
-                    return;
-                }
-
                 if (targetType === 'number') {
                     debouncedHandleInput(e);
                 } else if (targetType === 'range') {
-                    handleRangeInput(e);
+                    handleRangeInput.call(this, e);
                 } else {
-                    handleInput(e);
+                    handleInput.call(this, e);
                 }
             });
         }
@@ -588,7 +474,7 @@ class FiltersForm extends HTMLElement {
                     window.history.pushState({}, '', finalUrl);
                 }
             } catch (error) {
-                // Error handled silently
+                console.error('Error processing URL:', error);
 
                 // Fallback to original behavior
                 const sections = await fetch(
@@ -694,7 +580,7 @@ class FiltersForm extends HTMLElement {
                         finalUrl,
                     );
                 } catch (error) {
-                    // Error handled silently
+                    console.error('Error updating products or URL:', error);
                 }
             }),
         );
@@ -798,7 +684,7 @@ class FiltersForm extends HTMLElement {
                         open: false,
                     } as ModalToggleEvent);
                 } catch (error) {
-                    // Error handled silently
+                    console.error('Error updating products or URL:', error);
                 }
             }
         }
@@ -816,9 +702,6 @@ class FiltersForm extends HTMLElement {
 
     disconnectedCallback(): void {
         if (this.unsubscribe) this.unsubscribe();
-        if (this.abortController) {
-            this.abortController.abort();
-        }
     }
 }
 

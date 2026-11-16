@@ -1,0 +1,117 @@
+{%- doc -%}
+    Renders a cart discount form.
+
+    @param {string} section_id - The section ID
+{%- enddoc -%}
+
+{% liquid
+    assign discount_codes = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+    for item in cart.items
+        for allocation in item.line_level_discount_allocations
+            if allocation.discount_application.type == 'discount_code'
+                assign discount_codes = item.line_level_discount_allocations | slice: forloop.index0 | map: 'discount_application' | map: 'title' | concat: discount_codes
+            endif
+        endfor
+    endfor
+
+    assign discount_codes = discount_codes | uniq
+
+    # Evaluate the boolean expression for the accordion state
+    if discount_codes.size == 0
+        assign accordion_active = false
+    else
+        assign accordion_active = true
+    endif
+    assign title = 'cart.discount' | t
+    assign placeholder = 'cart.discount_code' | t
+%}
+
+{% capture discount_content %}
+  <cart-discount-component
+    data-section-id="{{ section_id }}"
+    class="w-full flex flex-col gap-2"
+  >
+    <div class="py-2">
+      <form
+        class="flex gap-4 items-center"
+        onsubmit="return false;"
+      >
+        {% assign label = 'cart.accessibility.discount' | t %}
+        {% render 'component.input',
+          id: 'cart-discount',
+          name: 'discount',
+          label: label,
+          label_class: 'sr-only',
+          input_class: 'flex-1',
+          type: 'text',
+          placeholder: placeholder,
+          required: true,
+          autocomplete: 'off',
+          autocapitalize: 'off',
+          autocorrect: 'off',
+          spellcheck: false,
+          default_value: '',
+          class: 'flex-1',
+          attributes: ''
+        %}
+        {% assign label = 'cart.apply' | t %}
+        {% render 'component.button',
+          label: label,
+          title: label,
+          type: 'submit',
+          aria_label: label,
+          variant: 'primary'
+        %}
+      </form>
+    </div>
+    <div
+      class="hidden items-center gap-2 py-2 text-primary"
+      role="alert"
+      ref="cartDiscountError"
+    >
+      <small
+        class="hidden"
+        ref="cartDiscountErrorDiscountCode"
+        data-error-template="{{ 'cart.discount_code_error' | t: code: '[code]' }}"
+      >
+        {{ 'cart.discount_code_error' | t: code: 'test' }}
+      </small>
+      <small
+        class="hidden"
+        ref="cartDiscountErrorShipping"
+      >
+        {{ 'cart.shipping_discount_error' | t }}
+      </small>
+    </div>
+    {% if discount_codes.size > 0 %}
+    <ul class="flex flex-wrap gap-2 mt-2">
+      {% for discount_code in discount_codes %}
+        {% assign attributes = 'data-discount-code="' | append: discount_code | append: '"' %}
+        <li
+          class="cart-discount__pill"
+        >
+          {% assign label = 'cart.remove_discount' | t: code: discount_code %}
+          {% render 'component.button',
+            label: discount_code,
+            title: label,
+            class: 'cart-discount__pill-remove gap-2 px-3 py-1 uppercase text-sm hover:opacity-80 transition-opacity',
+            attributes: attributes,
+            aria_label: label,
+            variant: 'ghost',
+            icon: 'close',
+            icon_position: 'right',
+            icon_class: 'w-4 h-4'
+          %}
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </cart-discount-component>
+{% endcapture %}
+
+{% render 'component.accordion',
+    title: title,
+    content: discount_content,
+    active: accordion_active,
+    class: 'px-4 flex flex-col'
+%}

@@ -1,0 +1,218 @@
+{
+  "accessibility": {
+    "close_cart": "Fermer le panier",
+    "header_main_navigation": "Navigation principale",
+    "open_mobile_menu": "Ouvrir le menu mobile",
+    "go_to_homepage": "Aller à la page d'accueil",
+    "open_user_account": "Ouvrir le compte client",
+    "open_cart": "Ouvrir le panier",
+    "header_menu_navigation": "Navigation du menu",
+    "open_hotspot": "Ouvrir les détails du point d'intérêt",
+    "close_search": "Fermer la recherche",
+    "mobile_navigation_menu": "Menu de navigation mobile",
+    "next_slide": "Diapositive suivante",
+    "previous_slide": "Diapositive précédente",
+    "search": "Rechercher",
+    "search_results": "Résultats de recherche",
+    "shopping_cart": "Panier"
+  },
+  "sections": {
+    "cart": {
+      "accessibility": {
+        "decrease_quantity": "Diminuer la quantité",
+        "increase_quantity": "Augmenter la quantité",
+        "remove_item": "Supprimer l'article"
+      }
+    },
+    "countdown_banner": {
+      "days": "Jours",
+      "day": "Jour",
+      "hours": "Heures",
+      "hour": "Heure",
+      "minutes": "Minutes",
+      "minute": "Minute",
+      "seconds": "Secondes",
+      "second": "Seconde",
+      "placeholder_text": "Ajoutez une date de fin valide pour démarrer le compte à rebours.",
+      "countdown_label": "Compte à rebours"
+    }
+  },
+  "general": {
+    "accessibility": {
+      "skip_to_content": "Aller au contenu"
+    },
+    "search": {
+      "search": "Rechercher",
+      "placeholder_text": "Que recherchez-vous ?",
+      "collections": "Collections",
+      "pages": "Pages",
+      "articles": "Articles",
+      "suggestions": "Suggestions",
+      "read_more": "Lire la suite",
+      "no_results": "Aucun résultat trouvé",
+      "no_results_description": "Nous n'avons trouvé aucun résultat pour votre recherche. Veuillez réessayer.",
+      "intial_search": "Que recherchez-vous ?",
+      "intial_search_description": "Recherchez des produits, des collections, des pages et des articles.",
+      "view_all_products": "Voir tous les produits"
+    },
+    "search_page": {
+      "no_results": "Aucun résultat trouvé pour '{{query}}'",
+      "placeholder_text": "Rechercher des produits, collections, pages et articles",
+      "search": "Rechercher",
+      "submit_search": "Rechercher"
+    },
+    "password": {
+      "submit": "Envoyer",
+      "placeholder": "Mot de passe",
+      "error": "Le mot de passe est incorrect.",
+      "label": "Mot de passe"
+    },
+    "breadcrumbs": {
+      "home": "Accueil",
+      "cart": "Panier"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "page": "Page"
+    },
+    "404": {
+      "go_home": "Retour à l'accueil",
+      "title": "Page introuvable"
+    },
+    "meta": {
+      "page": "Page {{ page }}",
+      "tags": "avec l'étiquette \"{{ tags }}\""
+    },
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "pinterest": "Pinterest",
+      "snapchat": "Snapchat",
+      "tiktok": "TikTok",
+      "tumblr": "Tumblr",
+      "vimeo": "Vimeo",
+      "x": "X",
+      "youtube": "YouTube"
+    }
+  },
+  "localization": {
+    "country_label": "Pays",
+    "language_label": "Langue",
+    "save": "Enregistrer",
+    "country_language_selector": "Sélecteur de pays et de langue"
+  },
+  "cart": {
+    "drawer": {
+      "title": "Panier",
+      "empty": "Votre panier est vide",
+      "continue_shopping": "Continuer mes achats",
+      "view_cart": "Voir le panier",
+      "subtotal": "Sous-total",
+      "checkout": "Procéder au paiement"
+    },
+    "main-cart": {
+      "title": "Panier",
+      "empty": "Votre panier est vide",
+      "continue_shopping": "Continuer mes achats",
+      "checkout": "Procéder au paiement",
+      "subtotal": "Sous-total"
+    },
+    "discount": "Remise",
+    "discount_code": "Saisir un code de réduction",
+    "apply": "Appliquer",
+    "discount_code_error": "Le code de réduction '{{code}}' n'est pas valide",
+    "shipping_discount_error": "Les remises sur la livraison s'affichent au paiement, après l'ajout d'une adresse",
+    "remove_discount": "Supprimer le code de réduction {{code}}",
+    "accessibility": {
+      "discount": "Champ de saisie du code de réduction"
+    }
+  },
+  "collection": {
+    "filters": {
+      "off_canvas_filters_header_title": "Filtres",
+      "filter": "Filtrer",
+      "filter_by_label": "Filtrer :",
+      "clear_all": "Tout effacer",
+      "apply": "Appliquer",
+      "active_filters": "Filtres actifs",
+      "product_count_simple": {
+        "one": "{{ count }} produit",
+        "other": "{{ count }} produits"
+      },
+      "max_price": "Prix maximum",
+      "min_price": "Prix minimum",
+      "sort_by_label": "Trier par"
+    },
+    "pagination": {
+      "one_result": "1 résultat",
+      "other_results": "{{count}} résultats",
+      "one_product": "1 produit",
+      "other_products": "{{count}} produits",
+      "one_product_of_count": "1 produit sur {{total}}",
+      "other_products_of_count": "{{count}} produits sur {{total}}",
+      "load_previous": "Charger les précédents",
+      "load_more": "Charger plus"
+    }
+  },
+  "comparison": {
+    "labels": {
+      "image": "Image",
+      "price": "Prix",
+      "product_name": "Nom du produit"
+    }
+  },
+  "products": {
+    "facets": {
+      "from": "À partir de"
+    },
+    "product": {
+      "add_to_cart": "Ajouter au panier",
+      "sold_out": "Épuisé",
+      "unavailable": "Indisponible",
+      "more_from_collection": "Plus de cette collection",
+      "form": {
+        "add_to_cart": "Ajouter au panier",
+        "sold_out": "Épuisé"
+      },
+      "gallery": {
+        "prev_slide": "Diapositive précédente",
+        "next_slide": "Diapositive suivante"
+      },
+      "out_of_stock_form": {
+        "title": "Prévenez-moi dès que disponible",
+        "subtitle": "Nous vous enverrons un e-mail dès que ce produit sera de nouveau en stock.",
+        "placeholder": "Saisissez votre adresse e-mail",
+        "submit": "Envoyer"
+      },
+      "quantity": {
+        "label": "Quantité"
+      },
+      "product_sku": "Réf."
+    }
+  },
+  "blogs": {
+    "no_results": "Aucun résultat trouvé",
+    "article": {
+      "read_more": "Lire la suite"
+    }
+  },
+  "newsletter": {
+    "label": "Adresse e-mail",
+    "button_label": "S'inscrire",
+    "success": "Merci pour votre inscription !"
+  },
+  "privacy": {
+    "label": "J'accepte la politique de confidentialité"
+  },
+  "customer": {
+    "account": {
+      "title": "Compte"
+    },
+    "login_page": {
+      "title": "Connexion"
+    }
+  }
+}

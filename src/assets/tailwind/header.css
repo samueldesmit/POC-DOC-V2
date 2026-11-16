@@ -1,70 +1,153 @@
 @layer components {
-    .announcement-bar--overlay {
-        @apply absolute top-0 z-60;
-    }
-
-    /* Announcement bar - change background when menu is open (only when transparent/overlay) */
-    .announcement-bar {
-        transition: background-color 0.3s ease;
-
-        &.announcement-bar--overlay.menu-open,
-        &.announcement-bar--overlay.desktop-menu-open {
-            background-color: var(--header-menu-bg-color, #06061c) !important;
-        }
-    }
-
     .section--header {
-        @apply z-50 w-full;
+        @apply sticky top-0 right-0 left-0 z-50;
+    }
 
-        /* Smooth transitions for transform and background */
+    /* Transparent header overlay: the header stays sticky/in-flow (no measuring
+       of the announcement bar required), and we pull the first content section
+       up by the header's height so it slides under the (transparent) header.
+       At the top of the page the header sits below the announcement bar in
+       flow; once you scroll past it, sticky pins the header to top:0. */
+    body:has(header-nav[data-transparent-mode]) #MainContent > :first-child {
+        margin-top: calc(-1 * var(--header-height, 0px));
+    }
+
+    /* While a modal is open the page becomes overflow:hidden, which breaks
+       `position: sticky`. Pin the header to its current viewport top
+       (`header-offset - header-height`) so it doesn't jump over the
+       announcement bar when the user is at the top of the page, and stays
+       at top:0 once scrolled past it. */
+    html[data-modal-open] .section--header {
+        position: fixed;
+        top: calc(var(--header-offset, 0px) - var(--header-height, 0px));
+        left: 0;
+        right: 0;
+    }
+
+    /* `position: fixed` pulls the header out of flow, which would shift
+       `#MainContent` up by `--header-height` (visible as the hero jumping
+       up on open and down on close). Reserve the header's flow space so
+       the layout stays put. The transparent-mode rule above still applies:
+       its `-header-height` margin on the first child cancels this padding,
+       so the hero continues to slide under the header as intended. */
+    html[data-modal-open] #MainContent {
+        padding-top: var(--header-height, 0px);
+    }
+
+    #main-header-nav {
+        background-color: var(--header-bg);
+        color: var(--header-text);
         transition:
-            transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-            background-color 0.3s ease;
-        background-color: var(--header-bg-color, #06061c);
-
-        /* Default: relative positioning (normal document flow) */
-        @apply relative;
-
-        /* Overlay mode on homepage - absolute below announcement bar */
-        &.is-overlay-mode {
-            @apply absolute inset-x-0;
-            top: var(--announcement-height, 0px);
-        }
-
-        /* Sticky state - sticks to top when scrolling (for non-overlay pages like PLP) */
-        &.is-sticky {
-            @apply sticky top-0;
-        }
-
-        /* Fixed state - when scrolled past announcement bar */
-        &.is-fixed {
-            @apply fixed top-0 inset-x-0;
-        }
-
-        /* Hidden state - slide up off screen */
-        &.is-sticky.is-hidden,
-        &.is-fixed.is-hidden {
-            transform: translateY(-100%);
-        }
-
-        /* Has background - solid color when scrolling up (kept for consistency) */
-        &.has-bg {
-            background-color: var(--header-menu-bg-color, #06061c);
-        }
-
-        /* Desktop menu open - change background when mega menu is open */
-        &.desktop-menu-open {
-            background-color: var(--header-menu-bg-color, #06061c) !important;
-        }
+            background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+            color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Mobile header bar - change background when menu is open */
-    .mobile-header-bar {
-        transition: background-color 0.3s ease;
-
-        &.menu-open {
-            background-color: var(--header-menu-bg-color, #06061c) !important;
-        }
+    #main-header-nav[data-transparent-mode][data-scrolled] {
+        background-color: var(--header-bg-scrolled);
+        color: var(--header-text-scrolled);
     }
 
+    /* When a mega-menu dropdown is open, swap the transparent header to its
+       solid (scrolled) colors so the menu doesn't sit on top of the hero
+       with see-through text. */
+    body:has(mega-menu[data-open]) #main-header-nav[data-transparent-mode] {
+        background-color: var(--header-bg-scrolled);
+        color: var(--header-text-scrolled);
+    }
+
+    /* Same swap for the mobile offcanvas menu — keep the header bar opaque
+       while the drawer is open so the hamburger/logo/actions row matches
+       the drawer panel instead of showing the hero through it. */
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open]) #main-header-nav[data-transparent-mode] {
+        background-color: var(--header-bg-scrolled);
+        color: var(--header-text-scrolled);
+    }
+
+    .mega-menu-panel {
+        background-color: var(--header-bg);
+        color: var(--header-text);
+    }
+
+    #main-header-nav[data-transparent-mode] .mega-menu-panel {
+        background-color: var(--header-bg-scrolled);
+        color: var(--header-text-scrolled);
+    }
+
+    /* Transparent-state logo swap. When the header is transparent (top of the
+       homepage, no mega-menu open) show the alternate logo; otherwise show
+       the default. The variants live as flex siblings inside the logo link
+       and we toggle via display, so the visible one fills the slot. */
+    .header-logo--transparent {
+        display: none;
+    }
+    #main-header-nav[data-transparent-mode]:not([data-scrolled]) .header-logo--default {
+        display: none;
+    }
+    #main-header-nav[data-transparent-mode]:not([data-scrolled]) .header-logo--transparent {
+        display: block;
+    }
+    body:has(mega-menu[data-open]) #main-header-nav[data-transparent-mode] .header-logo--default {
+        display: block;
+    }
+    body:has(mega-menu[data-open]) #main-header-nav[data-transparent-mode] .header-logo--transparent {
+        display: none;
+    }
+
+    /* Hamburger ↔ X — three lines morph into a cross when the offcanvas
+       menu opens. Top slides down and rotates 45°, middle fades out,
+       bottom slides up and rotates −45°. */
+    .hamburger .hamburger-line {
+        transition:
+            transform 0.2s ease,
+            opacity 0.15s ease;
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger
+        .hamburger-line:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger
+        .hamburger-line:nth-child(2) {
+        opacity: 0;
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger
+        .hamburger-line:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* Fancy variant — spring + extra ½ turn. The outer lines wind up an
+       extra 180° on the way into the X (and back on close), and the
+       middle line collapses horizontally into a point. Back-out ease
+       gives a snappy overshoot. */
+    .hamburger--fancy .hamburger-line {
+        transition:
+            transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+            opacity 0.2s ease;
+        transform-origin: center;
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger--fancy
+        .hamburger-line:nth-child(1) {
+        transform: translateY(7px) rotate(225deg);
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger--fancy
+        .hamburger-line:nth-child(2) {
+        transform: scaleX(0);
+        opacity: 0;
+    }
+    body:has(modal-dialog[data-id="offcanvas-menu"][data-open])
+        .hamburger--fancy
+        .hamburger-line:nth-child(3) {
+        transform: translateY(-7px) rotate(-225deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hamburger .hamburger-line,
+        .hamburger--fancy .hamburger-line {
+            transition: none;
+        }
+    }
 }

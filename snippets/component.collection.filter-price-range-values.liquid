@@ -1,50 +1,6 @@
-<div class="py-4 lg:pt-0">
-    <div class="range-slider h-[2px] relative bg-surface-200"></div>
-    <div class="range-input relative">
-        <label
-            for="range-min-{{ filter.min_value.param_name }}"
-            class="hidden"
-            >Minimum price</label
-        >
-        <input
-            type="range"
-            id="range-min-{{ filter.min_value.param_name }}"
-            class="range-min absolute w-full h-2 -top-1 bg-transparent pointer-events-none appearance-none"
-            min="0"
-            max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
-            {% if filter.min_value.value %}
-                value="{{ filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' | times: 1 }}"
-            {% else %}
-                value="0"
-            {% endif %}
-            step="1"
-            aria-label="Minimum price"
-        >
-        <label
-            for="range-max-{{ filter.max_value.param_name }}"
-            class="hidden"
-            >Maximum price</label
-        >
-        <input
-            type="range"
-            id="range-max-{{ filter.max_value.param_name }}"
-            class="range-max absolute w-full h-2 -top-1 bg-transparent pointer-events-none appearance-none"
-            min="0"
-            max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
-            {% if filter.max_value.value %}
-                value="{{ filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
-            {% else %}
-                value="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
-            {% endif %}
-            step="1"
-            aria-label="Maximum price"
-        >
-    </div>
-</div>
-
-<div class="flex items-center gap-x-4 pt-4">
+<div class="flex items-center gap-x-3">
     <div class="relative flex-1">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary">
+        <span class="absolute left-5 top-[50%] translate-y-[-50%]">
             {{- cart.currency.symbol -}}
         </span>
         <input
@@ -59,12 +15,13 @@
             placeholder="0"
             min="0"
             max="{{ filter.range_max | money_without_currency | replace: '.', '' }}"
-            class="w-full pl-7 pr-3 py-3 border border-brand-400/50 text-center text-primary bg-white"
+            class="w-full pl-7 pr-5 py-4 border border-foreground leading-[1] text-center"
             data-target="filters-form.input"
         >
     </div>
+    <span class="shrink-0 flex-s">-</span>
     <div class="relative flex-1">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-primary">
+        <span class="absolute left-5 top-[50%] translate-y-[-50%]">
             {{- cart.currency.symbol -}}
         </span>
         <input
@@ -79,8 +36,88 @@
             placeholder="{{ filter.range_max | money_without_currency | replace: '.', '' }}"
             min="0"
             max="{{ filter.range_max | money_without_currency | replace: '.', '' }}"
-            class="w-full pl-7 pr-3 py-3 border border-brand-400/50 text-center text-primary bg-white"
+            class="w-full pl-7 pr-5 py-4 border border-foreground leading-[1] text-center"
             data-target="filters-form.input"
         >
     </div>
+</div>
+<div class="pt-5">
+    <div class="range-slider h-1 relative bg-primary-background"></div>
+    <div
+        class="range-input relative"
+        data-target="filters-form.price-range-inputs"
+    >
+        <label
+            for="range-min-{{ filter.min_value.param_name }}"
+            class="hidden"
+            >{{ 'collection.filters.min_price' | t }}</label
+        >
+        <input
+            type="range"
+            id="range-min-{{ filter.min_value.param_name }}"
+            class="range-min absolute w-full h-2 -top-2 bg-transparent pointer-events-none appearance-none"
+            min="0"
+            max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+            {% if filter.min_value.value %}
+                value="{{ filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' | times: 1 }}"
+            {% else %}
+                value="0"
+            {% endif %}
+            step="1"
+            aria-label="{{ 'collection.filters.min_price' | t }}"
+        >
+        <label
+            for="range-max-{{ filter.max_value.param_name }}"
+            class="hidden"
+            >{{ 'collection.filters.max_price' | t }}</label
+        >
+        <input
+            type="range"
+            id="range-max-{{ filter.max_value.param_name }}"
+            class="range-max absolute w-full h-2 -top-2 bg-transparent pointer-events-none appearance-none"
+            min="0"
+            max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
+            {% if filter.max_value.value %}
+                value="{{ filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
+            {% else %}
+                value="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' | ceil }}"
+            {% endif %}
+            step="1"
+            aria-label="{{ 'collection.filters.max_price' | t }}"
+        >
+    </div>
+    {% if filter.range_max %}
+        <div class="pt-5 flex justify-between">
+            <span>0</span>
+            <span>
+                {{
+                    filter.range_max
+                    | times: 0.25
+                    | money_without_currency
+                    | replace: '.', ''
+                    | replace: ',', '.'
+                    | ceil
+                }}
+            </span>
+            <span>
+                {{
+                    filter.range_max
+                    | times: 0.75
+                    | money_without_currency
+                    | replace: '.', ''
+                    | replace: ',', '.'
+                    | ceil
+                }}
+            </span>
+            <span>
+                {{
+                    filter.range_max
+                    | money_without_currency
+                    | replace: '.', ''
+                    | replace: ',', '.'
+                    | ceil
+                }}
+            </span>
+        </div>
+    {% endif %}
 </div>

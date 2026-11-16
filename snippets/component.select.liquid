@@ -29,7 +29,7 @@
     assign align_vertical = align_vertical | default: false, allow_false: true
     assign icon_class = icon_class | default: 'rotate-90 w-3 aspect-square', allow_false: true
 
-    assign container_class = 'relative flex items-center gap-2 px-4 py-3 transition-all duration-300 cursor-pointer lg:hover:bg-gray-light lg:hover:border-highlight justify-between ' | append: container_class
+    assign container_class = 'relative flex items-center gap-2 px-4 py-3 transition-all duration-300 cursor-pointer lg:hover:bg-background lg:hover:border-highlight justify-between ' | append: container_class
 
     if no_border == false
         assign container_class = container_class
@@ -43,7 +43,7 @@
 >
     {%- if title != blank and show_title == true -%}
         <label
-            class="text-xs font-semibold text-surface-500"
+            class="text-xs font-semibold text-primary"
             for="{{ id }}"
         >
             {{- title -}}
@@ -104,7 +104,7 @@
                     {% if is_selected %}
                         selected
                     {% endif %}
-                    class="text-black"
+                    class="text-primary"
                 >
                     {{- option_label | capitalize -}}
                 </option>

@@ -16,7 +16,6 @@ customElements.define(
     'product-grid',
     class ProductGrid extends HTMLElement {
         private unsubscribe?: () => void;
-        private unsubscribeFilterChange?: () => void;
         private unsubscribePagination?: () => void;
         private isLoadingMore = false;
         private autoLoadObserver?: IntersectionObserver;
@@ -27,11 +26,6 @@ customElements.define(
                 this.closest('product-collection')?.getAttribute(
                     'data-section-id',
                 ) || '';
-
-            // Subscribe to loading state - toggle data-loading attribute
-            this.unsubscribeFilterChange = subscribe('filterChange', (isLoading: boolean) => {
-                this.toggleAttribute('data-loading', isLoading);
-            });
 
             this.unsubscribe = subscribe(
                 'productsUpdate',
@@ -187,26 +181,6 @@ customElements.define(
                     // Simple append like inspiration code
                     currentGrid.innerHTML += resGridEl.innerHTML;
 
-                    // Update "Viewed X of Y" text
-                    const viewedCountEl = productCollection.querySelector(
-                        '[data-viewed-count]',
-                    ) as HTMLElement | null;
-                    if (viewedCountEl) {
-                        const pageSize = parseInt(
-                            viewedCountEl.getAttribute('data-page-size') || '0',
-                            10,
-                        );
-                        const total = parseInt(
-                            viewedCountEl.getAttribute('data-total') || '0',
-                            10,
-                        );
-                        const viewed = Math.min(pageSize * currentPage, total);
-                        const template = viewedCountEl.getAttribute('data-template') || `You've viewed ${viewed} of ${total} products`;
-                        viewedCountEl.textContent = template
-                            .replace('VIEWED_PLACEHOLDER', String(viewed))
-                            .replace('TOTAL_PLACEHOLDER', String(total));
-                    }
-
                     // Update URL
                     window.history.pushState(
                         {},
@@ -240,7 +214,7 @@ customElements.define(
                         }
                     }
                 } catch (error) {
-                    // Ignore product load errors
+                    console.error('Error loading more products:', error);
                 } finally {
                     this.isLoadingMore = false;
                 }
@@ -316,7 +290,7 @@ customElements.define(
                         }
                     }
                 } catch (error) {
-                    // Ignore product load errors
+                    console.error('Error loading more products:', error);
                 } finally {
                     this.isLoadingMore = false;
                 }
@@ -476,7 +450,6 @@ customElements.define(
 
         disconnectedCallback(): void {
             if (this.unsubscribe) this.unsubscribe();
-            if (this.unsubscribeFilterChange) this.unsubscribeFilterChange();
             if (this.unsubscribePagination) this.unsubscribePagination();
             if (this.autoLoadObserver) {
                 this.autoLoadObserver.disconnect();

@@ -46,7 +46,7 @@ export class OffcanvasFilters extends HTMLElement {
 
     handleFilterButtonClick(event: Event): void {
         const button = event.currentTarget as HTMLButtonElement;
-        const filterContent = button.closest('li')?.querySelector(
+        const filterContent = button.parentElement?.querySelector(
             '.filter-content',
         ) as HTMLDivElement;
 

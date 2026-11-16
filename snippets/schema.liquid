@@ -1,0 +1,14 @@
+{% render 'schema.organization' %}
+
+{% case template.name %}
+    {% when 'index' %}
+
+    {% when 'page' %}
+        {% if page.suffix == 'over-ons' %}
+            {% render 'schema.about' %}
+        {% endif %}
+    {% when 'author' %}
+        {% render 'schema.author' %}
+    {% when 'collection' %}
+        {% render 'schema.collection' %}
+{% endcase %}

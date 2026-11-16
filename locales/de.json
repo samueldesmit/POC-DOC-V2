@@ -1,0 +1,227 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "accessibility": {
+    "close_cart": "Warenkorb schließen",
+    "header_main_navigation": "Hauptnavigation",
+    "open_mobile_menu": "Mobiles Menü öffnen",
+    "go_to_homepage": "Zur Startseite",
+    "open_user_account": "Benutzerkonto öffnen",
+    "open_cart": "Warenkorb öffnen",
+    "header_menu_navigation": "Menünavigation",
+    "open_hotspot": "Hotspot-Details öffnen",
+    "close_search": "Suche schließen",
+    "mobile_navigation_menu": "Mobiles Navigationsmenü",
+    "next_slide": "Nächste Folie",
+    "previous_slide": "Vorherige Folie",
+    "search": "Suchen",
+    "search_results": "Suchergebnisse",
+    "shopping_cart": "Warenkorb"
+  },
+  "sections": {
+    "cart": {
+      "accessibility": {
+        "decrease_quantity": "Menge verringern",
+        "increase_quantity": "Menge erhöhen",
+        "remove_item": "Artikel entfernen"
+      }
+    },
+    "countdown_banner": {
+      "days": "Tage",
+      "day": "Tag",
+      "hours": "Stunden",
+      "hour": "Stunde",
+      "minutes": "Minuten",
+      "minute": "Minute",
+      "seconds": "Sekunden",
+      "second": "Sekunde",
+      "placeholder_text": "Füge ein gültiges Enddatum hinzu, um den Countdown-Timer zu starten.",
+      "countdown_label": "Countdown"
+    }
+  },
+  "general": {
+    "accessibility": {
+      "skip_to_content": "Zum Inhalt springen"
+    },
+    "search": {
+      "search": "Suchen",
+      "placeholder_text": "Wonach suchst du?",
+      "collections": "Kollektionen",
+      "pages": "Seiten",
+      "articles": "Artikel",
+      "suggestions": "Vorschläge",
+      "read_more": "Mehr lesen",
+      "no_results": "Keine Ergebnisse gefunden",
+      "no_results_description": "Wir konnten keine Ergebnisse für deine Suche finden. Bitte versuche es erneut.",
+      "intial_search": "Wonach suchst du?",
+      "intial_search_description": "Suche nach Produkten, Kollektionen, Seiten und Artikeln.",
+      "view_all_products": "Alle Produkte anzeigen"
+    },
+    "search_page": {
+      "no_results": "Keine Ergebnisse gefunden für '{{query}}'",
+      "placeholder_text": "Produkte, Kollektionen, Seiten und Artikel durchsuchen",
+      "search": "Suchen",
+      "submit_search": "Suchen"
+    },
+    "password": {
+      "submit": "Senden",
+      "placeholder": "Passwort",
+      "error": "Das Passwort ist nicht korrekt.",
+      "label": "Passwort"
+    },
+    "breadcrumbs": {
+      "home": "Startseite",
+      "cart": "Warenkorb"
+    },
+    "pagination": {
+      "label": "Seitennummerierung",
+      "next": "Weiter",
+      "previous": "Zurück",
+      "page": "Seite"
+    },
+    "404": {
+      "go_home": "Zur Startseite",
+      "title": "Seite nicht gefunden"
+    },
+    "meta": {
+      "page": "Seite {{ page }}",
+      "tags": "getaggt \"{{ tags }}\""
+    },
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "pinterest": "Pinterest",
+      "snapchat": "Snapchat",
+      "tiktok": "TikTok",
+      "tumblr": "Tumblr",
+      "vimeo": "Vimeo",
+      "x": "X",
+      "youtube": "YouTube"
+    }
+  },
+  "localization": {
+    "country_label": "Land",
+    "language_label": "Sprache",
+    "save": "Speichern",
+    "country_language_selector": "Länder- und Sprachauswahl"
+  },
+  "cart": {
+    "drawer": {
+      "title": "Warenkorb",
+      "empty": "Dein Warenkorb ist leer",
+      "continue_shopping": "Weiter einkaufen",
+      "view_cart": "Warenkorb anzeigen",
+      "subtotal": "Zwischensumme",
+      "checkout": "Zur Kasse"
+    },
+    "main-cart": {
+      "title": "Warenkorb",
+      "empty": "Dein Warenkorb ist leer",
+      "continue_shopping": "Weiter einkaufen",
+      "checkout": "Zur Kasse",
+      "subtotal": "Zwischensumme"
+    },
+    "discount": "Rabatt",
+    "discount_code": "Rabattcode eingeben",
+    "apply": "Anwenden",
+    "discount_code_error": "Der Rabattcode '{{code}}' ist ungültig",
+    "shipping_discount_error": "Versandrabatte werden nach dem Hinzufügen einer Adresse an der Kasse angezeigt",
+    "remove_discount": "Rabattcode {{code}} entfernen",
+    "accessibility": {
+      "discount": "Eingabefeld für Rabattcode"
+    }
+  },
+  "collection": {
+    "filters": {
+      "off_canvas_filters_header_title": "Filter",
+      "filter": "Filter",
+      "filter_by_label": "Filter:",
+      "clear_all": "Alle löschen",
+      "apply": "Anwenden",
+      "active_filters": "Aktive Filter",
+      "product_count_simple": {
+        "one": "{{ count }} Produkt",
+        "other": "{{ count }} Produkte"
+      },
+      "max_price": "Höchstpreis",
+      "min_price": "Mindestpreis",
+      "sort_by_label": "Sortieren nach"
+    },
+    "pagination": {
+      "one_result": "1 Ergebnis",
+      "other_results": "{{count}} Ergebnisse",
+      "one_product": "1 Produkt",
+      "other_products": "{{count}} Produkte",
+      "one_product_of_count": "1 Produkt von {{total}}",
+      "other_products_of_count": "{{count}} Produkte von {{total}}",
+      "load_previous": "Vorherige laden",
+      "load_more": "Mehr laden"
+    }
+  },
+  "comparison": {
+    "labels": {
+      "image": "Bild",
+      "price": "Preis",
+      "product_name": "Produktname"
+    }
+  },
+  "products": {
+    "facets": {
+      "from": "Ab"
+    },
+    "product": {
+      "add_to_cart": "In den Warenkorb",
+      "sold_out": "Ausverkauft",
+      "unavailable": "Nicht verfügbar",
+      "more_from_collection": "Mehr aus dieser Kollektion",
+      "form": {
+        "add_to_cart": "In den Warenkorb",
+        "sold_out": "Ausverkauft"
+      },
+      "gallery": {
+        "prev_slide": "Vorherige Folie",
+        "next_slide": "Nächste Folie"
+      },
+      "out_of_stock_form": {
+        "title": "Benachrichtige mich, wenn verfügbar",
+        "subtitle": "Wir senden dir eine E-Mail, sobald dieses Produkt wieder auf Lager ist.",
+        "placeholder": "Gib deine E-Mail-Adresse ein",
+        "submit": "Absenden"
+      },
+      "quantity": {
+        "label": "Menge"
+      },
+      "product_sku": "SKU"
+    }
+  },
+  "blogs": {
+    "no_results": "Keine Ergebnisse gefunden",
+    "article": {
+      "read_more": "Mehr lesen"
+    }
+  },
+  "newsletter": {
+    "label": "E-Mail-Adresse",
+    "button_label": "Abonnieren",
+    "success": "Danke für dein Abonnement!"
+  },
+  "privacy": {
+    "label": "Ich stimme der Datenschutzerklärung zu"
+  },
+  "customer": {
+    "account": {
+      "title": "Konto"
+    },
+    "login_page": {
+      "title": "Anmelden"
+    }
+  }
+}

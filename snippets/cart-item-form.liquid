@@ -1,68 +1,62 @@
-<cart-item-form class="flex h-full w-full flex-col">
+<cart-item-form class="size-full">
     <form
         action="{{ routes.cart_url }}"
         data-target="cart-item.form"
-        class="group-data-loading/cart-form:pointer-events-none flex h-full flex-col"
+        class="group-data-loading/cart-form:pointer-events-none h-full"
     >
-        <quantity-input class="flex h-full flex-col">
-            {%- comment -%} Top row: Vendor, Title, Delete {%- endcomment -%}
-            <div class="mb-auto flex items-start justify-between gap-2">
-                <div class="flex flex-col gap-0.5">
-                    {%- if item.product.metafields.custom.winery != blank -%}
-                        <span class="font-inter text-[0.6875rem] font-normal uppercase leading-[150%] tracking-[0.034375rem] text-black">
-                            {{- item.product.metafields.custom.winery.value.title | escape -}}
-                        </span>
-                    {%- endif -%}
-                    <a
-                        href="{{ item.product.url }}"
-                        class="font-cormorant-garamond text-base font-medium leading-[130%] text-black"
-                    >
-                        {{- item.product.title -}}
-                    </a>
-                    {%- unless item.product.has_only_default_variant -%}
-                        <span class="text-[0.75rem] text-black">
+        <quantity-input class="flex h-full flex-col justify-between text-xs">
+            <div class="flex justify-between items-start gap-1">
+                <div class="flex flex-col text-xs">
+                    {%- if item.product.has_only_default_variant -%}
+                        <a
+                            class="line-clamp-2"
+                            href="{{ item.product.url }}"
+                        >
+                            {{- item.product.title -}}
+                        </a>
+                    {%- else -%}
+                        <a href="{{ item.variant.url }}">
+                            {{- item.product.title -}}
+                        </a>
+                        <span class="text-secondary">
                             {{- item.variant.title -}}
                         </span>
-                    {%- endunless -%}
+                    {%- endif -%}
                 </div>
                 <button
                     data-target="quantity-input.remove"
                     type="button"
                     name="remove"
-                    aria-label="Remove item"
-                    class="shrink-0 cursor-pointer p-1 text-black transition-colors hover:text-black/70"
+                    aria-label="{{- 'sections.cart.accessibility.remove_item' | t -}}"
+                    class="w-fit text-xs underline cursor-pointer text-secondary"
                 >
                     {%- render 'component.icon',
                         type: 'delete_bin',
-                        class: 'size-4'
+                        class: 'text-secondary size-4'
                     -%}
                 </button>
             </div>
-
-            {%- comment -%} Bottom row: Quantity controls, Price {%- endcomment -%}
-            <div class="mt-2 flex items-center justify-between gap-2">
-                <div class="flex items-center border border-surface-300">
+            <div class="flex justify-between items-center">
+                <div class="flex">
                     <button
                         data-target="quantity-input.minus"
                         type="button"
                         name="minus"
-                        aria-label="Decrease quantity"
+                        aria-label="{{- 'sections.cart.accessibility.decrease_quantity' | t -}}"
                         {% if item.variant.quantity_rule.min
                             and item.quantity <= item.variant.quantity_rule.min
                         %}
                             disabled
                         {% endif %}
-                        class="inline-flex size-8 items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        class="inline-flex aspect-square items-center justify-center p-2 align-middle disabled:text-primary/10 cursor-pointer"
                     >
-                        {%- render 'component.icon',
-                            type: 'minus',
-                            class: 'size-1.5 w-4 h-4 text-surface-500'
-                        -%}
+                        {%- render 'component.icon', type: 'minus' -%}
                     </button>
                     <input
                         data-target="quantity-input.input"
                         class="hidden"
                         type="number"
+                        disabled
                         name="updates[]"
                         value="{{ item.quantity }}"
                         min="{{ item.variant.quantity_rule.min }}"
@@ -77,7 +71,7 @@
                     >
                     <span
                         data-target="quantity-input.value"
-                        class="inline-flex min-w-[1.5rem] items-center justify-center text-center text-[0.9375rem] font-light leading-[150%] text-surface-500"
+                        class="text-center inline-flex aspect-square items-center justify-center align-middle"
                     >
                         {{ item.quantity }}
                     </span>
@@ -85,7 +79,7 @@
                         data-target="quantity-input.plus"
                         type="button"
                         name="plus"
-                        aria-label="{{- 'accessibility.increase_quantity' | t -}}"
+                        aria-label="{{- 'sections.cart.accessibility.increase_quantity' | t -}}"
                         {% if item.variant.quantity_rule.max
                             and item.quantity >= item.variant.quantity_rule.max
                         %}
@@ -96,24 +90,15 @@
                         %}
                             disabled
                         {% endif %}
-                        class="inline-flex size-8 items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        class="inline-flex aspect-square items-center justify-center p-2 align-middle disabled:text-primary/10 cursor-pointer"
                     >
                         {%- render 'component.icon',
                             type: 'plus',
-                            class: 'size-1.5 w-4 h-4 text-surface-500'
+                            class: 'text-primary'
                         -%}
                     </button>
                 </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-[0.8125rem] font-medium text-surface-500">
-                        {{ item.final_line_price | money }}
-                    </span>
-                    {%- if item.variant.compare_at_price > item.variant.price -%}
-                        <span class="text-[0.6875rem] font-normal text-surface-400 line-through">
-                            {{ item.variant.compare_at_price | times: item.quantity | money }}
-                        </span>
-                    {%- endif -%}
-                </div>
+                {%- render 'cart.item-price', item: item -%}
             </div>
         </quantity-input>
     </form>

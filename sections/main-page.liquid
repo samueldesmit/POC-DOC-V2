@@ -1,13 +1,111 @@
+{%- liquid
+    comment
+        Tables get a scroll wrapper so a wide table scrolls inside the text
+        column instead of pushing the page sideways on mobile.
+    endcomment
+    assign page_body = page.content
+    if page_body contains '<table'
+        assign page_body = page_body | replace: '<table', '<div class="overflow-x-auto"><table' | replace: '</table>', '</table></div>'
+    endif
+-%}
+
+{%- capture content_classes -%}
+    text-primary break-words
+    [&>*+*]:mt-4
+    [&_:is(h1,h2,h3,h4,h5,h6)]:mt-8 [&_:is(h1,h2,h3,h4,h5,h6)]:mb-4
+    [&_:is(h1,h2,h3,h4,h5,h6):first-child]:mt-0
+    [&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_:is(h4,h5,h6)]:text-base
+    [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:opacity-70
+    [&_:is(ul,ol)]:pl-5 [&_ul]:list-disc [&_ol]:list-decimal
+    [&_li+li]:mt-2 [&_li>:is(ul,ol)]:mt-2
+    [&_blockquote]:border-l-2 [&_blockquote]:border-surface-200 [&_blockquote]:pl-4 [&_blockquote]:italic
+    [&_hr]:my-8 [&_hr]:border-surface-200
+    [&_table]:w-full [&_table]:border-collapse [&_table]:text-left
+    [&_:is(th,td)]:border-b [&_:is(th,td)]:border-surface-200 [&_:is(th,td)]:px-3 [&_:is(th,td)]:py-2 [&_:is(th,td)]:align-top
+    [&_th]:bg-surface-100 [&_th]:font-medium
+    [&_:is(img,video)]:h-auto [&_:is(img,video)]:max-w-full
+    [&_iframe]:aspect-video [&_iframe]:h-auto [&_iframe]:w-full
+{%- endcapture -%}
+{%- assign content_classes = content_classes | strip_newlines | split: ' ' | join: ' ' -%}
+
+{% render 'component.animation-open', section: section %}
+
 <div class="p-6 lg:p-8">
   <h1 class="text-xl">
     {{- page.title | default: shop.name -}}
   </h1>
+  {%- if page_body != blank -%}
+    <div class="mt-6 max-w-3xl {{ content_classes }}">
+      {{ page_body }}
+    </div>
+  {%- endif -%}
 </div>
+
+{% render 'component.animation-close', section: section %}
 
 {% schema %}
 {
     "name": "Main Page",
-    "settings": [],
+    "settings": [
+        {
+            "type": "header",
+            "content": "Animation"
+        },
+        {
+            "type": "select",
+            "id": "animation_type",
+            "label": "Animation",
+            "options": [
+                {
+                    "value": "none",
+                    "label": "None"
+                },
+                {
+                    "value": "fade-in",
+                    "label": "Fade in"
+                },
+                {
+                    "value": "fade-up",
+                    "label": "Fade up"
+                },
+                {
+                    "value": "fade-down",
+                    "label": "Fade down"
+                },
+                {
+                    "value": "fade-left",
+                    "label": "Fade in from left"
+                },
+                {
+                    "value": "fade-right",
+                    "label": "Fade in from right"
+                },
+                {
+                    "value": "zoom-in",
+                    "label": "Zoom in"
+                },
+                {
+                    "value": "zoom-out",
+                    "label": "Zoom out"
+                },
+                {
+                    "value": "stagger",
+                    "label": "Stagger"
+                }
+            ],
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
+        }
+    ],
     "blocks": []
 }
 

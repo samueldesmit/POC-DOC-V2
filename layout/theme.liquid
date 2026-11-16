@@ -1,10 +1,5 @@
 <!doctype html>
-<html
-    lang="{{ request.locale.iso_code }}"
-    {% if customer %}
-        data-customer-email="{{ customer.email }}"
-    {% endif %}
->
+<html lang="{{ request.locale.iso_code }}">
     <head>
         <meta charset="UTF-8">
         <meta
@@ -13,7 +8,7 @@
         >
         <meta
             name="theme-color"
-            content="#06061C"
+            content=""
         >
         <link
             rel="canonical"
@@ -30,23 +25,23 @@
 
         <title>
             {{ page_title }}
-            {%- if current_tags %}
-                &ndash; tagged "{{ current_tags | join: ', ' }}"
+            {%- if current_tags -%}
+                {%- assign meta_tags = current_tags | join: ', ' -%}
+                &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}
             {%- endif -%}
             {%- if current_page != 1 %}
-                &ndash; Page {{ current_page -}}
+                &ndash; {{ 'general.meta.page' | t: page: current_page }}
             {%- endif -%}
             {%- unless page_title contains shop.name %}
                 &ndash; {{ shop.name -}}
             {%- endunless -%}
         </title>
 
-        {% if page_description %}
-            <meta
-                name="description"
-                content="{{ page_description | escape }}"
-            >
-        {% endif %}
+        {%- assign meta_description = page_description | default: shop.description | default: shop.name -%}
+        <meta
+            name="description"
+            content="{{ meta_description | escape }}"
+        >
 
         {{ content_for_header }}
 
@@ -56,34 +51,14 @@
 
         {%- render 'theme.fonts' -%}
 
-        {%- render 'preload-media' -%}
-    </head>
-    <body class="bg-white">
-        {% style %}
-            body::selection {
-                background-color: {{ settings.selection_color }};
-                color: white;
-            }
+        {%- render 'color-schemes' -%}
 
-            @media (prefers-reduced-motion: reduce) {
-                *, *::before, *::after {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                    scroll-behavior: auto !important;
-                }
-            }
-        {% endstyle %}
-        {%- if theme.role == 'development' or request.design_mode -%}
-            {% style %}
-                #shopify-pc__banner {
-                    display: none !important;
-                }
-            {% endstyle %}
-        {%- endif -%}
+        {% render 'schema' %}
+    </head>
+    <body class="bg-background">
         {%- # Skip link for better keyboard navigation -%}
         <a
-            class="pointer-events-none fixed z-50 m-8 translate-y-4 bg-white p-4 opacity-0 shadow-xl transition-all duration-300 focus:pointer-events-auto focus:translate-y-0 focus:opacity-100"
+            class="pointer-events-none fixed z-50 m-8 translate-y-4 bg-background p-4 opacity-0 shadow-xl transition-all duration-300 focus:pointer-events-auto focus:translate-y-0 focus:opacity-100"
             href="#MainContent"
         >
             {{ 'general.accessibility.skip_to_content' | t }}

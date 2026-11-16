@@ -17,7 +17,7 @@
                 assign input_class = 'peer appearance-none border border-foreground h-5 w-[22px] relative after:absolute after:left-1.5 after:top-0.5 after:w-[6px] after:h-[11px] after:border-r-2 after:border-b-2 after:border-foreground disabled:opacity-40 after:rotate-45 after:opacity-0 checked:after:opacity-100 after:transition after:duration-100 after:ease-in-out'
             endif
         -%}
-        <li class="flex gap-x-3 items-center font-inter text-sm font-normal leading-tight has-[:checked]:bg-brand-400/10 {{ list_class }}">
+        <li class="flex gap-x-3 items-center text-base font-light {{ list_class }}">
             <input
                 data-target="filters-form.input"
                 {% if swatch_value %}
@@ -37,11 +37,10 @@
                 {% endif %}
             >
             <label
-                class="cursor-pointer peer-disabled:cursor-default peer-disabled:opacity-40 flex gap-1 w-full"
+                class="cursor-pointer peer-disabled:cursor-default peer-disabled:opacity-40 flex justify-between w-full"
                 for="{{- input_id -}}"
             >
-                <span>{{ value.label }}</span>
-                <span class="text-surface-400" data-filter-count>({{ value.count }})</span>
+                <span>{{ value.label }} </span>
             </label>
         </li>
     {%- endfor -%}

@@ -1,0 +1,139 @@
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "url": "{{ shop.url }}",
+        {% if shop.brand.logo != blank %}
+            "logo": "{{ shop.brand.logo | image_url: width: 600 }}",
+        {% endif %}
+        {% if shop.brand.short_description != blank %}
+            "description": {{ shop.brand.short_description | json }},
+        {% endif %}
+        {% if shop.phone != blank %}
+            "telephone": {{ shop.phone | json }},
+        {% endif %}
+        {% if shop.email != blank %}
+            "email": {{ shop.email | json }},
+        {% endif %}
+        {%- comment -%}
+            Joined with a pipe rather than a comma because URLs may contain commas.
+        {%- endcomment -%}
+        {%- liquid
+            assign social_platforms = 'facebook,pinterest,instagram,tiktok,tumblr,snapchat,vimeo' | split: ','
+            assign social_links_output = ''
+            for platform in social_platforms
+                assign platform_value = shop.brand.metafields.social_links[platform].value
+                if platform_value != blank
+                    if social_links_output != ''
+                        assign social_links_output = social_links_output | append: '|'
+                    endif
+                    assign social_links_output = social_links_output | append: platform_value
+                endif
+            endfor
+        -%}
+        {% if social_links_output != '' %}
+            "sameAs": [
+                {%- liquid
+                    assign social_items = social_links_output | split: '|'
+                    for item in social_items
+                        echo item | json
+                        unless forloop.last
+                            echo ','
+                        endunless
+                    endfor
+                -%}
+            ],
+        {% endif %}
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": {{ shop.address.country.iso_code | json }}
+            {% if shop.address.city != blank %}
+                ,"addressLocality": {{ shop.address.city | json }}
+            {% endif %}
+            {% if shop.address.zip != blank %}
+                ,"postalCode": {{ shop.address.zip | json }}
+            {% endif %}
+            {% if shop.address.street != blank %}
+                ,"streetAddress": {{ shop.address.street | json }}
+            {% endif %}
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            {% if shop.phone != blank %}
+                "telephone": {{ shop.phone | json }},
+            {% endif %}
+            {% if shop.email != blank %}
+                "email": {{ shop.email | json }},
+            {% endif %}
+            "contactType": "customer service",
+            "areaServed": {{ shop.address.country.iso_code | json }}
+        }
+        {%- assign stores = metaobjects.store_location.values -%}
+        {%- if stores.size > 0 -%}
+            {%- assign days_schema = 'monday,tuesday,wednesday,thursday,friday,saturday,sunday' | split: ',' -%}
+            {%- assign days_full = 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday' | split: ',' -%}
+            ,"department": [
+                {%- for store in stores -%}
+                    {
+                        "@type": "LocalBusiness",
+                        "name": {{ store.store_name.value | json }},
+                        {%- if store.image.value != blank -%}
+                            "image": {{ store.image.value | image_url: width: 1200 | prepend: "https:" | json }},
+                        {%- endif -%}
+                        {%- if store.phone.value != blank -%}
+                            "telephone": {{ store.phone.value | json }},
+                        {%- endif -%}
+                        {%- if store.email.value != blank -%}
+                            "email": {{ store.email.value | json }},
+                        {%- endif -%}
+                        "url": {{ store.system.url | prepend: request.origin | json }},
+                        "address": {
+                            "@type": "PostalAddress",
+                            "streetAddress": {{ store.street.value | json }},
+                            "postalCode": {{ store.postal_code.value | json }},
+                            "addressLocality": {{ store.city.value | json }},
+                            "addressCountry": {{ shop.address.country.iso_code | json }}
+                        }
+                        {%- if store.latitude.value != blank and store.longitude.value != blank -%}
+                            ,"geo": {
+                                "@type": "GeoCoordinates",
+                                "latitude": {{ store.latitude.value }},
+                                "longitude": {{ store.longitude.value }}
+                            }
+                        {%- endif -%}
+                        {%- assign has_hours = false -%}
+                        {%- for day in days_schema -%}
+                            {%- assign day_hours = store[day].value -%}
+                            {%- if day_hours != blank and day_hours != 'Gesloten' and day_hours != 'gesloten' and day_hours != 'Closed' and day_hours != 'closed' -%}
+                                {%- assign has_hours = true -%}
+                                {%- break -%}
+                            {%- endif -%}
+                        {%- endfor -%}
+                        {%- if has_hours -%}
+                            ,"openingHoursSpecification": [
+                                {%- assign first_spec = true -%}
+                                {%- for day in days_schema -%}
+                                    {%- assign day_hours = store[day].value -%}
+                                    {%- if day_hours != blank and day_hours != 'Gesloten' and day_hours != 'gesloten' and day_hours != 'Closed' and day_hours != 'closed' -%}
+                                        {%- assign hours_parts = day_hours | split: ' - ' -%}
+                                        {%- if hours_parts.size == 2 -%}
+                                            {%- unless first_spec -%},{%- endunless -%}
+                                            {
+                                                "@type": "OpeningHoursSpecification",
+                                                "dayOfWeek": {{ days_full[forloop.index0] | json }},
+                                                "opens": {{ hours_parts[0] | strip | replace: '.', ':' | json }},
+                                                "closes": {{ hours_parts[1] | strip | replace: '.', ':' | json }}
+                                            }
+                                            {%- assign first_spec = false -%}
+                                        {%- endif -%}
+                                    {%- endif -%}
+                                {%- endfor -%}
+                            ]
+                        {%- endif -%}
+                    }{%- unless forloop.last -%},{%- endunless -%}
+                {%- endfor -%}
+            ]
+        {%- endif -%}
+    }
+</script>

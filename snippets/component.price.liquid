@@ -11,20 +11,32 @@
 
     Usage:
       {%- render 'component.price', current_variant: current_variant, class: 'flex gap-x-2' -%}
-
-    @param {object} [current_variant] - Current variant object providing price and compare_at_price
-    @param {string} [class] - Additional classes to add to the container
-    @param {string} [price_class] - Additional classes to add to the price element
-    @param {string} [compare_at_price_class] - Additional classes to add to the compare-at price element
 {%- enddoc -%}
+
+{%- liquid
+    if current_variant.compare_at_price > current_variant.price
+        assign price_class = price_class
+    endif
+
+    assign price_unformatted = current_variant.price | money_without_trailing_zeros
+    assign compare_at_price_unformatted = current_variant.compare_at_price | money_without_trailing_zeros
+
+    capture price_formatted
+        render 'function.price-format', price: price_unformatted
+    endcapture
+
+    capture compare_at_price_formatted
+        render 'function.price-format', price: compare_at_price_unformatted
+    endcapture
+-%}
 
 <div class="flex flex-row gap-1 {{ class }}">
     <span class="{{ price_class }}">
-        {{- current_variant.price | money -}}
+        {{- price_formatted -}}
     </span>
     {%- if current_variant.compare_at_price > current_variant.price -%}
-        <span class="line-through text-surface-400 {{ compare_at_price_class }}">
-            {{- current_variant.compare_at_price | money -}}
+        <span class="line-through text-secondary {{ compare_at_price_class }}">
+            {{- compare_at_price_formatted -}}
         </span>
     {%- endif -%}
 </div>

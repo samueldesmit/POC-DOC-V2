@@ -1,4 +1,3 @@
-import { enablePageScroll } from '@fluejs/noscroll';
 import { publish } from '../global.js';
 import { customElement } from '../utilities/decorators';
 
@@ -21,9 +20,6 @@ const MEGA_MENU_CONFIG = {
         CLOSE_BUTTON: '[data-close-menu]',
         MAIN_HEADER: '#main-header-nav',
         MEGA_MENU: '#mega-menu',
-        SUBMENU_TRIGGER: '[data-submenu-trigger]',
-        SUBMENU_CONTENT: '[data-submenu-content]',
-        SUBMENU_CARD: '[data-submenu-card]',
     },
     CSS_VARIABLES: {
         HEADER_HEIGHT: '--header-height',
@@ -43,27 +39,12 @@ const MEGA_MENU_CONFIG = {
  */
 @customElement('mega-menu')
 export class MegaMenu extends HTMLElement {
-    private scrollDisableCount: number = 0;
-    private resetPageScroll: () => void;
     private eventListeners: Array<{
         element: EventTarget;
         event: string;
         handler: EventListener;
     }> = [];
     private hoverTimeout: number | null = null;
-    private previousScroll: number = 0;
-    private boundScrollHandler: () => void;
-
-    constructor() {
-        super();
-        this.resetPageScroll = () => {
-            for (let i = 0; i < this.scrollDisableCount; i++) {
-                enablePageScroll();
-            }
-            this.scrollDisableCount = 0;
-        };
-        this.boundScrollHandler = this.handleScroll.bind(this);
-    }
 
     connectedCallback(): void {
         this.initializeHeaderHeight();
@@ -97,7 +78,7 @@ export class MegaMenu extends HTMLElement {
                 );
             }
         } catch (error) {
-            // Ignore header height initialization errors
+            console.warn('Failed to initialize header height:', error);
         }
     }
 
@@ -111,6 +92,7 @@ export class MegaMenu extends HTMLElement {
         open = true,
     ): Promise<void> {
         if (!item) {
+            console.warn('toggleDropdown called with null/undefined item');
             return;
         }
 
@@ -131,11 +113,10 @@ export class MegaMenu extends HTMLElement {
             // Normal behavior for opening/closing
             this.updateMenuState(open);
             await this.handleNormalToggle(item as MegaMenuItemElement, open);
-            this.handleScrollState(open);
 
             publish(MEGA_MENU_CONFIG.EVENTS.MEGA_MENU_TOGGLED, { open });
         } catch (error) {
-            // Ignore dropdown toggle errors
+            console.error('Error toggling dropdown:', error);
         }
     }
 
@@ -152,7 +133,7 @@ export class MegaMenu extends HTMLElement {
             // Open the new item without animation
             await newItem.toggle(true, true);
         } catch (error) {
-            // Ignore dropdown content switch errors
+            console.error('Error switching dropdown content:', error);
         }
     }
 
@@ -174,7 +155,7 @@ export class MegaMenu extends HTMLElement {
                     menuItem !== item,
                 );
             } catch (error) {
-                // Ignore menu item toggle errors
+                console.error('Error toggling menu item:', error);
             }
         }
     }
@@ -187,32 +168,32 @@ export class MegaMenu extends HTMLElement {
     }
 
     /**
-     * Handle page scroll state based on dropdown state
-     */
-    private handleScrollState(open: boolean): void {
-        if (open) {
-            // disablePageScroll();
-            this.scrollDisableCount++;
-        } else {
-            const openDropdowns = this.querySelectorAll(
-                MEGA_MENU_CONFIG.SELECTORS.OPEN_DROPDOWN,
-            );
-            if (openDropdowns.length === 0) {
-                this.resetPageScroll();
-            }
-        }
-    }
-
-    /**
      * Setup all event listeners for the mega menu
      */
     private setupEventListeners(): void {
         this.setupClickListeners();
         this.setupKeyboardListeners();
+        this.setupScrollListener();
         this.setupDropdownItemListeners();
         this.setupNonDropdownItemListeners();
-        this.setupSubmenuListeners();
-        this.setupScrollListener();
+    }
+
+    /**
+     * Close any open dropdown when the user scrolls the page.
+     */
+    private setupScrollListener(): void {
+        const scrollHandler = () => {
+            if (this.hasAttribute('data-open')) {
+                this.closeOpenDropdown();
+            }
+        };
+
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+        this.eventListeners.push({
+            element: window,
+            event: 'scroll',
+            handler: scrollHandler,
+        });
     }
 
     /**
@@ -220,13 +201,6 @@ export class MegaMenu extends HTMLElement {
      */
     private setupClickListeners(): void {
         // Close button click handler
-        const curtain = this.querySelector<HTMLElement>('.mega-menu-curtain');
-        if (curtain) {
-            curtain.addEventListener('mouseenter', () => {
-                this.closeOpenDropdown();
-            });
-        }
-
         const closeButtonHandler = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
             const closeButton =
@@ -363,90 +337,6 @@ export class MegaMenu extends HTMLElement {
     }
 
     /**
-     * Setup event listeners for submenu triggers (child links that show grandchild links)
-     */
-    private setupSubmenuListeners(): void {
-        const submenuTriggers = this.querySelectorAll<HTMLElement>(
-            MEGA_MENU_CONFIG.SELECTORS.SUBMENU_TRIGGER,
-        );
-
-        submenuTriggers.forEach((trigger) => {
-            const mouseEnterHandler = () => {
-                const triggerId = trigger.getAttribute('data-submenu-trigger');
-                if (!triggerId) return;
-
-                // Find the parent dropdown container
-                const dropdownContainer = trigger.closest('.grid');
-                if (!dropdownContainer) return;
-
-                // Hide all submenu contents in this dropdown
-                const allContents =
-                    dropdownContainer.querySelectorAll<HTMLElement>(
-                        MEGA_MENU_CONFIG.SELECTORS.SUBMENU_CONTENT,
-                    );
-                allContents.forEach((content) => {
-                    content.classList.add('opacity-0', 'pointer-events-none');
-                    content.classList.remove(
-                        'opacity-100',
-                        'pointer-events-auto',
-                    );
-                });
-
-                // Hide all promotional cards in this dropdown
-                const allCards =
-                    dropdownContainer.querySelectorAll<HTMLElement>(
-                        MEGA_MENU_CONFIG.SELECTORS.SUBMENU_CARD,
-                    );
-                allCards.forEach((card) => {
-                    card.classList.add('opacity-0', 'pointer-events-none');
-                    card.classList.remove('opacity-100', 'pointer-events-auto');
-                });
-
-                // Show the matching submenu content
-                const matchingContent =
-                    dropdownContainer.querySelector<HTMLElement>(
-                        `[data-submenu-content="${triggerId}"]`,
-                    );
-                if (matchingContent) {
-                    matchingContent.classList.remove(
-                        'opacity-0',
-                        'pointer-events-none',
-                    );
-                    matchingContent.classList.add(
-                        'opacity-100',
-                        'pointer-events-auto',
-                    );
-                }
-
-                // Show the matching promotional card
-                const matchingCard =
-                    dropdownContainer.querySelector<HTMLElement>(
-                        `[data-submenu-card="${triggerId}"]`,
-                    );
-                if (matchingCard) {
-                    matchingCard.classList.remove(
-                        'opacity-0',
-                        'pointer-events-none',
-                    );
-                    matchingCard.classList.add(
-                        'opacity-100',
-                        'pointer-events-auto',
-                    );
-                }
-            };
-
-            trigger.addEventListener('mouseenter', mouseEnterHandler);
-
-            // Store for cleanup
-            this.eventListeners.push({
-                element: trigger,
-                event: 'mouseenter',
-                handler: mouseEnterHandler,
-            });
-        });
-    }
-
-    /**
      * Setup event listeners for non-dropdown menu items
      * These should close any open submenus when hovered
      */
@@ -488,41 +378,7 @@ export class MegaMenu extends HTMLElement {
         if (openItem) {
             this.toggleDropdown(openItem, false);
             (this.querySelector(':focus') as HTMLElement)?.blur();
-            this.resetPageScroll();
         }
-    }
-
-    /**
-     * Setup scroll listener to close menu when scrolling down
-     */
-    private setupScrollListener(): void {
-        window.addEventListener('scroll', this.boundScrollHandler, {
-            passive: true,
-        });
-        this.eventListeners.push({
-            element: window,
-            event: 'scroll',
-            handler: this.boundScrollHandler,
-        });
-    }
-
-    /**
-     * Handle scroll events - close menu when scrolling down
-     */
-    private handleScroll(): void {
-        if (!this.hasAttribute('data-open')) {
-            return;
-        }
-
-        const scroll = window.scrollY || 0;
-        const scrollDirection = scroll < this.previousScroll ? 'up' : 'down';
-
-        // Close menu when scrolling down
-        if (scrollDirection === 'down') {
-            this.closeOpenDropdown();
-        }
-
-        this.previousScroll = scroll;
     }
 
     /**
@@ -530,7 +386,6 @@ export class MegaMenu extends HTMLElement {
      */
     disconnectedCallback(): void {
         this.cleanupEventListeners();
-        this.resetPageScroll();
     }
 
     /**

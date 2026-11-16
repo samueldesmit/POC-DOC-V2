@@ -1,119 +1,262 @@
 [
-    {
-        "name": "theme_info",
-        "theme_name": "Strix Owl Nest Theme",
-        "theme_version": "1.0.0",
-        "theme_author": "Strix",
-        "theme_documentation_url": "https://github.com/webweit-gmbh/owls-nest-starter",
-        "theme_support_url": "https://www.strix.net/en"
-    },
-    {
-        "name": "Social media",
-        "settings": [
-            {
-                "type": "header",
-                "content": "Social accounts"
-            },
-            {
-                "type": "text",
-                "id": "social_facebook_link",
-                "label": "Facebook",
-                "placeholder": "https://facebook.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_instagram_link",
-                "label": "Instagram",
-                "placeholder": "http://instagram.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_youtube_link",
-                "label": "YouTube",
-                "placeholder": "https://www.youtube.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_tiktok_link",
-                "label": "TikTok",
-                "placeholder": "https://tiktok.com/@shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_twitter_link",
-                "label": "Twitter",
-                "placeholder": "https://twitter.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_snapchat_link",
-                "label": "Snapchat",
-                "placeholder": "https://www.snapchat.com/add/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_pinterest_link",
-                "label": "Pinterest",
-                "placeholder": "https://pinterest.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_tumblr_link",
-                "label": "Tumblr",
-                "placeholder": "https://shopify.tumblr.com"
-            },
-            {
-                "type": "text",
-                "id": "social_vimeo_link",
-                "label": "Vimeo",
-                "placeholder": "https://vimeo.com/shopify"
-            },
-            {
-                "type": "text",
-                "id": "social_linkedin_link",
-                "label": "LinkedIn",
-                "placeholder": "https://linkedin.com/shopify"
-            },
-            {
-                "type": "checkbox",
-                "id": "social_open_new_tab",
-                "label": "Open links in new tab",
-                "default": false
-            }
-        ]
-    },
-    {
-        "name": "Favicon",
-        "settings": [
-            {
-                "type": "image_picker",
-                "id": "favicon",
-                "label": "favicon",
-                "info": "The favicon is the small icon that appears in the browser tab"
-            }
-        ]
-    },
-    {
-        "name": "Selection Color",
-        "settings": [
-            {
-                "type": "color",
-                "id": "selection_color",
-                "label": "Selection Color",
-                "default": "#B19E5E"
-            }
-        ]
-    },
-    {
-        "name": "Product cards",
-        "settings": [
-            {
-                "type": "checkbox",
-                "id": "show_awards_on_card",
-                "label": "Show awards on product cards",
-                "info": "Overlays product awards (from custom.awards metafield) on the product card image, matching the PDP.",
-                "default": true
-            }
-        ]
-    }
+  {
+    "name": "theme_info",
+    "theme_name": "Strix Kickstarter Theme",
+    "theme_version": "1.0.11",
+    "theme_author": "B.Fijneman & J.Nasser",
+    "theme_documentation_url": "https://github.com/webweit-gmbh/kickstarter",
+    "theme_support_url": "https://www.strix.net/en"
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Social accounts"
+      },
+      {
+        "type": "text",
+        "id": "social_facebook_link",
+        "label": "Facebook",
+        "placeholder": "https://facebook.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_instagram_link",
+        "label": "Instagram",
+        "placeholder": "http://instagram.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube_link",
+        "label": "YouTube",
+        "placeholder": "https://www.youtube.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok_link",
+        "label": "TikTok",
+        "placeholder": "https://tiktok.com/@shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_twitter_link",
+        "label": "Twitter",
+        "placeholder": "https://twitter.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_snapchat_link",
+        "label": "Snapchat",
+        "placeholder": "https://www.snapchat.com/add/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_pinterest_link",
+        "label": "Pinterest",
+        "placeholder": "https://pinterest.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_tumblr_link",
+        "label": "Tumblr",
+        "placeholder": "https://shopify.tumblr.com"
+      },
+      {
+        "type": "text",
+        "id": "social_vimeo_link",
+        "label": "Vimeo",
+        "placeholder": "https://vimeo.com/shopify"
+      },
+      {
+        "type": "text",
+        "id": "social_linkedin_link",
+        "label": "LinkedIn",
+        "placeholder": "https://linkedin.com/shopify"
+      },
+      {
+        "type": "checkbox",
+        "id": "social_open_new_tab",
+        "label": "Open links in new tab",
+        "default": false
+      }
+    ]
+  },
+  {
+    "name": "Logo",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "desktop_logo",
+        "label": "Desktop Logo"
+      },
+      {
+        "type": "image_picker",
+        "id": "mobile_logo",
+        "label": "Mobile Logo"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Will be scaled down to 32 × 32px"
+      }
+    ]
+  },
+  {
+    "name": "Newsletter Klaviyo List ID footer",
+    "settings": [
+      {
+        "type": "text",
+        "id": "newsletter_klaviyo_list_id",
+        "label": "List ID",
+        "info": "This setting should be localized to enable the distinction between both markets and languages within those markets for different subscriber lists in Klaviyo."
+      }
+    ]
+  },
+  {
+    "name": "Color schemes",
+    "settings": [
+      {
+        "type": "color_scheme_group",
+        "id": "color_schemes",
+        "definition": [
+          {
+            "type": "color",
+            "id": "background",
+            "label": "Section Background Color",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "color_background",
+            "id": "background_gradient",
+            "label": "Background Gradient"
+          },
+          {
+            "type": "color",
+            "id": "text",
+            "label": "Text Color",
+            "default": "#000000"
+          },
+          {
+            "type": "color",
+            "id": "primary_background",
+            "label": "Primary Button Color",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "color",
+            "id": "primary_foreground",
+            "label": "Primary Button Label Color",
+            "default": "#000000"
+          },
+          {
+            "type": "color",
+            "id": "secondary_background",
+            "label": "Secondary Button Color",
+            "default": "#000000"
+          },
+          {
+            "type": "color",
+            "id": "secondary_foreground",
+            "label": "Secondary Button Label Color",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "color",
+            "id": "arrows_color",
+            "label": "Arrows Color",
+            "default": "#000000"
+          },
+          {
+            "type": "color",
+            "id": "svg_background",
+            "label": "SVG Background Color",
+            "default": "#BF8B66"
+          },
+          {
+            "type": "color",
+            "id": "shadow",
+            "label": "Shadow Color",
+            "default": "#D3D3D3"
+          },
+          {
+            "type": "color",
+            "id": "disabled_background",
+            "label": "Button Color Disabled",
+            "default": "#BABABA"
+          },
+          {
+            "type": "color",
+            "id": "disabled_foreground",
+            "label": "Button Label Color Disabled",
+            "default": "#F3F3F3"
+          },
+          {
+            "type": "color",
+            "id": "info_color",
+            "label": "Info Color",
+            "default": "#3FA7D6"
+          },
+          {
+            "type": "color",
+            "id": "success_color",
+            "label": "Success Color",
+            "default": "#76A030"
+          },
+          {
+            "type": "color",
+            "id": "warning_color",
+            "label": "Warning Color",
+            "default": "#FFB538"
+          },
+          {
+            "type": "color",
+            "id": "error_color",
+            "label": "Error Color",
+            "default": "#FF674D"
+          }
+        ],
+        "role": {
+          "text": "text",
+          "background": {
+            "solid": "background",
+            "gradient": "background_gradient"
+          },
+          "links": "primary_foreground",
+          "icons": "text",
+          "primary_button": "primary_background",
+          "secondary_button": "secondary_background",
+          "on_primary_button": "primary_foreground",
+          "on_secondary_button": "secondary_foreground",
+          "primary_button_border": "primary_background",
+          "secondary_button_border": "secondary_background"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Markets price format",
+    "settings": [
+      {
+        "type": "text",
+        "id": "markets_price_format",
+        "label": "Price Format market",
+        "info": "Comma separated list of market codes. Add market where currency code needs to come after the price.",
+        "default": "DE,FR"
+      }
+    ]
+  },
+  {
+    "name": "Animations",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_animations",
+        "label": "Enable scroll animations",
+        "info": "Reveals each section as it scrolls into view using GSAP. Per-section options live in each section's settings.",
+        "default": true
+      }
+    ]
+  }
 ]

@@ -1,0 +1,227 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+    "accessibility": {
+        "close_cart": "Close cart",
+        "header_main_navigation": "Main navigation",
+        "open_mobile_menu": "Open mobile menu",
+        "go_to_homepage": "Go to homepage",
+        "open_user_account": "Open user account",
+        "open_cart": "Open cart",
+        "header_menu_navigation": "Menu navigation",
+        "open_hotspot": "Open hotspot details",
+        "close_search": "Close search",
+        "mobile_navigation_menu": "Mobile navigation menu",
+        "next_slide": "Next slide",
+        "previous_slide": "Previous slide",
+        "search": "Search",
+        "search_results": "Search results",
+        "shopping_cart": "Shopping cart"
+    },
+    "sections": {
+        "cart": {
+            "accessibility": {
+                "decrease_quantity": "Decrease quantity",
+                "increase_quantity": "Increase quantity",
+                "remove_item": "Remove item"
+            }
+        },
+        "countdown_banner": {
+            "days": "Days",
+            "day": "Day",
+            "hours": "Hours",
+            "hour": "Hour",
+            "minutes": "Minutes",
+            "minute": "Minute",
+            "seconds": "Seconds",
+            "second": "Second",
+            "placeholder_text": "Add a valid end date to start the countdown timer.",
+            "countdown_label": "Countdown"
+        }
+    },
+    "general": {
+        "accessibility": {
+            "skip_to_content": "Skip to content"
+        },
+        "search": {
+            "search": "Search",
+            "placeholder_text": "What are you looking for?",
+            "collections": "Collections",
+            "pages": "Pages",
+            "articles": "Articles",
+            "suggestions": "Suggestions",
+            "read_more": "Read more",
+            "no_results": "No results found",
+            "no_results_description": "We couldn't find any results for your search. Please try again.",
+            "intial_search": "What are you looking for?",
+            "intial_search_description": "Search for products, collections, pages, and articles.",
+            "view_all_products": "View all products"
+        },
+        "search_page": {
+            "no_results": "No results found for '{{query}}'",
+            "placeholder_text": "Search products, collections, pages, and articles",
+            "search": "Search",
+            "submit_search": "Search"
+        },
+        "password": {
+            "submit": "Submit",
+            "placeholder": "Password",
+            "error": "The password is incorrect.",
+            "label": "Password"
+        },
+        "breadcrumbs": {
+            "home": "Home",
+            "cart": "Cart"
+        },
+        "pagination": {
+            "label": "Pagination",
+            "next": "Next",
+            "previous": "Previous",
+            "page": "Page"
+        },
+        "404": {
+            "go_home": "Go home",
+            "title": "Page not found"
+        },
+        "meta": {
+            "page": "Page {{ page }}",
+            "tags": "tagged \"{{ tags }}\""
+        },
+        "social": {
+            "facebook": "Facebook",
+            "instagram": "Instagram",
+            "linkedin": "LinkedIn",
+            "pinterest": "Pinterest",
+            "snapchat": "Snapchat",
+            "tiktok": "TikTok",
+            "tumblr": "Tumblr",
+            "vimeo": "Vimeo",
+            "x": "X",
+            "youtube": "YouTube"
+        }
+    },
+    "localization": {
+        "country_label": "Country",
+        "language_label": "Language",
+        "save": "Save",
+        "country_language_selector": "Country and language selector"
+    },
+    "cart": {
+        "drawer": {
+            "title": "Cart",
+            "empty": "Your cart is empty",
+            "continue_shopping": "Continue shopping",
+            "view_cart": "View cart",
+            "subtotal": "Subtotal",
+            "checkout": "Checkout"
+        },
+        "main-cart": {
+            "title": "Cart",
+            "empty": "Your cart is empty",
+            "continue_shopping": "Continue shopping",
+            "checkout": "Checkout",
+            "subtotal": "Subtotal"
+        },
+        "discount": "Discount",
+        "discount_code": "Enter discount code",
+        "apply": "Apply",
+        "discount_code_error": "The discount code '{{code}}' is not valid",
+        "shipping_discount_error": "Shipping discounts are shown at checkout after adding an address",
+        "remove_discount": "Remove discount code {{code}}",
+        "accessibility": {
+            "discount": "Discount code input"
+        }
+    },
+    "collection": {
+        "filters": {
+            "off_canvas_filters_header_title": "Filter",
+            "filter": "Filter",
+            "filter_by_label": "Filter:",
+            "clear_all": "Clear all",
+            "apply": "Apply",
+            "active_filters": "Active filters",
+            "product_count_simple": {
+                "one": "{{ count }} product",
+                "other": "{{ count }} products"
+            },
+            "max_price": "Maximum price",
+            "min_price": "Minimum price",
+            "sort_by_label": "Sort by"
+        },
+        "pagination": {
+            "one_result": "1 result",
+            "other_results": "{{count}} results",
+            "one_product": "1 product",
+            "other_products": "{{count}} products",
+            "one_product_of_count": "1 product of {{total}}",
+            "other_products_of_count": "{{count}} products of {{total}}",
+            "load_previous": "Load previous",
+            "load_more": "Load more"
+        }
+    },
+    "comparison": {
+        "labels": {
+            "image": "Image",
+            "price": "Price",
+            "product_name": "Product name"
+        }
+    },
+    "products": {
+        "facets": {
+            "from": "From"
+        },
+        "product": {
+            "add_to_cart": "Add to cart",
+            "sold_out": "Sold out",
+            "unavailable": "Unavailable",
+            "more_from_collection": "More from this collection",
+            "form": {
+                "add_to_cart": "Add to cart",
+                "sold_out": "Sold out"
+            },
+            "gallery": {
+                "prev_slide": "Previous slide",
+                "next_slide": "Next slide"
+            },
+            "out_of_stock_form": {
+                "title": "Notify me when available",
+                "subtitle": "We'll send you an email when this product is back in stock.",
+                "placeholder": "Enter your email address",
+                "submit": "Submit"
+            },
+            "quantity": {
+                "label": "Quantity"
+            },
+            "product_sku": "SKU"
+        }
+    },
+    "blogs": {
+        "no_results": "No results found",
+        "article": {
+            "read_more": "Read more"
+        }
+    },
+    "newsletter": {
+        "label": "Email address",
+        "button_label": "Subscribe",
+        "success": "Thanks for subscribing!"
+    },
+    "privacy": {
+        "label": "I agree to the privacy policy"
+    },
+    "customer": {
+        "account": {
+            "title": "Account"
+        },
+        "login_page": {
+            "title": "Log in"
+        }
+    }
+}

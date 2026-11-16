@@ -1,0 +1,6 @@
+{%- liquid
+    assign anim = section.settings.animation_type
+    if settings.enable_animations and anim != blank and anim != 'none'
+        echo '</scroll-animate>'
+    endif
+-%}

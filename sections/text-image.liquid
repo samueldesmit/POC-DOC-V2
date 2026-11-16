@@ -1,292 +1,96 @@
 {% liquid
     assign s = section.settings
     assign section_id = 'section-' | append: section.id
-    assign has_mobile_media = false
-    assign show_section = true
-    if s.mobile_image != blank
-        assign has_mobile_media = true
-    endif
-    if s.image_position == 'right'
-        assign text_order = 'lg:order-1'
-        assign image_order = 'lg:order-3'
-        assign grid_template = 'lg:grid-cols-[minmax(0,_0.721fr)_auto_minmax(0,_1fr)]'
-        if s.animation_style == 'split-sides'
-            assign text_animation = 'gsap-slide-from-left-late'
-            assign image_animation = 'gsap-slide-from-right-late'
-        else
-            assign text_animation = ''
-            assign image_animation = ''
-        endif
-    else
-        assign text_order = 'lg:order-3'
-        assign image_order = 'lg:order-1'
-        assign grid_template = 'lg:grid-cols-[minmax(0,_1fr)_auto_minmax(0,_0.721fr)]'
-        if s.animation_style == 'split-sides'
-            assign text_animation = 'gsap-slide-from-right-late'
-            assign image_animation = 'gsap-slide-from-left-late'
-        else
-            assign text_animation = ''
-            assign image_animation = ''
-        endif
-    endif
-    if s.mobile_image_position == 'down'
-        assign mobile_text_order = 'order-1'
-        assign mobile_image_order = 'order-3'
-    else
-        assign mobile_text_order = 'order-3'
-        assign mobile_image_order = 'order-1'
-    endif
-
-    if s.visibility_audience == 'premium_only'
-        assign show_section = false
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = true
-            endif
-        endif
-    elsif s.visibility_audience == 'non_premium_only'
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = false
-            endif
-        endif
-    endif
 %}
 
-{% if show_section %}
-    <div
-        id="{{ section_id }}"
-        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
-    >
-        {% render 'section-colors', current_section: section %}
-        <div class="container {{ s.desktop_padding }} {{ s.mobile_padding }}">
-            {% if s.animation_style != blank and s.animation_style != 'none' and s.animation_style != 'split-sides' -%}
-                <gsap-section data-animation="{{ s.animation_style }}">
-            {%- endif %}
-            {% if s.animation_style == 'split-sides' %}<gsap-elements>{% endif %}
-                <div class="grid grid-cols-1 items-stretch gap-10 {{ grid_template }} lg:gap-[5.875rem]">
-                    <div class="{{ mobile_text_order }} {{ text_order }} {{ text_animation }} flex flex-col justify-center {% if s.text_alignment == 'center' %}text-center items-center{% elsif s.text_alignment == 'right' %}text-right items-end{% else %}text-left items-start{% endif %} lg:max-w-[25rem] gap-5 lg:gap-6">
-                        {% if s.logo != blank
-                            or s.heading != blank
-                            or s.winery_article != blank
-                        %}
-                            <div class="flex flex-col gap-0">
-                                {% if s.winery_article.metafields.custom.winery_logo
-                                        != blank
-                                %}
-                                    {{-
-                                        s.winery_article.metafields.custom.winery_logo
-                                        | image_url: width: 200
-                                        | image_tag:
-                                            class: 'w-[6.25rem] h-auto mb-1 lg:mb-2',
-                                            loading: 'lazy'
-                                    -}}
-                                {% elsif s.logo != blank %}
-                                    {{-
-                                        s.logo
-                                        | image_url: width: 200
-                                        | image_tag:
-                                            class: 'w-[6.25rem] h-auto mb-1 lg:mb-2',
-                                            loading: 'lazy'
-                                    -}}
-                                {% endif %}
-                                {% if s.winery_article.metafields.custom.extra_title
-                                        != blank
-                                %}
-                                    {% render 'component.heading',
-                                        tag: 'h2',
-                                        variant: s.heading_size,
-                                        content: s.winery_article.metafields.custom.extra_title,
-                                        class: 'text-primary font-cormorant-garamond font-semibold text-[30px] lg:text-[40px]'
-                                    %}
-                                {% elsif s.winery_article.title != blank %}
-                                    {% render 'component.heading',
-                                        tag: 'h2',
-                                        variant: s.heading_size,
-                                        content: s.winery_article.title,
-                                        class: 'text-primary font-cormorant-garamond font-semibold text-[30px] lg:text-[40px]'
-                                    %}
-                                {% elsif s.heading != blank %}
-                                    {% render 'component.heading',
-                                        tag: 'h2',
-                                        variant: s.heading_size,
-                                        content: s.heading,
-                                        class: 'text-primary font-cormorant-garamond font-semibold text-[30px] lg:text-[40px]'
-                                    %}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        {% if s.winery_article.metafields.custom.extra_description
-                                != blank
-                        %}
-                            <div class="last:mb-6 space-y-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 text-primary">
-                                {{ s.winery_article.metafields.custom.extra_description }}
-                            </div>
-                        {% elsif s.winery_article.excerpt != blank %}
-                            <div class="last:mb-6 space-y-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 text-primary">
-                                {{ s.winery_article.excerpt }}
-                            </div>
-                        {% elsif s.text != blank %}
-                            <div class="last:mb-6 space-y-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 text-primary">
-                                {{ s.text }}
-                            </div>
-                        {% endif %}
+{% render 'component.animation-open', section: section %}
 
-                        {% if s.button_text != blank
-                            and s.button_url != blank
-                            or s.winery_article != blank
-                        %}
-                            {% liquid
-                                if s.winery_article != blank
-                                    assign button_text = 'sections.text_image.more_about' | t: winery_title: s.winery_article.title
-                                    assign button_url = s.winery_article.url
-                                else
-                                    assign button_text = s.button_text
-                                    assign button_url = s.button_url
-                                endif
-                            %}
-                            {% render 'component.button',
-                                label: button_text,
-                                title: button_text,
-                                href: button_url,
-                                class: 'w-fit justify-center text-center md:w-auto !font-normal text-[0.875rem]',
-                                id: button_text,
-                                attributes: '',
-                                type: 'button',
-                                name: button_text,
-                                aria_label: button_text,
-                                aria_describedby: button_text,
-                                style: s.button_style,
-                                size: '',
-                                icon: '',
-                                icon_position: '',
-                                icon_class: '',
-                                css_variables: '',
-                                disabled: false,
-                                loading: false,
-                                translate: false
-                            %}
-                        {% endif %}
+<div
+    id="{{ section_id }}"
+    class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
+>
+    {% render 'section-colors', current_section: section %}
+    <div class="container {{ s.desktop_padding }} {{ s.mobile_padding }}">
+        <div class="flex flex-col {% if s.image_position == 'right' %}lg:flex-row{% else %}lg:flex-row-reverse{% endif %} gap-8 lg:gap-12 items-stretch">
+            <div class="lg:w-1/2 flex flex-col justify-center {% if s.text_alignment == 'center' %}text-center items-center{% elsif s.text_alignment == 'right' %}text-right items-end{% else %}text-left items-start{% endif %}">
+                {% if s.subheading != blank %}
+                    <p class="uppercase text-sm tracking-wider mb-2 text-secondary">
+                        {{ s.subheading }}
+                    </p>
+                {% endif %}
+
+                {% if s.heading != blank %}
+                    {% render 'component.heading',
+                        tag: 'h2',
+                        variant: s.heading_size,
+                        content: s.heading,
+                        class: 'mb-4 text-primary'
+                    %}
+                {% endif %}
+
+                {% if s.text != blank %}
+                    <div class="last:mb-6 space-y-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 text-primary">
+                        {{ s.text }}
                     </div>
+                {% endif %}
 
-                    <div
-                        class="order-2 block h-px w-full opacity-50 lg:order-2 lg:h-auto lg:w-px self-stretch"
-                        style="background-color: {{ s.divider_color | default: '#B19E5E' }};"
-                        aria-hidden="true"
-                    ></div>
+                {% if s.button_text != blank and s.button_url != blank %}
+                    {% render 'component.button',
+                        label: s.button_text,
+                        title: s.button_text,
+                        href: s.button_url,
+                        class: 'mt-4',
+                        aria_label: s.button_text,
+                        variant: s.button_style
+                    %}
+                {% endif %}
+            </div>
 
-                    <div class="{{ mobile_image_order }} {{ image_order }} {{ image_animation }} flex">
-                        <responsive-media class="w-full h-full {{ s.image_aspect_ratio | default: 'aspect-671/789' }} flex-1">
-                            {% if has_mobile_media %}
-                                <div class="hidden lg:block h-full w-full">
-                            {% endif %}
-
-                            {% if s.winery_article.metafields.custom.extra_image
-                                    != blank
+            <div class="lg:w-1/2 flex">
+                <responsive-media class="w-full h-full aspect-4/3 flex-1">
+                    {% if s.image != blank %}
+                        {{-
+                            s.image
+                            | image_url: width: 1200
+                            | image_tag:
+                                class: 'w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105',
+                                loading: 'lazy'
+                        -}}
+                    {% endif %}
+                    {% if s.enable_overlay %}
+                        {% if s.overlay_type == 'color' %}
+                            <div class="absolute inset-0 bg-black" style="opacity: {{ s.overlay_opacity | divided_by: 100.0 }};"></div>
+                        {% elsif s.mobile_gradient != blank
+                            and s.desktop_gradient != blank
+                        %}
+                            {% render 'component.gradient',
+                                mobile_bg: s.mobile_gradient,
+                                desktop_bg: s.desktop_gradient,
+                                mobile_visible: true,
+                                desktop_visible: true
                             %}
-                                <div class="h-full w-full flex items-center justify-center">
-                                    {{
-                                        s.winery_article.metafields.custom.extra_image
-                                        | image_url: width: 1200
-                                        | image_tag:
-                                            class: 'w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105',
-                                            loading: 'lazy',
-                                            widths: '375,750,1100,1200',
-                                            sizes: '(min-width: 1024px) 50vw, 100vw'
-                                    }}
-                                </div>
-                            {% elsif s.winery_article.image != blank %}
-                                {{-
-                                    s.winery_article.image
-                                    | image_url: width: 1200
-                                    | image_tag:
-                                        class: 'w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105',
-                                        loading: 'lazy',
-                                        widths: '375,750,1100,1200',
-                                        sizes: '(min-width: 1024px) 50vw, 100vw'
-                                -}}
-                            {% elsif s.image != blank %}
-                                {{-
-                                    s.image
-                                    | image_url: width: 1200
-                                    | image_tag:
-                                        class: 'w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105',
-                                        loading: 'lazy',
-                                        widths: '375,750,1100,1200',
-                                        sizes: '(min-width: 1024px) 50vw, 100vw'
-                                -}}
-                            {% else %}
-                                <div class="h-full w-full flex items-center justify-center">
-                                    {{
-                                        'image'
-                                        | placeholder_svg_tag: 'placeholder-svg w-full h-full bg-gray-100'
-                                    }}
-                                </div>
-                            {% endif %}
-
-                            {% if has_mobile_media %}
-                                </div>
-                                <div class="lg:hidden h-full w-full">
-                                    {{
-                                        s.mobile_image
-                                        | image_url: width: 750
-                                        | image_tag:
-                                            class: 'w-full h-full object-cover transition-transform duration-500 ease-in-out hover:scale-105',
-                                            loading: 'lazy',
-                                            widths: '375,750',
-                                            sizes: '100vw'
-                                    }}
-                                </div>
-                            {% endif %}
-                        </responsive-media>
-                    </div>
-                </div>
-            {% if s.animation_style == 'split-sides' %}</gsap-elements>{% endif %}
-            {% if s.animation_style != blank and s.animation_style != 'none' and s.animation_style != 'split-sides' -%}
-                </gsap-section>
-            {%- endif %}
+                        {% endif %}
+                    {% endif %}
+                </responsive-media>
+            </div>
         </div>
     </div>
-{% endif %}
+</div>
+
+{% render 'component.animation-close', section: section %}
 
 {% schema %}
 {
-    "name": "Image and text",
+    "name": "Text with Image",
     "tag": "section",
     "class": "section",
     "disabled_on": {
-        "groups": ["header", "footer"]
+        "groups": [
+            "header",
+            "footer"
+        ]
     },
     "settings": [
-        {
-            "type": "paragraph",
-            "content": "[View documentation](/admin/apps/documentation-poc/app/sections/text-image)"
-        },
-        {
-            "type": "header",
-            "content": "Documentation for this section",
-            "info": "Click [here](https://strix-net.atlassian.net/wiki/x/HACc3) for more information."
-        },
-        {
-            "type": "select",
-            "id": "visibility_audience",
-            "label": "Visibility (audience)",
-            "options": [
-                {
-                    "value": "everyone",
-                    "label": "Everyone"
-                },
-                {
-                    "value": "premium_only",
-                    "label": "Only premium-club customers"
-                },
-                {
-                    "value": "non_premium_only",
-                    "label": "Only non premium-club customers"
-                }
-            ],
-            "default": "everyone"
-        },
         {
             "type": "header",
             "content": "Section Styling"
@@ -297,6 +101,11 @@
             "label": "Add styling to section",
             "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
             "default": false
+        },
+        {
+            "type": "header",
+            "content": "Section Color Scheme",
+            "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "header",
@@ -315,31 +124,15 @@
                 },
                 {
                     "value": "py-2",
-                    "label": "S - 8px"
+                    "label": "Small - 8px"
                 },
                 {
                     "value": "py-4",
-                    "label": "M - 16px"
+                    "label": "Medium - 16px"
                 },
                 {
                     "value": "py-6",
-                    "label": "L - 24px"
-                },
-                {
-                    "value": "py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 24px"
                 }
             ],
             "default": "py-0"
@@ -355,35 +148,19 @@
                     "label": "None"
                 },
                 {
-                    "value": "lg:py-2",
-                    "label": "S - 8px"
-                },
-                {
                     "value": "lg:py-4",
-                    "label": "M - 16px"
+                    "label": "Small - 16px"
                 },
                 {
                     "value": "lg:py-6",
-                    "label": "L - 24px"
+                    "label": "Medium - 24px"
                 },
                 {
                     "value": "lg:py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "lg:py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "lg:py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "lg:py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 32px"
                 }
             ],
-            "default": "lg:py-0"
+            "default": "lg:py-4"
         },
         {
             "type": "header",
@@ -447,13 +224,6 @@
         },
         {
             "type": "color",
-            "id": "divider_color",
-            "label": "Divider color",
-            "default": "#B19E5E",
-            "visible_if": "{{ section.settings.section_styling == true }}"
-        },
-        {
-            "type": "color",
             "id": "background",
             "label": "Section background color",
             "default": "#FFFFFF",
@@ -468,9 +238,16 @@
         },
         {
             "type": "color",
+            "id": "secondary_text_color",
+            "label": "Secondary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
             "id": "primary_button_color",
             "label": "Primary button background color",
-            "default": "#ffffff00",
+            "default": "#FFFFFF",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
@@ -496,52 +273,62 @@
         },
         {
             "type": "header",
-            "content": "Winery"
-        },
-        {
-            "type": "article",
-            "id": "winery_article",
-            "label": "Connect to a winery"
-        },
-        {
-            "type": "header",
             "content": "Image"
         },
         {
             "type": "image_picker",
             "id": "image",
-            "label": "Image",
-            "info": "Used as fallback when a winery is connected but the winery image is missing."
+            "label": "Image"
         },
         {
-            "type": "header",
-            "content": "Mobile Image"
-        },
-        {
-            "type": "image_picker",
-            "id": "mobile_image",
-            "label": "Mobile image",
-            "info": "Optional: upload a different image for mobile. Falls back to desktop image if empty."
+            "type": "checkbox",
+            "id": "enable_overlay",
+            "default": false,
+            "label": "Enable overlay"
         },
         {
             "type": "select",
-            "id": "image_aspect_ratio",
-            "label": "Image aspect ratio",
+            "id": "overlay_type",
+            "label": "Overlay type",
             "options": [
                 {
-                    "value": "aspect-671/789",
-                    "label": "portrait"
+                    "value": "gradient",
+                    "label": "Gradient"
                 },
                 {
-                    "value": "aspect-square",
-                    "label": "square"
-                },
-                {
-                    "value": "aspect-16/9",
-                    "label": "landscape"
+                    "value": "color",
+                    "label": "Color overlay"
                 }
             ],
-            "default": "aspect-671/789"
+            "default": "gradient",
+            "visible_if": "{{ section.settings.enable_overlay == true }}"
+        },
+        {
+            "type": "color_background",
+            "id": "mobile_gradient",
+            "label": "Gradient [Mobile]",
+            "info": "Click on color-picker to adjust gradient colors, direction and opacity",
+            "default": "linear-gradient(transparent, #000000)",
+            "visible_if": "{{ section.settings.enable_overlay == true and section.settings.overlay_type == 'gradient' }}"
+        },
+        {
+            "type": "color_background",
+            "id": "desktop_gradient",
+            "label": "Gradient [Desktop]",
+            "info": "Click on color-picker to adjust gradient colors, direction and opacity",
+            "default": "linear-gradient(transparent, #000000)",
+            "visible_if": "{{ section.settings.enable_overlay == true and section.settings.overlay_type == 'gradient' }}"
+        },
+        {
+            "type": "range",
+            "id": "overlay_opacity",
+            "label": "Overlay opacity",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": "%",
+            "default": 30,
+            "visible_if": "{{ section.settings.enable_overlay == true and section.settings.overlay_type == 'color' }}"
         },
         {
             "type": "select",
@@ -557,23 +344,7 @@
                 }
             ],
             "default": "right",
-            "label": "Image position (Desktop)"
-        },
-        {
-            "type": "select",
-            "id": "mobile_image_position",
-            "options": [
-                {
-                    "value": "up",
-                    "label": "Up"
-                },
-                {
-                    "value": "down",
-                    "label": "Down"
-                }
-            ],
-            "default": "up",
-            "label": "Image position (Mobile)"
+            "label": "Image position"
         },
         {
             "type": "header",
@@ -602,15 +373,8 @@
         {
             "type": "inline_richtext",
             "id": "heading",
-            "label": "Heading",
-            "default": "Feature highlight with image",
-            "info": "Used as fallback when a winery is connected but the winery title is missing."
-        },
-        {
-            "type": "image_picker",
-            "id": "logo",
-            "label": "Logo",
-            "info": "Used as fallback when a winery is connected but the winery logo is missing."
+            "label": "heading",
+            "default": "Feature highlight with image"
         },
         {
             "type": "select",
@@ -618,11 +382,11 @@
             "options": [
                 {
                     "value": "2xl",
-                    "label": "2XL - 40px"
+                    "label": "2XL"
                 },
                 {
                     "value": "xl",
-                    "label": "XL - 32px"
+                    "label": "XL"
                 },
                 {
                     "value": "lg",
@@ -641,11 +405,15 @@
             "label": "Heading size"
         },
         {
+            "type": "inline_richtext",
+            "id": "subheading",
+            "label": "Subheading"
+        },
+        {
             "type": "richtext",
             "id": "text",
             "label": "Text content",
-            "default": "<p>Combine text and image to showcase your product features, tell your brand story, or explain your value proposition. This versatile section can be customized to match your brand's design.</p>",
-            "info": "Used as fallback when a winery is connected but the winery description is missing."
+            "default": "<p>Combine text and image to showcase your product features, tell your brand story, or explain your value proposition. This versatile section can be customized to match your brand's design.</p>"
         },
         {
             "type": "header",
@@ -675,8 +443,8 @@
                     "label": "Secondary"
                 },
                 {
-                    "value": "link",
-                    "label": "Link"
+                    "value": "ghost",
+                    "label": "Ghost"
                 }
             ],
             "default": "primary"
@@ -687,27 +455,38 @@
         },
         {
             "type": "select",
-            "id": "animation_style",
-            "label": "Scroll animation",
-            "info": "Adds a subtle entrance animation when the section scrolls into view.",
+            "id": "animation_type",
+            "label": "Animation",
             "options": [
                 { "value": "none", "label": "None" },
-                { "value": "fade-up", "label": "Fade up" },
                 { "value": "fade-in", "label": "Fade in" },
-                { "value": "slide-in-left", "label": "Slide in from left" },
-                { "value": "slide-in-right", "label": "Slide in from right" },
-                { "value": "split-sides", "label": "Split sides (text & image from opposite sides)" }
+                { "value": "fade-up", "label": "Fade up" },
+                { "value": "fade-down", "label": "Fade down" },
+                { "value": "fade-left", "label": "Fade in from left" },
+                { "value": "fade-right", "label": "Fade in from right" },
+                { "value": "zoom-in", "label": "Zoom in" },
+                { "value": "zoom-out", "label": "Zoom out" },
+                { "value": "stagger", "label": "Stagger" }
             ],
-            "default": "none"
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
         }
     ],
     "presets": [
         {
-            "name": "Image and text",
+            "name": "Text with Image",
             "settings": {
                 "heading": "Feature highlight with image",
                 "image": "shopify://shop_images/theme_cover_image.jpg",
-                "image_aspect_ratio": "aspect-4/3",
                 "image_position": "right",
                 "text_alignment": "left",
                 "heading_size": "lg",

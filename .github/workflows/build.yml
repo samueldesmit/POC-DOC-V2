@@ -17,6 +17,9 @@ jobs:
             - name: Install packages
               run: npm install
 
+            - name: Check design tokens are compiled
+              run: npm run tokens:check
+
             - name: Compile Assets
               run: npm run build
 

@@ -1,0 +1,259 @@
+{%- liquid
+    assign shown_colors = ''
+    assign visible_color_count = 0
+    assign unique_color_count = 0
+    assign color_option_position = 0
+    assign color_option_name = product.options_by_name.Color.position | prepend: 'option'
+
+    # Find which option is the color option (typically option1)
+    for option in product.options_with_values
+        assign downcased_option = option.name | downcase
+        if downcased_option contains 'color'
+            assign color_option_position = forloop.index
+            break
+        endif
+    endfor
+
+    # Default to first option if no color option found
+    if color_option_position == 0
+        assign color_option_position = 1
+    endif
+
+    # First collect all unique colors
+    assign all_unique_colors = ''
+    for variant in product.variants
+        if color_option_position == 1
+            assign color_value = variant.option1
+        elsif color_option_position == 2
+            assign color_value = variant.option2
+        elsif color_option_position == 3
+            assign color_value = variant.option3
+        endif
+
+        assign color_marker = '|' | append: color_value | append: '|'
+        unless all_unique_colors contains color_marker
+            assign all_unique_colors = all_unique_colors | append: color_marker
+            assign unique_color_count = unique_color_count | plus: 1
+        endunless
+    endfor
+-%}
+
+{%- assign size_option_position = 0 -%}
+
+{%- for option in product.options_with_values -%}
+    {%- assign downcased_option = option.name | downcase -%}
+    {%- if downcased_option contains 'size' -%}
+        {%- assign size_option_position = forloop.index -%}
+        {%- break -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{%- if size_option_position > 0 -%}
+    {%- assign all_unique_sizes = '' -%}
+    {%- assign unique_size_count = 0 -%}
+
+    {%- for variant in product.variants -%}
+        {%- if size_option_position == 1 -%}
+            {%- assign size_value = variant.option1 -%}
+        {%- elsif size_option_position == 2 -%}
+            {%- assign size_value = variant.option2 -%}
+        {%- elsif size_option_position == 3 -%}
+            {%- assign size_value = variant.option3 -%}
+        {%- endif -%}
+
+        {%- assign size_marker = '|' | append: size_value | append: '|' -%}
+        {%- unless all_unique_sizes contains size_marker -%}
+            {%- assign all_unique_sizes = all_unique_sizes
+                | append: size_marker
+            -%}
+            {%- assign unique_size_count = unique_size_count | plus: 1 -%}
+        {%- endunless -%}
+    {%- endfor -%}
+
+    {%- if unique_size_count > 1 -%}
+        <div class="product-sizes mt-2 flex flex-wrap gap-2 text-sm">
+            {%- assign shown_sizes = '' -%}
+            {%- for variant in product.variants -%}
+                {%- if size_option_position == 1 -%}
+                    {%- assign size_value = variant.option1 -%}
+                {%- elsif size_option_position == 2 -%}
+                    {%- assign size_value = variant.option2 -%}
+                {%- elsif size_option_position == 3 -%}
+                    {%- assign size_value = variant.option3 -%}
+                {%- endif -%}
+
+                {%- assign size_marker = '|'
+                    | append: size_value
+                    | append: '|'
+                -%}
+                {%- if shown_sizes contains size_marker -%}
+                    {%- continue -%}
+                {%- endif -%}
+
+                {%- assign shown_sizes = shown_sizes | append: size_marker -%}
+
+                <span
+                    class="px-2.5 py-1 border cursor-pointer data-active:bg-primary-background data-active:text-primary-foreground data-active:pointer-events-none"
+                    data-variant-id="{{ variant.id }}"
+                    data-size="{{ size_value }}"
+                    {% if size_option_position == 1
+                        and current_variant.option1 == size_value
+                    %}
+                        data-active
+                    {% elsif size_option_position == 2
+                        and current_variant.option2 == size_value
+                    %}
+                        data-active
+                    {% elsif size_option_position == 3
+                        and current_variant.option3 == size_value
+                    %}
+                        data-active
+                    {% endif %}
+                >
+                    {{ size_value }}
+                </span>
+            {%- endfor -%}
+        </div>
+    {%- endif -%}
+{%- endif -%}
+
+{%- if unique_color_count >= 2 -%}
+    <div class="flex flex-col mt-2">
+        <div
+            class="gap-x-1.5 {% if show_thumbnails %}pt-2 grid grid-cols-[repeat(5,1fr)] w-full{% else %}flex flex-row{% endif %} {{  swatches_class }} {{  swatches_class_in_div }}"
+        >
+            {%- for variant in product.variants -%}
+                {%- liquid
+                    # Get the color value for this variant
+                    if color_option_position == 1
+                        assign color_value = variant.option1
+                    elsif color_option_position == 2
+                        assign color_value = variant.option2
+                    elsif color_option_position == 3
+                        assign color_value = variant.option3
+                    endif
+
+                    # Create a unique marker for this color
+                    assign current_color = '|' | append: color_value | append: '|'
+
+                    # Skip if we've already shown this color
+                    if shown_colors contains current_color
+                        continue
+                    endif
+
+                    # Check if all variants with this color are hidden
+                    assign color_variants = product.variants | where: color_option_name, color_value
+                    assign all_hidden = true
+                    for color_variant in color_variants
+                        unless color_variant.metafields.custom.hide_variant
+                            assign all_hidden = false
+                            break
+                        endunless
+                    endfor
+
+                    # If all are hidden, skip this color
+                    if all_hidden
+                        continue
+                    endif
+
+                    # Mark color as shown
+                    assign shown_colors = shown_colors | append: current_color
+
+                    # Get custom variant images
+                    assign variant_images = variant.metafields.custom.variant_images.value
+
+                    # Initialize image variables
+                    assign image_1 = null
+                    assign image_2 = null
+                    assign image_count = 0
+
+                    assign image_1 = product.images[0]
+                    assign image_2 = product.images
+
+                    for image in variant_images
+                        assign image_count = image_count | plus: 1
+                        if image_count == 1
+                            assign image_1 = image
+                        elsif image_count == 2
+                            assign image_2 = image
+                        endif
+                    endfor
+
+                    # Reset badge variables for each variant
+                    assign badge_1 = ''
+                    assign badge_2 = ''
+
+                    # Get badges for this specific variant
+                    assign variant_badges = variant.metafields.custom.badges
+                    if variant_badges.value != blank
+                        for badge in variant_badges.value limit: 2
+                            if badge.badge_text != blank
+                                if forloop.index == 1
+                                    assign badge_1 = badge.badge_text
+                                elsif forloop.index == 2
+                                    assign badge_2 = badge.badge_text
+                                endif
+                            endif
+                        endfor
+                    endif
+                -%}
+
+                {%- if image_1 -%}
+                    <responsive-media
+                        data-primary-image="{{- image_1 | image_url: width: 800 -}}"
+                        {% if image_2 %}
+                            data-variant-hover-image="{{- image_2 | image_url: width: 800 -}}"
+                        {% endif %}
+                        data-variant-url="{{- variant.url -}}&deselect-size=true"
+                        data-variant-id="{{ variant.id }}"
+                        data-color="{{- variant[color_option_name] -}}"
+                        {% if current_variant[color_option_name]
+                                == variant[color_option_name]
+                        %}
+                            data-active
+                        {% endif %}
+                        data-badge1="{{ badge_1 }}"
+                        data-badge2="{{ badge_2 }}"
+                        class="{{ class }} aspect-square cursor-pointer data-active:border data-active:pointer-events-none border-primary {% if visible_color_count >= 4 %}hidden{% endif %}"
+                    >
+                        {{-
+                            image_1
+                            | image_url: width: 160
+                            | image_tag:
+                                sizes: '80px',
+                                widths: '80, 120, 160, 240',
+                                class: 'w-full object-cover',
+                                loading: loading
+                        -}}
+                    </responsive-media>
+                {%- endif -%}
+
+                {%- assign visible_color_count = visible_color_count
+                    | plus: 1
+                -%}
+            {%- endfor -%}
+
+            {%- liquid
+                # Calculate if we need to show "+ more"
+                if unique_color_count > 4
+                    assign remaining_colors = unique_color_count | minus: 4
+                else
+                    assign remaining_colors = 0
+                endif
+            -%}
+
+            {%- if remaining_colors > 0 -%}
+                <button
+                    class="
+                        show-more-colors-btn
+                        text-secondary text-xs font-semibold leading-4
+                        {% if show_thumbnails %}tracking-tighter ml-1{% else %}tracking-widest{% endif %}
+                        uppercase flex-shrink-0 self-center cursor-pointer h-full
+                    "
+                >
+                    + {{ remaining_colors }}
+                </button>
+            {%- endif -%}
+        </div>
+    </div>
+{%- endif -%}

@@ -1,40 +1,36 @@
 {% liquid
-    assign list_class = 'items-center justify-center hover:opacity-70 transition-all duration-300'
+    assign list_class = 'items-center justify-center hover:opacity-50 transition-all duration-300'
     assign button_class = 'hover:cursor-pointer'
 %}
 
-<ul class="flex justify-end items-center space-x-7 lg:space-x-5">
+<ul class="flex items-center space-x-7 lg:space-x-5">
+    <li class="hidden lg:flex">
+        {%- render 'localization-form',
+            icon_type: 'chevron',
+            icon_class: 'rotate-90 w-3 aspect-square group-hover:translate-y-0.5 transition-transform duration-500 ease-bounce'
+        -%}
+    </li>
     <li class="{{ list_class }} hidden lg:flex">
+        {%- render 'component.icon', type: 'wishlist_heart' -%}
+    </li>
+    <li class="{{ list_class }} flex">
         <modal-toggle
             target="search-results"
             class="flex justify-center items-center delay-modal"
             id="open-predictive-search-mobile"
+            {{ search_attributes }}
         >
-            <button
-                type="button"
-                aria-label="{{ 'general.search.placeholder_text' | t | default: 'Search' }}"
-                class="flex items-center cursor-pointer"
-            >
-                <span class="search-icon-wrapper">
-                    {% render 'component.icon',
-                        type: 'search',
-                        class: 'size-[18px]'
-                    %}
-                </span>
-            </button>
+            {% render 'component.icon', type: 'search' %}
         </modal-toggle>
     </li>
-    <li class="{{ list_class }} flex mr-5">
+    <li class="{{ list_class }} hidden lg:flex">
         {% if shop.customer_accounts_enabled %}
             <shopify-account
-                menu="{{ section.settings.customer_account_menu | default: 'customer-account-main-menu' }}"
-                style="--shopify-account-signed-in-avatar-color-background: #A08735;"
+                menu="customer-account-main-menu"
+                class="inline-flex items-center justify-center min-w-6 min-h-6"
             >
                 <div slot="signed-out-avatar">
-                    {%- render 'component.icon',
-                        type: 'account',
-                        class: 'size-[18px]'
-                    -%}
+                    {%- render 'component.icon', type: 'customer_account' -%}
                 </div>
             </shopify-account>
         {% else %}
@@ -52,16 +48,13 @@
                 {{ account_attributes }}
                 href="{{- account_link -}}"
             >
-                {%- render 'component.icon',
-                    type: 'account',
-                    class: 'size-[18px]'
-                -%}
+                {%- render 'component.icon', type: 'customer_account' -%}
             </a>
         {% endif %}
     </li>
     <li>
         {%- liquid
-            assign cart_aria_label = 'accessibility.open_cart' | t | default: 'Open cart'
+            assign cart_aria_label = 'accessibility.open_cart' | t
         -%}
         <modal-toggle
             target="cart-drawer"
@@ -70,18 +63,16 @@
             <button
                 type="button"
                 aria-label="{{ cart_aria_label }}"
+                aria-haspopup="dialog"
                 class="relative {{ button_class }}"
             >
                 <cart-count
-                    class="hidden data-[active]:flex absolute -top-1 -right-1 bg-surface-200 text-white size-4 rounded-full justify-center items-center text-[0.5rem]"
+                    class="hidden data-[active]:flex absolute -top-1 -right-1 bg-black text-white size-4 rounded-full justify-center items-center text-[0.5rem]"
                     aria-hidden="true"
                 >
                     {{- cart.item_count -}}
                 </cart-count>
-                {%- render 'component.icon',
-                    type: 'cart_drawer',
-                    class: 'size-[18px] text-[{{ header_bar_text_color }}]'
-                -%}
+                {%- render 'component.icon', type: 'cart_drawer' -%}
             </button>
         </modal-toggle>
     </li>

@@ -1,40 +1,45 @@
-<div class="desktop-header-bar container relative items-center justify-between hidden lg:flex">
-    <div class="hidden lg:flex">
-        {%- render 'header-megamenu',
-            menu: menu,
-            header_menu_background_color: header_menu_background_color,
-            header_bar_text_color: header_bar_text_color,
-            header_menu_text_color: header_menu_text_color,
-            header_logo: header_logo,
-            header_logo_width: header_logo_width,
-            header_logo_premium: header_logo_premium,
-            header_logo_premium_width: header_logo_premium_width
-        -%}
+<div class="container relative items-center justify-between hidden py-[10px] lg:flex">
+    {%- liquid
+        assign logo_aria_label = 'accessibility.go_to_homepage' | t
+        assign logo_attributes = 'aria-label="' | append: logo_aria_label | append: '"'
+    -%}
+    <div class="items-center justify-start hidden lg:flex">
+        {%- render 'header-megamenu', menu: menu -%}
     </div>
-    <div class="flex items-center justify-end gap-7">
-        {% if customer and premium_club_url != blank %}
-            {% if customer.tags contains 'premium-club' %}
-                <a
-                    href="{{ premium_club_url }}"
-                    class="relative font-inter text-[13px] uppercase tracking-[0.2em] underline underline-offset-4 transition-opacity duration-300 hover:opacity-70"
-                    style="color: {{ accent_color }};"
-                >
-                    {{ premium_club_label | default: 'Premium Club Member' }}
-                    {% if premium_club_icon != blank %}
-                        <img
-                            src="{{ premium_club_icon | image_url: width: 48 }}"
-                            alt=""
-                            width="24"
-                            height="24"
-                            loading="lazy"
-                            class="absolute -top-3 -right-5 object-contain"
-                        >
-                    {% endif %}
-                </a>
+
+    <a
+        {{ logo_attributes }}
+        href="{{ routes.root_url }}"
+        class="flex items-center h-12 w-20"
+    >
+        {% if settings.mobile_logo != blank or desktop_logo != blank %}
+            <responsive-media class="w-full h-full{% if is_transparent_mode and transparent_desktop_logo != blank %} header-logo--default{% endif %}">
+                {{
+                    desktop_logo
+                    | default: settings.mobile_logo
+                    | image_url: width: 400
+                    | image_tag:
+                        loading: 'lazy',
+                        class: 'w-full h-full object-contain'
+                }}
+            </responsive-media>
+            {% if is_transparent_mode and transparent_desktop_logo != blank %}
+                <responsive-media class="w-full h-full header-logo--transparent">
+                    {{
+                        transparent_desktop_logo
+                        | image_url: width: 400
+                        | image_tag:
+                            loading: 'lazy',
+                            class: 'w-full h-full object-contain'
+                    }}
+                </responsive-media>
             {% endif %}
+        {% else %}
+            {{ shop.name }}
         {% endif %}
-        {% render 'header-action-menu',
-            header_bar_text_color: header_bar_text_color
-        %}
+    </a>
+
+    <div class="flex items-center justify-end">
+        {% render 'header-action-menu' %}
     </div>
 </div>

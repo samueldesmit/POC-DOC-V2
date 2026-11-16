@@ -35,7 +35,7 @@
                     <h6 class="text-base leading-6 text-magenta">
                         {{- 'products.product.out_of_stock_form.title' | t -}}
                     </h6>
-                    <p class="text-xs text-black mt-3">
+                    <p class="text-xs text-primary mt-3">
                         {{-
                             'products.product.out_of_stock_form.subtitle'
                             | t
@@ -44,18 +44,18 @@
 
                     <div class="relative w-full mt-3">
                         <input
-                            class="w-full text-xs text-black placeholder:text-surface-500 py-3.5 px-4 rounded-md bg-white focus:outline-none focus:ring-0 focus:border-surface-500"
+                            class="w-full text-xs text-primary placeholder:text-secondary py-3.5 px-4 bg-background focus:outline-none focus:ring-0 focus:border-primary"
                             name="email"
                             type="email"
                             data-input
                             placeholder="{{- 'products.product.out_of_stock_form.placeholder' | t -}}"
                         >
                         <button
-                            aria-label="submit"
+                            aria-label="{{ 'products.product.out_of_stock_form.submit' | t }}"
                             type="submit"
                             class="absolute top-0 right-0 h-full w-11 flex justify-center items-center "
                         >
-                            <span class="sr-only">Submit</span>
+                            <span class="sr-only">{{ 'products.product.out_of_stock_form.submit' | t }}</span>
                             {%- render 'component.icon',
                                 type: 'chevron',
                                 class: 'h-4 w-4 text-magenta'

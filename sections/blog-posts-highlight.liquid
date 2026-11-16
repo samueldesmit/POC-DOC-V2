@@ -1,216 +1,106 @@
 {% liquid
     assign s = section.settings
     assign section_id = 'section-' | append: section.id
-    assign show_section = true
-
-    if s.visibility_audience == 'premium_only'
-        assign show_section = false
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = true
-            endif
-        endif
-    elsif s.visibility_audience == 'non_premium_only'
-        if customer
-            if customer.tags contains 'premium-club'
-                assign show_section = false
-            endif
-        endif
-    endif
-
-    comment
-        Determine article source: blocks override the blog setting
-    endcomment
-    assign has_block_articles = false
-    for block in section.blocks
-        if block.settings.article != blank
-            assign has_block_articles = true
-            break
-        endif
-    endfor
-
-    assign use_blog = false
-    if has_block_articles == false and s.blog != blank
-        assign use_blog = true
-        assign blog_articles = s.blog.articles
-    endif
+    assign prev_slide_label = 'accessibility.previous_slide' | t
+    assign next_slide_label = 'accessibility.next_slide' | t
 %}
 
-{% if show_section %}
-    <div
-        id="{{ section_id }}"
-        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background overflow-hidden"
-    >
-        {% render 'section-colors', current_section: section %}
-        <div class="container {{ s.mobile_padding }} {{ s.desktop_padding }}">
-            {% if s.animation_style != blank and s.animation_style != 'none' -%}
-                <gsap-section data-animation="{{ s.animation_style }}">
-            {%- endif %}
-            <splide-section
-                data-splide-type="slide"
-                data-splide-per-page-mobile="1.2"
-                data-splide-per-page-desktop="4.1"
-                data-splide-gap-mobile="2rem"
-                data-splide-gap-desktop="2rem"
-                data-splide-autoplay="false"
-                data-splide-pagination="false"
-                data-splide-omit-end="true"
-                data-splide-drag="true"
-                data-splide-arrows="true"
-                class="flex justify-between items-center"
-            >
-                <div class="splide w-full">
+{% render 'component.animation-open', section: section %}
+
+<div
+    id="{{ section_id }}"
+    class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background overflow-hidden"
+>
+    {% render 'section-colors', current_section: section %}
+    <div class="container {{ s.mobile_padding }} {{ s.desktop_padding }}">
+        <splide-section
+            data-splide-type="slide"
+            data-splide-per-page-mobile="1.05"
+            data-splide-per-page-desktop="3"
+            data-splide-gap-mobile="0.75rem"
+            data-splide-gap-desktop="1rem"
+            data-splide-autoplay="false"
+            data-splide-pagination="false"
+            data-splide-omit-end="true"
+            data-splide-drag="true"
+            data-splide-arrows="true"
+            class="flex justify-between items-center"
+        >
+            <div class="splide w-full">
+                <div class="flex items-center justify-between lg:justify-center mb-6 font-poppins font-normal lg:mb-8">
+                    {%- if s.title != blank -%}
+                        {%- render 'component.heading',
+                            variant: 'lg',
+                            tag: 'h2',
+                            content: s.title,
+                            class: 'text-primary'
+                        -%}
+                    {%- endif -%}
+
                     <div
-                        class="
-                            flex items-end justify-between mb-6 font-cormorant-garamond font-normal lg:mb-13 text-[30px]
-                            lg:text-[40px]
-                        "
+                        class="splide__arrows pr-3 lg:pr-12 text-arrows-color {% if section.blocks.size <= 1 %}hidden{% else %}flex lg:hidden{% endif %}"
                     >
-                        {%- if s.title != blank -%}
-                            {%- render 'component.heading',
-                                variant: 'lg',
-                                tag: 'h2',
-                                content: s.title,
-                                class: 'text-primary text-[30px] lg:text-[40px] leading-[120%] font-semibold'
-                            -%}
-                        {%- endif -%}
-
-                        {% render 'component.splide-arrows',
-                            style: 'primary',
-                            icon_class: 'size-5',
-                            container_class: 'splide__arrows splide__arrows--ltr items-end pointer-events-none z-10 flex'
+                        {%- render 'component.button',
+                            title: prev_slide_label,
+                            aria_label: prev_slide_label,
+                            variant: 'ghost',
+                            icon: 'chevron',
+                            icon_position: 'left',
+                            icon_class: 'rotate-180 size-3 md:size-5',
+                            class: 'items-center justify-center px-2 lg:px-4 py-3 splide__arrow--prev'
                         %}
-                    </div>
-
-                    <div class="h-full !overflow-visible splide__track w-full">
-                        <ul class="splide__list flex">
-                            {% if use_blog %}
-                                {% for article in blog_articles %}
-                                    {%- liquid
-                                        assign article_is_restricted = false
-                                        if article.metafields.custom.premium_club_exclusive.value == true
-                                            assign article_is_restricted = true
-                                            if customer and customer.tags contains 'premium-club'
-                                                assign article_is_restricted = false
-                                            endif
-                                        endif
-                                    -%}
-                                    {%- unless article_is_restricted -%}
-                                        <li class="splide__slide md:col-span-1">
-                                            <div
-                                                role="tabpanel"
-                                                aria-roledescription="slide"
-                                            >
-                                                {% render 'component.article-card',
-                                                    article: article,
-                                                    class: 'col-span-1'
-                                                %}
-                                            </div>
-                                        </li>
-                                    {%- endunless -%}
-                                {% endfor %}
-                            {% else %}
-                                {% for block in section.blocks %}
-                                    {%- liquid
-                                        assign b = block.settings
-                                    -%}
-                                    {%- if b.article != blank -%}
-                                        {%- liquid
-                                            assign article_is_restricted = false
-                                            if b.article.metafields.custom.premium_club_exclusive.value == true
-                                                assign article_is_restricted = true
-                                                if customer and customer.tags contains 'premium-club'
-                                                    assign article_is_restricted = false
-                                                endif
-                                            endif
-                                        -%}
-                                        {%- unless article_is_restricted -%}
-                                            <li class="splide__slide md:col-span-1">
-                                                <div
-                                                    role="tabpanel"
-                                                    aria-roledescription="slide"
-                                                >
-                                                    {% render 'component.article-card',
-                                                        article: b.article,
-                                                        class: 'col-span-1'
-                                                    %}
-                                                </div>
-                                            </li>
-                                        {%- endunless -%}
-                                    {%- endif -%}
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
+                        {%- render 'component.button',
+                            title: next_slide_label,
+                            aria_label: next_slide_label,
+                            variant: 'ghost',
+                            icon: 'chevron',
+                            icon_position: 'right',
+                            icon_class: 'size-3 md:size-5',
+                            class: 'items-center justify-center px-2 lg:px-4 py-3 splide__arrow--next'
+                        -%}
                     </div>
                 </div>
-            </splide-section>
-            {% if s.animation_style != blank and s.animation_style != 'none' -%}
-                </gsap-section>
-            {%- endif %}
-            {% if s.button_text != blank and s.button_url != blank %}
-                {% render 'component.button',
-                    label: s.button_text,
-                    title: s.button_text,
-                    href: s.button_url,
-                    class: 'w-fit md:w-max justify-center text-center !font-normal m-auto mt-8 lg:mt-13 text-[0.875rem]',
-                    id: s.button_text,
-                    attributes: '',
-                    type: 'button',
-                    name: s.button_text,
-                    aria_label: s.button_text,
-                    aria_describedby: s.button_text,
-                    style: s.button_style,
-                    size: '',
-                    icon: '',
-                    icon_position: '',
-                    icon_class: '',
-                    css_variables: '',
-                    disabled: false,
-                    loading: false,
-                    translate: false
-                %}
-            {% endif %}
-        </div>
+
+                <div class="h-full !overflow-visible splide__track w-full">
+                    <ul class="splide__list flex">
+                        {% for block in section.blocks %}
+                            {%- liquid
+                                assign b = block.settings
+                            -%}
+                            {%- if b.article != blank -%}
+                                <li class="splide__slide md:col-span-1">
+                                    <div
+                                        role="tabpanel"
+                                        aria-roledescription="slide"
+                                    >
+                                        {% render 'component.article-card',
+                                            article: b.article,
+                                            class: 'col-span-1'
+                                        %}
+                                    </div>
+                                </li>
+                            {%- endif -%}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </splide-section>
     </div>
-{% endif %}
+</div>
+
+{% render 'component.animation-close', section: section %}
 
 {% schema %}
 {
-    "name": "Blog Slider",
+    "name": "Blog Posts Highlight",
     "tag": "section",
     "disabled_on": {
-        "groups": ["header", "footer"]
+        "groups": [
+            "header",
+            "footer"
+        ]
     },
     "settings": [
-        {
-            "type": "paragraph",
-            "content": "[View documentation](/admin/apps/documentation-poc/app/sections/blog-posts-highlight)"
-        },
-        {
-            "type": "header",
-            "content": "Documentation for this section",
-            "info": "Click [here](https://strix-net.atlassian.net/wiki/x/KoCe3) for more information."
-        },
-        {
-            "type": "select",
-            "id": "visibility_audience",
-            "label": "Visibility (audience)",
-            "options": [
-                {
-                    "value": "everyone",
-                    "label": "Everyone"
-                },
-                {
-                    "value": "premium_only",
-                    "label": "Only premium-club customers"
-                },
-                {
-                    "value": "non_premium_only",
-                    "label": "Only non premium-club customers"
-                }
-            ],
-            "default": "everyone"
-        },
         {
             "type": "header",
             "content": "Section Styling"
@@ -221,6 +111,11 @@
             "label": "Add styling to section",
             "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
             "default": false
+        },
+        {
+            "type": "header",
+            "content": "Section Color Scheme",
+            "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "header",
@@ -239,31 +134,15 @@
                 },
                 {
                     "value": "py-2",
-                    "label": "S - 8px"
+                    "label": "Small - 8px"
                 },
                 {
                     "value": "py-4",
-                    "label": "M - 16px"
+                    "label": "Medium - 16px"
                 },
                 {
                     "value": "py-6",
-                    "label": "L - 24px"
-                },
-                {
-                    "value": "py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 24px"
                 }
             ],
             "default": "py-0"
@@ -279,35 +158,19 @@
                     "label": "None"
                 },
                 {
-                    "value": "lg:py-2",
-                    "label": "S - 8px"
-                },
-                {
                     "value": "lg:py-4",
-                    "label": "M - 16px"
+                    "label": "Small - 16px"
                 },
                 {
                     "value": "lg:py-6",
-                    "label": "L - 24px"
+                    "label": "Medium - 24px"
                 },
                 {
                     "value": "lg:py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "lg:py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "lg:py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "lg:py-16",
-                    "label": "4XL - 64px"
+                    "label": "Large - 32px"
                 }
             ],
-            "default": "lg:py-0"
+            "default": "lg:py-4"
         },
         {
             "type": "header",
@@ -317,7 +180,7 @@
         {
             "type": "select",
             "id": "mobile_margin",
-            "label": "Mobile section margin",
+            "label": "Mobile Section margin",
             "visible_if": "{{ section.settings.section_styling == true }}",
             "options": [
                 {
@@ -342,7 +205,7 @@
         {
             "type": "select",
             "id": "desktop_margin",
-            "label": "Desktop section margin",
+            "label": "Desktop Section margin",
             "visible_if": "{{ section.settings.section_styling == true }}",
             "options": [
                 {
@@ -378,16 +241,30 @@
         },
         {
             "type": "color",
+            "id": "primary_text_color",
+            "label": "Primary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_text_color",
+            "label": "Secondary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
             "id": "primary_button_color",
             "label": "Primary button background color",
-            "default": "#CFDADD",
+            "default": "#FFFFFF",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
             "type": "color",
             "id": "primary_button_text_color",
             "label": "Primary button text color",
-            "default": "#282828",
+            "default": "#000000",
             "visible_if": "{{ section.settings.section_styling == true }}"
         },
         {
@@ -409,47 +286,10 @@
             "content": "Content"
         },
         {
-            "type": "blog",
-            "id": "blog",
-            "label": "Blog",
-            "info": "Select a blog to automatically show the latest articles. Adding individual blog post blocks below will override this setting."
-        },
-        {
             "type": "text",
             "id": "title",
             "label": "Title",
-            "default": "Exclusive access for true wine lovers"
-        },
-        {
-            "type": "header",
-            "content": "Button"
-        },
-        {
-            "type": "text",
-            "id": "button_text",
-            "label": "Button text",
-            "default": "Read all articles"
-        },
-        {
-            "type": "url",
-            "id": "button_url",
-            "label": "Button url"
-        },
-        {
-            "type": "select",
-            "id": "button_style",
-            "label": "Button style",
-            "options": [
-                {
-                    "value": "primary",
-                    "label": "Primary"
-                },
-                {
-                    "value": "secondary",
-                    "label": "Secondary"
-                }
-            ],
-            "default": "primary"
+            "default": "Latest from our blog"
         },
         {
             "type": "header",
@@ -457,24 +297,37 @@
         },
         {
             "type": "select",
-            "id": "animation_style",
-            "label": "Scroll animation",
-            "info": "Adds a subtle entrance animation when the section scrolls into view.",
+            "id": "animation_type",
+            "label": "Animation",
             "options": [
                 { "value": "none", "label": "None" },
-                { "value": "fade-up", "label": "Fade up" },
                 { "value": "fade-in", "label": "Fade in" },
-                { "value": "stagger-up", "label": "Stagger up" },
-                { "value": "slide-in-left", "label": "Slide in from left" },
-                { "value": "slide-in-right", "label": "Slide in from right" }
+                { "value": "fade-up", "label": "Fade up" },
+                { "value": "fade-down", "label": "Fade down" },
+                { "value": "fade-left", "label": "Fade in from left" },
+                { "value": "fade-right", "label": "Fade in from right" },
+                { "value": "zoom-in", "label": "Zoom in" },
+                { "value": "zoom-out", "label": "Zoom out" },
+                { "value": "stagger", "label": "Stagger" }
             ],
-            "default": "none"
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
         }
     ],
     "blocks": [
         {
             "type": "blog_post",
             "name": "Blog Post",
+            "limit": 3,
             "settings": [
                 {
                     "type": "article",
@@ -486,7 +339,7 @@
     ],
     "presets": [
         {
-            "name": "Blog Slider",
+            "name": "Blog Posts Highlight",
             "settings": {}
         }
     ]

@@ -1,19 +1,42 @@
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "url": "{{ page.url }}",
-  "mainEntity": [
-    {%- for question in category.items.value -%}
-        {
-        "@type": "Question",
-        "name": "{{ question.title.value }}",
-        "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "{{ question.description | metafield_text }}"
-        }
-        }{%- unless forloop.last -%},{%- endunless -%}
-    {%- endfor -%}
-  ]
-}
-</script>
+{% doc %}
+    Outputs one FAQPage JSON-LD object for a list of questions. Render it once
+    per section, not per question: several FAQPage objects on a page are
+    invalid structured data.
+
+    @param {object[]} [items] - Question metaobjects with title and description
+    @param {object} [category] - A faq_category metaobject, used when items is not set
+
+    @example
+    {% render 'schema.faq', items: faq_categories %}
+{% enddoc %}
+
+{%- liquid
+    assign faq_items = items | default: category.items.value
+
+    comment
+        Questions without an answer are skipped, so the separator goes in
+        front of every entry after the first one that was actually written.
+    endcomment
+    assign entries = ''
+    for question in faq_items
+        if question.title != blank and question.description != blank
+            capture entry
+                echo '{"@type":"Question","name":'
+                echo question.title | json
+                echo ',"acceptedAnswer":{"@type":"Answer","text":'
+                echo question.description | metafield_text | json
+                echo '}}'
+            endcapture
+            if entries != ''
+                assign entries = entries | append: ','
+            endif
+            assign entries = entries | append: entry
+        endif
+    endfor
+-%}
+
+{%- if entries != '' -%}
+    <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{{ entries }}]}
+    </script>
+{%- endif -%}

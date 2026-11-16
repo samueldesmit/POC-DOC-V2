@@ -8,51 +8,34 @@ module.exports = {
         './layout/**/*.liquid',
         './templates/**/*.liquid',
     ],
-    blocklist: ['!container'],
     theme: {
+        // Palette (surface, brand), fonts (heading, body), screens and radii come from design-tokens.json
+        // through src/assets/tailwind/tokens.css (npm run tokens).
         extend: {
-            screens: {
-                xl: '1280px',
-                '2xl': '1440px',
-                '3xl': '1536px',
-                '4xl': '1920px',
-                '5xl': '2560px',
-            },
             colors: {
-                surface: {
-                    50: '#FFFFFF',
-                    100: '#F3F4F5',
-                    200: '#A08735',
-                    300: '#B0BAC0',
-                    400: '#6B7E88',
-                    500: '#092839',
-                },
-                brand: {
-                    50: '#06061C',
-                    100: '#EBB58C',
-                    200: '#BF8B66',
-                    300: '#F8F3ED',
-                    400: '#B19E5E',
-                    500: '#E8E2D9',
-                },
-                background: 'var(--color-background, #FFFFFF)',
-                primary: 'var(--color-primary, #000000)',
-                secondary: 'var(--color-secondary, #A08735)',
-                border: 'var(--border-color, #000000)',
-                'primary-background': 'var(--color-primary-background, transparent)',
-                'primary-foreground': 'var(--color-primary-foreground, #000000)',
-                'secondary-background': 'var(--color-secondary-background, #000000)',
-                'secondary-foreground': 'var(--color-secondary-foreground, #FFFFFF)',
+                background: 'var(--color-background)',
+                primary: 'var(--color-primary)',
+                secondary: 'var(--color-secondary)',
+                'primary-background': 'var(--color-primary-background)',
+                'primary-foreground': 'var(--color-primary-foreground)',
+                'secondary-background': 'var(--color-secondary-background)',
+                'secondary-foreground': 'var(--color-secondary-foreground)',
+                arrows: 'var(--color-arrows)',
+                'svg-background': 'var(--color-svg-background)',
+                shadow: 'var(--color-shadow)',
+                'disabled-background': 'var(--color-disabled-background)',
+                'disabled-foreground': 'var(--color-disabled-foreground)',
+                info: 'var(--color-info)',
+                success: 'var(--color-success)',
+                warning: 'var(--color-warning)',
+                error: 'var(--color-error)',
             },
             fontFamily: {
-                inter: ['Inter', 'sans-serif'],
-                cormorantGaramond: ['Cormorant Garamond', 'serif'],
+                poppins: ['Poppins', 'sans-serif'],
             },
             fontWeight: {
                 light: 300,
                 regular: 400,
-                medium: 500,
-                semibold: 600,
                 bold: 700,
             },
             lineHeight: {
@@ -72,11 +55,6 @@ module.exports = {
             },
             width: {
                 full: '100%',
-            },
-            borderRadius: {
-                sm: '0.25rem',
-                lg: '0.5rem',
-                '3xl': '1.25rem',
             },
             borderWidth: {
                 1: '0.063',

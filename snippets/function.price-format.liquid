@@ -1,0 +1,34 @@
+{%- doc -%}
+    Price Format Function
+    -------------------
+    Formats a price according to market-specific settings, handling currency symbol placement
+    based on the current market's requirements.
+
+    Usage:
+    {% render 'function.price-format',
+        price: product.price
+    %}
+
+    Parameters:
+    - price (required): The price value to format, should be pre-formatted with money filters
+
+    Settings:
+    - markets_price_format: Theme setting that specifies which markets need special price formatting
+                          Format should be comma-separated list of country codes (e.g., "NL,DE,FR")
+
+    Example:
+    Input price: "$99.99"
+    For markets in markets_price_format: "99.99 $"
+    For other markets: "$99.99" (unchanged)
+{%- enddoc -%}
+
+{%- liquid
+    assign markets_price_format = settings.markets_price_format
+    assign market_code = localization.country.iso_code
+    if markets_price_format != blank and markets_price_format contains market_code
+        assign price = price | remove: localization.country.currency.symbol | append: ' ' | append: localization.country.currency.symbol
+    else
+        assign price = price
+    endif
+    echo price
+-%}

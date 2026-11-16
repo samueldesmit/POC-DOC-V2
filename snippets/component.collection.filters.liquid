@@ -1,0 +1,83 @@
+{%- for filter in collection.filters -%}
+    {%- case filter.type -%}
+        {%- when 'list' -%}
+            {%- liquid
+                assign filter_size = filter.active_values | size
+                assign sorted_values = filter.values
+                # Keep the selected values grouped together when operator is AND
+
+                if filter.operator == 'AND'
+                    assign active_filter_values = filter.values | where: 'active', true
+                    assign inactive_filter_values = filter.values | where: 'active', false
+                    assign sorted_values = active_filter_values | concat: inactive_filter_values
+                endif
+            -%}
+
+            {% capture filter_label %}
+                <span class="text-base font-medium">{{ filter.label }}</span>
+            {% endcapture %}
+
+            {% capture filter_title_attributes %}
+                data-target="filters-form.filter-title"
+            {% endcapture %}
+
+            {% capture filter_content %}
+                {%- render 'component.collection.filter-list-values', sorted_values: sorted_values -%}
+            {% endcapture %}
+
+            {% render 'component.accordion',
+                class: 'border-b border-primary',
+                title: filter_label,
+                title_tag: 'h3',
+                title_variant: 'xs',
+                title_attributes: filter_title_attributes,
+                icon_classes: 'size-4 transform-none group-open:rotate-180 transition duration-200 ease-in-out',
+                content: filter_content,
+                content_class: 'flex flex-col space-y-3',
+                header_reversed_order: true,
+                chevron_class: "size-3 group-aria-[expanded='true']/button:rotate-90"
+            %}
+
+        {%- when 'price_range' -%}
+            {% capture filter_label %}
+                <span class="text-base font-medium">{{ filter.label }}</span>
+                {% if filter.min_value.value != null or filter.max_value.value != null %}
+                    <span>
+
+                        ({%- if filter.min_value.value -%}
+                            {{- filter.min_value.value | money -}}
+                        {% else %}
+                            {{ 0 | money }}
+                        {% endif %}
+                        <span class="mx-1">-</span>
+                        {% if filter.max_value.value %}
+                            {{- filter.max_value.value | money }}
+                        {% else %}
+                            {{ filter.range_max | money -}}
+                        {%- endif -%})
+                    </span>
+                {% endif %}
+            {% endcapture %}
+
+            {% capture filter_title_attributes %}
+                data-target="filters-form.filter-title"
+            {% endcapture %}
+
+            {% capture filter_content %}
+                {%- render 'component.collection.filter-price-range-values', filter: filter -%}
+            {% endcapture %}
+
+            {% render 'component.accordion',
+                class: 'border-b border-primary',
+                title: filter_label,
+                title_tag: 'h3',
+                title_variant: 'xs',
+                title_attributes: filter_title_attributes,
+                icon_classes: 'size-4 transform-none group-open:rotate-180 transition duration-200 ease-in-out',
+                content: filter_content,
+                content_class: 'flex flex-col space-y-3',
+                header_reversed_order: true,
+                chevron_class: "size-3 group-aria-[expanded='true']/button:rotate-90"
+            %}
+    {%- endcase -%}
+{%- endfor -%}

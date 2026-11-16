@@ -7,7 +7,7 @@ module.exports = function ({ addComponents }) {
             '@apply w-full lg:max-w-4xl mx-auto section-px': {},
         },
         '.section-px': {
-            '@apply px-4 lg:px-12': {},
+            '@apply px-3 lg:px-12': {},
         },
         '.main-grid-layout': {
             '@apply grid grid-cols-4 lg:grid-cols-12 gap-2 lg:gap-4': {},
@@ -21,6 +21,10 @@ module.exports = function ({ addComponents }) {
         },
         '.link-animation': {
             '@apply relative inline-block after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 after:bg-current after:transition-transform after:duration-300 after:ease-in-out hover:after:origin-bottom-left hover:after:scale-x-100':
+                {},
+        },
+        '.li-hover-transition': {
+            '@apply lg:odd:hover:-rotate-12 lg:even:hover:rotate-12 lg:hover:scale-125 lg:odd:group-hover:-rotate-12 lg:even:group-hover:rotate-12 lg:group-hover:scale-125 transition-transform':
                 {},
         },
     });

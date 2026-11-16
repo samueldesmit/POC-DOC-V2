@@ -34,44 +34,10 @@ export class AddToCart extends HTMLElement {
         this._loading = value;
         this.toggleAttribute('data-loading', value);
         this.button?.toggleAttribute('disabled', value);
-
-        if (value) {
-            this.showLoadingSpinner();
-        } else {
-            this.hideLoadingSpinner();
-        }
     }
 
     get loading(): boolean {
         return this._loading;
-    }
-
-    private showLoadingSpinner(): void {
-        const button = this.button;
-        if (!button) return;
-
-        const buttonSpinner = button.querySelector('.button-spinner');
-        if (buttonSpinner) {
-            buttonSpinner.classList.remove('hidden');
-        }
-        const atcIcon = button.querySelector('.atc-icon');
-        if (atcIcon) {
-            atcIcon.classList.add('invisible');
-        }
-    }
-
-    private hideLoadingSpinner(): void {
-        const button = this.button;
-        if (!button) return;
-
-        const buttonSpinner = button.querySelector('.button-spinner');
-        if (buttonSpinner) {
-            buttonSpinner.classList.add('hidden');
-        }
-        const atcIcon = button.querySelector('.atc-icon');
-        if (atcIcon) {
-            atcIcon.classList.remove('invisible');
-        }
     }
 
     private createFormData(): FormData {
@@ -134,6 +100,7 @@ export class AddToCart extends HTMLElement {
 
             if (cartData.status) {
                 this.toggleError(cartData.description, true);
+                console.error('Add to cart error:', cartData.description);
                 return;
             }
 
@@ -150,7 +117,7 @@ export class AddToCart extends HTMLElement {
                 open: true,
             });
         } catch (error) {
-            // Ignore add-to-cart errors
+            console.error('Error adding to cart:', error);
         } finally {
             this.loading = false;
         }

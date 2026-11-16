@@ -1,0 +1,780 @@
+{% liquid
+    assign s = section.settings
+    assign section_id = 'section-' | append: section.id
+    assign is_design_mode = request.design_mode
+
+    assign has_hotspots = false
+    if section.blocks.size > 0
+        assign has_hotspots = true
+    endif
+%}
+
+{% render 'component.animation-open', section: section %}
+
+{% if has_hotspots %}
+    <div
+        id="{{ section_id }}"
+        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
+    >
+        {% render 'section-colors', current_section: section %}
+        <div class="{{ s.mobile_padding }} {{ s.desktop_padding }}">
+            {% capture pins_markup %}
+                <hotspots-pins class="absolute inset-0">
+                    {% for block in section.blocks %}
+                        {% liquid
+                            assign pin_settings = block.settings
+                            assign pin_position_x = pin_settings.pin_position_x | default: 50
+                            assign pin_position_y = pin_settings.pin_position_y | default: 50
+                            assign pin_position_x_mobile = pin_settings.pin_position_x_mobile
+                            assign pin_position_y_mobile = pin_settings.pin_position_y_mobile
+
+                            if pin_position_x_mobile == blank
+                                assign pin_position_x_mobile = pin_position_x
+                            endif
+                            if pin_position_y_mobile == blank
+                                assign pin_position_y_mobile = pin_position_y
+                            endif
+
+                            assign hotspot_text = pin_settings.hotspot_text | strip
+                            assign hotspot_link = pin_settings.hotspot_link | strip
+                            assign hotspot_button_label = pin_settings.hotspot_button_label | strip
+                            assign hotspot_text_alignment = pin_settings.hotspot_text_alignment | default: 'left'
+
+                            assign bubble_position_desktop = pin_settings.bubble_position_desktop | default: 'right'
+                            case bubble_position_desktop
+                                when 'left'
+                                    assign bubble_classes_desktop = 'right-full mr-3 top-1/2 transform -translate-y-1/2'
+                                when 'top'
+                                    assign bubble_classes_desktop = 'bottom-full mb-3 left-1/2 transform -translate-x-1/2'
+                                when 'bottom'
+                                    assign bubble_classes_desktop = 'top-full mt-3 left-1/2 transform -translate-x-1/2'
+                                else
+                                    assign bubble_classes_desktop = 'left-full ml-3 top-1/2 transform -translate-y-1/2'
+                            endcase
+
+                            assign bubble_position_mobile = pin_settings.bubble_position_mobile
+                            if bubble_position_mobile == blank
+                                assign bubble_position_mobile = bubble_position_desktop
+                            endif
+                            if bubble_position_mobile == blank
+                                assign bubble_position_mobile = 'right'
+                            endif
+
+                            case bubble_position_mobile
+                                when 'left'
+                                    assign bubble_classes_mobile = 'right-full mr-3 top-1/2 transform -translate-y-1/2'
+                                when 'top'
+                                    assign bubble_classes_mobile = 'bottom-full mb-3 left-1/2 transform -translate-x-1/2'
+                                when 'bottom'
+                                    assign bubble_classes_mobile = 'top-full mt-3 left-1/2 transform -translate-x-1/2'
+                                else
+                                    assign bubble_classes_mobile = 'left-full ml-3 top-1/2 transform -translate-y-1/2'
+                            endcase
+                        %}
+
+                        <div
+                            class="group absolute z-10 lg:hidden data-[active=true]:z-30"
+                            data-hotspot-wrapper
+                            data-active="false"
+                            style="left:{{ pin_position_x_mobile }}%; top:{{ pin_position_y_mobile }}%; transform: translate(-{{ pin_position_x_mobile }}%, -{{ pin_position_y_mobile }}%);"
+                            {{ block.shopify_attributes }}
+                        >
+                            <div
+                                class="absolute {{ bubble_classes_mobile }} bg-background text-primary shadow-lg p-3 w-max opacity-0 invisible transition-all duration-300 ease-out z-30 group-data-[active=true]:opacity-100 group-data-[active=true]:visible text-{{ hotspot_text_alignment }}"
+                                data-hotspot-bubble
+                            >
+                                {% if hotspot_text != blank %}
+                                    <p class="text-sm text-secondary">
+                                        {{ hotspot_text }}
+                                    </p>
+                                {% endif %}
+
+                                {% if hotspot_button_label != blank and hotspot_link != blank %}
+                                    <div class="mt-3">
+                                        {% render 'component.button',
+                                            label: hotspot_button_label,
+                                            title: hotspot_button_label,
+                                            href: hotspot_link,
+                                            class: 'mx-auto w-auto justify-center',
+                                            aria_label: hotspot_button_label,
+                                            variant: 'primary'
+                                        %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <button
+                                type="button"
+                                class="size-10 border border-primary-foreground flex items-center justify-center bg-background text-primary transition-colors duration-200 group-data-[active=true]:border-primary cursor-pointer"
+                                data-hotspot-button
+                                aria-label="{{ 'accessibility.open_hotspot' | t }}"
+                                aria-expanded="false"
+                            >
+                                {% render 'component.icon',
+                                    type: 'plus',
+                                    class: 'size-5'
+                                %}
+                            </button>
+                        </div>
+
+                        <div
+                            class="group absolute hidden z-10 lg:block data-[active=true]:z-30"
+                            data-hotspot-wrapper
+                            data-active="false"
+                            style="left:{{ pin_position_x }}%; top:{{ pin_position_y }}%; transform: translate(-{{ pin_position_x }}%, -{{ pin_position_y }}%);"
+                            {{ block.shopify_attributes }}
+                        >
+                            <div
+                                class="absolute {{ bubble_classes_desktop }} bg-background text-primary shadow-lg p-3 w-max opacity-0 invisible transition-all duration-300 ease-out z-30 group-data-[active=true]:opacity-100 group-data-[active=true]:visible text-{{ hotspot_text_alignment }}"
+                                data-hotspot-bubble
+                            >
+                                {% if hotspot_text != blank %}
+                                    <p class="text-sm text-secondary">
+                                        {{ hotspot_text }}
+                                    </p>
+                                {% endif %}
+
+                                {% if hotspot_button_label != blank and hotspot_link != blank %}
+                                    <div class="mt-3">
+                                        {% render 'component.button',
+                                            label: hotspot_button_label,
+                                            title: hotspot_button_label,
+                                            href: hotspot_link,
+                                            class: 'mx-auto w-auto justify-center',
+                                            aria_label: hotspot_button_label,
+                                            variant: 'primary'
+                                        %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <button
+                                type="button"
+                                class="size-10 border border-primary-foreground flex items-center justify-center bg-background text-primary transition-colors duration-200 group-data-[active=true]:border-primary cursor-pointer"
+                                data-hotspot-button
+                                aria-label="{{ 'accessibility.open_hotspot' | t }}"
+                                aria-expanded="false"
+                            >
+                                {% render 'component.icon',
+                                    type: 'plus',
+                                    class: 'size-5'
+                                %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                </hotspots-pins>
+            {% endcapture %}
+
+            {% if s.full_width_image %}
+                <div class="relative mx-auto container">
+                    {% if s.mobile_image %}
+                        <responsive-media class="w-full aspect-[16/9] lg:hidden">
+                            {{-
+                                s.mobile_image
+                                | image_url: width: 1024
+                                | image_tag:
+                                    sizes: '100vw',
+                                    class: 'w-full aspect-[16/9] object-cover',
+                                    loading: 'lazy'
+                            -}}
+                        </responsive-media>
+                    {% endif %}
+
+                    <responsive-media
+                        class="w-full aspect-[16/9] {% if s.mobile_image %}hidden lg:block{% endif %}"
+                    >
+                        {{-
+                            s.image
+                            | image_url: width: 1920
+                            | image_tag:
+                                sizes: '100vw',
+                                class: 'w-full object-cover',
+                                loading: 'lazy'
+                        -}}
+                    </responsive-media>
+
+                    {{ pins_markup }}
+                </div>
+            {% else %}
+                <div class="container">
+                    <div class="grid gap-12 lg:grid-cols-2">
+                        <div class="relative">
+                            {% if s.mobile_image %}
+                                <responsive-media class="w-full aspect-square lg:hidden">
+                                    {{-
+                                        s.mobile_image
+                                        | image_url: width: 1024
+                                        | image_tag:
+                                            sizes: '(max-width: 1024px) 100vw, 50vw',
+                                            class: 'w-full object-cover',
+                                            loading: 'lazy'
+                                    -}}
+                                </responsive-media>
+                            {% endif %}
+
+                            {% if s.image != blank %}
+                                <responsive-media
+                                    class="w-full aspect-square {% if s.mobile_image %}hidden lg:block{% endif %}"
+                                >
+                                    {{-
+                                        s.image
+                                        | image_url: width: 1400
+                                        | image_tag:
+                                            class: 'w-full object-cover',
+                                            loading: 'lazy'
+                                    -}}
+                                </responsive-media>
+                            {% else %}
+                                {{ 'product-1' | placeholder_svg_tag }}
+                            {% endif %}
+                            {{ pins_markup }}
+                        </div>
+
+                        <div class="overflow-hidden px-6 lg:px-0 mx-auto max-w-[28.125rem] lg:flex lg:flex-col lg:justify-center">
+                            {% if s.hotspots_title != blank %}
+                                {% render 'component.heading',
+                                    content: s.hotspots_title,
+                                    variant: s.headline_size,
+                                    tag: 'h2',
+                                    class: 'mb-6 text-center text-primary'
+                                %}
+                            {% endif %}
+
+                            {% if s.hotspots_description != blank %}
+                                <p class="mb-6 text-center text-secondary">
+                                    {{ s.hotspots_description | newline_to_br }}
+                                </p>
+                            {% endif %}
+
+                            {% if s.hotspots_button_label != blank
+                                and s.hotspots_button_link != blank
+                            %}
+                                <div class="text-center">
+                                    {% render 'component.button',
+                                        label: s.hotspots_button_label,
+                                        title: s.hotspots_button_label,
+                                        href: s.hotspots_button_link,
+                                        class: 'mx-auto text-center justify-center',
+                                        aria_label: s.hotspots_button_label,
+                                        variant: 'primary'
+                                    %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% elsif is_design_mode %}
+    <div
+        id="{{ section_id }}"
+        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background"
+    >
+        {% render 'section-colors', current_section: section %}
+        <div class="{{ s.mobile_padding }} {{ s.desktop_padding }}">
+            <div class="container flex flex-col items-center gap-6 text-center">
+                <div class="relative w-full max-w-xl overflow-hidden border border-dashed border-primary bg-background">
+                    {% render 'component.placeholder-image', class: 'w-full' %}
+                </div>
+                <div class="max-w-lg text-secondary">
+                    Add an image and hotspot blocks to preview this section.
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% render 'component.animation-close', section: section %}
+
+{% schema %}
+{
+    "name": "Hotspots",
+    "disabled_on": {
+        "groups": [
+            "header",
+            "footer"
+        ]
+    },
+    "settings": [
+        {
+            "type": "header",
+            "content": "Section Styling"
+        },
+        {
+            "type": "checkbox",
+            "id": "section_styling",
+            "label": "Add styling to section",
+            "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
+            "default": false
+        },
+        {
+            "type": "header",
+            "content": "Section Color Scheme",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "header",
+            "content": "Section Spacing",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "select",
+            "id": "mobile_padding",
+            "label": "Mobile padding",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "py-0",
+                    "label": "None"
+                },
+                {
+                    "value": "py-2",
+                    "label": "Small - 8px"
+                },
+                {
+                    "value": "py-4",
+                    "label": "Medium - 16px"
+                },
+                {
+                    "value": "py-6",
+                    "label": "Large - 24px"
+                }
+            ],
+            "default": "py-0"
+        },
+        {
+            "type": "select",
+            "id": "desktop_padding",
+            "label": "Desktop padding",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "lg:py-0",
+                    "label": "None"
+                },
+                {
+                    "value": "lg:py-4",
+                    "label": "Small - 16px"
+                },
+                {
+                    "value": "lg:py-6",
+                    "label": "Medium - 24px"
+                },
+                {
+                    "value": "lg:py-8",
+                    "label": "Large - 32px"
+                }
+            ],
+            "default": "lg:py-4"
+        },
+        {
+            "type": "header",
+            "content": "Section Margin",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "select",
+            "id": "mobile_margin",
+            "label": "Mobile Section margin",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "mb-0",
+                    "label": "None"
+                },
+                {
+                    "value": "mb-4",
+                    "label": "Small - 16px"
+                },
+                {
+                    "value": "mb-8",
+                    "label": "Medium - 32px"
+                },
+                {
+                    "value": "mb-12",
+                    "label": "Large - 48px"
+                }
+            ],
+            "default": "mb-0"
+        },
+        {
+            "type": "select",
+            "id": "desktop_margin",
+            "label": "Desktop Section margin",
+            "visible_if": "{{ section.settings.section_styling == true }}",
+            "options": [
+                {
+                    "value": "lg:mb-0",
+                    "label": "None"
+                },
+                {
+                    "value": "lg:mb-8",
+                    "label": "Small - 32px"
+                },
+                {
+                    "value": "lg:mb-12",
+                    "label": "Medium - 48px"
+                },
+                {
+                    "value": "lg:mb-16",
+                    "label": "Large - 64px"
+                }
+            ],
+            "default": "lg:mb-0"
+        },
+        {
+            "type": "header",
+            "content": "Colors",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "background",
+            "label": "Section background color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_text_color",
+            "label": "Primary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_text_color",
+            "label": "Secondary text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_button_color",
+            "label": "Primary button background color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "primary_button_text_color",
+            "label": "Primary button text color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_button_color",
+            "label": "Secondary button background color",
+            "default": "#000000",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "color",
+            "id": "secondary_button_text_color",
+            "label": "Secondary button text color",
+            "default": "#FFFFFF",
+            "visible_if": "{{ section.settings.section_styling == true }}"
+        },
+        {
+            "type": "header",
+            "content": "Hotspot media"
+        },
+        {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Section image"
+        },
+        {
+            "type": "checkbox",
+            "id": "full_width_image",
+            "label": "Image only mode",
+            "info": "Display only the image at full width without additional text and buttons",
+            "default": false
+        },
+        {
+            "type": "image_picker",
+            "id": "mobile_image",
+            "label": "Mobile image",
+            "info": "Optional separate image for mobile devices"
+        },
+        {
+            "type": "header",
+            "content": "Hotspot content"
+        },
+        {
+            "type": "text",
+            "id": "hotspots_title",
+            "label": "Heading"
+        },
+        {
+            "type": "select",
+            "id": "headline_size",
+            "label": "Heading size",
+            "options": [
+                {
+                    "value": "2xl",
+                    "label": "2XL"
+                },
+                {
+                    "value": "xl",
+                    "label": "XL"
+                },
+                {
+                    "value": "lg",
+                    "label": "LG"
+                },
+                {
+                    "value": "md",
+                    "label": "MD"
+                },
+                {
+                    "value": "sm",
+                    "label": "SM"
+                },
+                {
+                    "value": "xs",
+                    "label": "XS"
+                },
+                {
+                    "value": "2xs",
+                    "label": "2XS"
+                },
+                {
+                    "value": "3xs",
+                    "label": "3XS"
+                }
+            ],
+            "default": "lg"
+        },
+        {
+            "type": "textarea",
+            "id": "hotspots_description",
+            "label": "Description"
+        },
+        {
+            "type": "text",
+            "id": "hotspots_button_label",
+            "label": "Button label"
+        },
+        {
+            "type": "url",
+            "id": "hotspots_button_link",
+            "label": "Button link"
+        },
+        {
+            "type": "header",
+            "content": "Animation"
+        },
+        {
+            "type": "select",
+            "id": "animation_type",
+            "label": "Animation",
+            "options": [
+                { "value": "none", "label": "None" },
+                { "value": "fade-in", "label": "Fade in" },
+                { "value": "fade-up", "label": "Fade up" },
+                { "value": "fade-down", "label": "Fade down" },
+                { "value": "fade-left", "label": "Fade in from left" },
+                { "value": "fade-right", "label": "Fade in from right" },
+                { "value": "zoom-in", "label": "Zoom in" },
+                { "value": "zoom-out", "label": "Zoom out" },
+                { "value": "stagger", "label": "Stagger" }
+            ],
+            "default": "fade-up"
+        },
+        {
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
+        }
+    ],
+    "blocks": [
+        {
+            "type": "hotspot",
+            "name": "Hotspot",
+            "settings": [
+                {
+                    "type": "header",
+                    "content": "Hotspot text",
+                    "info": "Text that appears when hotspot is clicked"
+                },
+                {
+                    "type": "richtext",
+                    "id": "hotspot_text",
+                    "label": "Hotspot text"
+                },
+                {
+                    "type": "select",
+                    "id": "hotspot_text_alignment",
+                    "label": "Text alignment",
+                    "default": "left",
+                    "options": [
+                        {
+                            "value": "left",
+                            "label": "Left"
+                        },
+                        {
+                            "value": "center",
+                            "label": "Center"
+                        },
+                        {
+                            "value": "right",
+                            "label": "Right"
+                        }
+                    ]
+                },
+                {
+                    "type": "url",
+                    "id": "hotspot_link",
+                    "label": "Hotspot link"
+                },
+                {
+                    "type": "text",
+                    "id": "hotspot_button_label",
+                    "label": "Hotspot button label",
+                    "placeholder": "Shop now"
+                },
+                {
+                    "type": "header",
+                    "content": "Pin positions"
+                },
+                {
+                    "type": "range",
+                    "id": "pin_position_x",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "label": "Pin horizontal position (X)",
+                    "default": 50
+                },
+                {
+                    "type": "range",
+                    "id": "pin_position_y",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "label": "Pin vertical position (Y)",
+                    "default": 50
+                },
+                {
+                    "type": "header",
+                    "content": "Mobile pin positions",
+                    "info": "Optional separate positions for mobile devices"
+                },
+                {
+                    "type": "range",
+                    "id": "pin_position_x_mobile",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "label": "Mobile pin horizontal position (X)",
+                    "info": "Leave empty to use desktop position",
+                    "default": 50
+                },
+                {
+                    "type": "range",
+                    "id": "pin_position_y_mobile",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "label": "Mobile pin vertical position (Y)",
+                    "info": "Leave empty to use desktop position",
+                    "default": 50
+                },
+                {
+                    "type": "header",
+                    "content": "Bubble position"
+                },
+                {
+                    "type": "select",
+                    "id": "bubble_position_desktop",
+                    "label": "Bubble position (desktop)",
+                    "default": "right",
+                    "options": [
+                        {
+                            "value": "left",
+                            "label": "Left"
+                        },
+                        {
+                            "value": "right",
+                            "label": "Right"
+                        },
+                        {
+                            "value": "top",
+                            "label": "Top"
+                        },
+                        {
+                            "value": "bottom",
+                            "label": "Bottom"
+                        }
+                    ]
+                },
+                {
+                    "type": "select",
+                    "id": "bubble_position_mobile",
+                    "label": "Bubble position (mobile)",
+                    "info": "Leave empty to reuse the desktop bubble position.",
+                    "options": [
+                        {
+                            "value": "",
+                            "label": "Same as desktop"
+                        },
+                        {
+                            "value": "left",
+                            "label": "Left"
+                        },
+                        {
+                            "value": "right",
+                            "label": "Right"
+                        },
+                        {
+                            "value": "top",
+                            "label": "Top"
+                        },
+                        {
+                            "value": "bottom",
+                            "label": "Bottom"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Hotspots",
+            "settings": {
+                "hotspots_title": "Discover our products",
+                "hotspots_description": "Click on the hotspot to learn more about the collection.",
+                "hotspots_button_label": "View Collection",
+                "hotspots_button_link": "/collections/all"
+            },
+            "blocks": [
+                {
+                    "type": "hotspot",
+                    "settings": {
+                        "hotspot_text": "<p>Sample hotspot text</p>",
+                        "hotspot_text_alignment": "left",
+                        "hotspot_link": "/collections/all",
+                        "hotspot_button_label": "Shop now",
+                        "pin_position_x": 50,
+                        "pin_position_y": 50,
+                        "bubble_position_desktop": "right"
+                    }
+                }
+            ]
+        }
+    ]
+}
+{% endschema %}

@@ -39,12 +39,15 @@ export class MegaMenuItem extends HTMLElement {
 
                 const dropdown = this.getDropdownElement();
                 if (!dropdown) {
+                    console.warn(
+                        'Dropdown element not found for mega menu item',
+                    );
                     return;
                 }
 
                 await this.animateDropdown(dropdown, open, instant);
             } catch (error) {
-                // Ignore toggle errors
+                console.error('Error toggling mega menu item:', error);
             }
         };
     }

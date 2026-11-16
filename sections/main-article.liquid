@@ -1,29 +1,15 @@
-{% liquid
-    assign s = section.settings
-    assign section_id = 'section-' | append: section.id
-%}
-{%- liquid
-    assign article_is_restricted = false
-    if article.metafields.custom.premium_club_exclusive.value == true
-        assign article_is_restricted = true
-        if customer and customer.tags contains 'premium-club'
-            assign article_is_restricted = false
-        endif
-    endif
--%}
-{%- if article_is_restricted -%}
-    <script>window.location.href = "{{ blog.url }}";</script>
-{%- else -%}
-    <div
-        id="{{ section_id }}"
-        class="{{ s.mobile_margin }} {{ s.desktop_margin }} bg-background text-primary"
-    >
-        {% render 'section-colors', current_section: section %}
-        <div class="container {{ s.mobile_padding }} {{ s.desktop_padding }} article-content">
-            {{ article.content }}
-        </div>
-    </div>
-{%- endif -%}
+{% render 'component.animation-open', section: section %}
+
+<div class="p-6 lg:p-8">
+  <h1 class="mb-4 text-xl">{{ article.title }}</h1>
+  <div>{{ article.content }}</div>
+</div>
+
+{% render 'component.animation-close', section: section %}
+
+{% if template == 'article' %}
+    {% render 'schema.article' %}
+{% endif %}
 
 {% schema %}
 {
@@ -31,128 +17,64 @@
     "settings": [
         {
             "type": "header",
-            "content": "Section Styling"
-        },
-        {
-            "type": "checkbox",
-            "id": "section_styling",
-            "label": "Add styling to section",
-            "info": "If enabled this shows the settings to set the color scheme, spacing, and margin for the section.",
-            "default": false
-        },
-        {
-            "type": "header",
-            "content": "Section Spacing",
-            "visible_if": "{{ section.settings.section_styling == true }}"
+            "content": "Animation"
         },
         {
             "type": "select",
-            "id": "mobile_padding",
-            "label": "Mobile padding",
-            "visible_if": "{{ section.settings.section_styling == true }}",
+            "id": "animation_type",
+            "label": "Animation",
             "options": [
                 {
-                    "value": "py-0",
+                    "value": "none",
                     "label": "None"
                 },
                 {
-                    "value": "py-2",
-                    "label": "S - 8px"
+                    "value": "fade-in",
+                    "label": "Fade in"
                 },
                 {
-                    "value": "py-4",
-                    "label": "M - 16px"
+                    "value": "fade-up",
+                    "label": "Fade up"
                 },
                 {
-                    "value": "py-6",
-                    "label": "L - 24px"
+                    "value": "fade-down",
+                    "label": "Fade down"
                 },
                 {
-                    "value": "py-8",
-                    "label": "XL - 32px"
+                    "value": "fade-left",
+                    "label": "Fade in from left"
                 },
                 {
-                    "value": "py-10",
-                    "label": "2XL - 40px"
+                    "value": "fade-right",
+                    "label": "Fade in from right"
                 },
                 {
-                    "value": "py-12",
-                    "label": "3XL - 48px"
+                    "value": "zoom-in",
+                    "label": "Zoom in"
                 },
                 {
-                    "value": "py-16",
-                    "label": "4XL - 64px"
+                    "value": "zoom-out",
+                    "label": "Zoom out"
+                },
+                {
+                    "value": "stagger",
+                    "label": "Stagger"
                 }
             ],
-            "default": "py-0"
+            "default": "fade-up"
         },
         {
-            "type": "select",
-            "id": "desktop_padding",
-            "label": "Desktop padding",
-            "visible_if": "{{ section.settings.section_styling == true }}",
-            "options": [
-                {
-                    "value": "lg:py-0",
-                    "label": "None"
-                },
-                {
-                    "value": "lg:py-2",
-                    "label": "S - 8px"
-                },
-                {
-                    "value": "lg:py-4",
-                    "label": "M - 16px"
-                },
-                {
-                    "value": "lg:py-6",
-                    "label": "L - 24px"
-                },
-                {
-                    "value": "lg:py-8",
-                    "label": "XL - 32px"
-                },
-                {
-                    "value": "lg:py-10",
-                    "label": "2XL - 40px"
-                },
-                {
-                    "value": "lg:py-12",
-                    "label": "3XL - 48px"
-                },
-                {
-                    "value": "lg:py-16",
-                    "label": "4XL - 64px"
-                }
-            ],
-            "default": "lg:py-0"
-        },
-        {
-            "type": "header",
-            "content": "Section Margin",
-            "visible_if": "{{ section.settings.section_styling == true }}"
-        },
-
-        {
-            "type": "header",
-            "content": "Colors",
-            "visible_if": "{{ section.settings.section_styling == true }}"
-        },
-        {
-            "type": "color",
-            "id": "background",
-            "label": "Section background color",
-            "default": "#FFFFFF",
-            "visible_if": "{{ section.settings.section_styling == true }}"
-        },
-        {
-            "type": "color",
-            "id": "primary_text_color",
-            "label": "Primary text color",
-            "default": "#000000",
-            "visible_if": "{{ section.settings.section_styling == true }}"
+            "type": "range",
+            "id": "animation_duration",
+            "label": "Duration",
+            "min": 0.2,
+            "max": 2,
+            "step": 0.1,
+            "unit": "s",
+            "default": 0.8
         }
     ],
     "blocks": []
 }
+
 {% endschema %}

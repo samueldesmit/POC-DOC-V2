@@ -1,0 +1,99 @@
+<product-form
+    data-url="{{ product.url }}"
+    data-section="main-product"
+>
+    {%- form 'product',
+        product,
+        id: 'product-form',
+        class: 'group/product-form flex flex-col gap-4'
+    -%}
+        <div class="flex justify-between">
+            <span class="flex items-center gap-2 flex-wrap">
+                <h1 class="font-bold text-2xl">{{ product.title }}</h1>
+                <span
+                    id="variant-title-container"
+                    class="text-sm"
+                >
+                    {{ first_variant.title }}
+                </span>
+            </span>
+            <div
+                id="variant-price-container"
+                data-prices
+            >
+                <span id="variant-price">
+                    {{- first_variant.price | money -}}
+                </span>
+            </div>
+        </div>
+        <p class="text-xs">{{ product.description }}</p>
+        {% assign first_variant_id = first_variant.id %}
+        <div data-options>
+            {% for option in product.options_with_values %}
+                <div class="option">
+                    <fieldset
+                        data-fieldset-name="fieldset-{{ option.name }}"
+                        class="flex flex-col"
+                    >
+                        {% for value in option.values %}
+                            <label>
+                                <input
+                                    class="option__input"
+                                    type="radio"
+                                    name="option{{ option.position }}"
+                                    value="{{ value }}"
+                                    {% if option.selected_value == value %}
+                                        checked
+                                    {% endif %}
+                                >
+                                <span>
+                                    {{- value -}}
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+            {% endfor %}
+        </div>
+
+        {%- render 'add-to-cart-box' -%}
+        <div
+            id="product-form-value"
+        >
+            <input
+                type="hidden"
+                name="id"
+                value="{{ product.selected_or_first_available_variant.id }}"
+            >
+            <button
+                {% unless product.selected_or_first_available_variant.available %}
+                    disabled
+                {% endunless %}
+                type="submit"
+                data-atc-button
+                data-label="{{ 'products.product.form.add_to_cart' | t }}"
+                data-label-sold-out="{{ 'products.product.form.sold_out' | t }}"
+                data-label-unavailable="{{ 'products.product.unavailable' | t }}"
+                class="hover:cursor-pointer border bg-primary-background px-3 py-2 text-center text-primary-foreground disabled:border-primary/10 disabled:bg-primary-background/10 disabled:text-primary/10 group-data-[loading]/product-form:pointer-events-none"
+            >
+                {%- if product.selected_or_first_available_variant.available -%}
+                    {{- 'products.product.form.add_to_cart' | t -}}
+                {%- else -%}
+                    {{- 'products.product.form.sold_out' | t -}}
+                {%- endif -%}
+            </button>
+        </div>
+    {% endform %}
+
+    <script type="application/json">
+        [
+            {% for variant in product.variants %}
+            {
+                "id": {{ variant.id }},
+                "options": [{% for option in variant.options %}"{{ option }}"{% unless forloop.last %},{% endunless %}{% endfor %}],
+                "available": {{ variant.available }}
+            }{% unless forloop.last %},{% endunless %}
+            {% endfor %}
+        ]
+    </script>
+</product-form>
