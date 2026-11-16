@@ -1,8 +1,8 @@
 {% doc %}
-    Renders a button or link with one of three style variants.
+    Renders a button or link with one of four style variants.
 
     @param {string} [label] - Button text
-    @param {string} [variant] - primary | secondary | ghost (default: primary)
+    @param {string} [variant] - primary | secondary | ghost | success (default: primary). success is green and uses the scheme's success color.
     @param {string} [href] - If set, renders <a>; otherwise <button>
     @param {string} [type] - button | submit | reset (default: button)
     @param {string} [class] - Extra CSS classes
@@ -39,6 +39,8 @@
             assign variant_classes = 'px-6 py-2 bg-primary-foreground text-primary-background focus:outline-primary-background hover:bg-primary-foreground/70'
         when 'ghost'
             assign variant_classes = 'text-primary-foreground focus:outline-primary-foreground border border-primary-foreground px-6 py-2'
+        when 'success'
+            assign variant_classes = 'px-6 py-2 bg-success text-primary-foreground focus:outline-primary-foreground hover:bg-success/70 border border-success hover:border-success/70'
         else
             assign variant_classes = 'px-6 py-2 bg-primary-background text-primary-foreground focus:outline-primary-foreground hover:bg-primary-background/70 border border-primary-foreground hover:border-primary-foreground/40'
     endcase
