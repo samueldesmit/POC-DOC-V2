@@ -40,7 +40,7 @@ export default function ClaudeConnections({ canCreate, onClose }) {
   return <section className="m-card connections" aria-labelledby={headingId}>
     <div className="m-card-head"><h2 id={headingId}>{t.cTitle}</h2><button className="text-button" onClick={onClose}>{t.cClose}</button></div>
     <p className="m-lead">{t.cIntro}</p>
-    {created ? <div className="m-callout m-callout--good">
+    {created ? <div className="m-callout m-callout--good" style={{ boxShadow: "none", background: "#f7f7f7" }}>
       <strong>{t.cLink}</strong>
       <p>{t.cLinkNote}</p>
       <div className="connection-url"><code>{created.url}</code><button className="button button--primary" onClick={copy}>{copied ? t.cCopied : t.cCopy}</button></div>
