@@ -133,24 +133,6 @@
       }
     },
     "content_for_index": [],
-    "blocks": {
-      "10864971697205422121": {
-        "type": "shopify://apps/gorgias-live-chat-helpdesk/blocks/gorgias/a66db725-7b96-4e3f-916e-6c8e6f87aaaa",
-        "disabled": false,
-        "settings": {}
-      },
-      "12454652558189796508": {
-        "type": "shopify://apps/custom-search/blocks/embed/019e1bcb-2012-75d5-b972-035ff9b8e302",
-        "disabled": false,
-        "settings": {
-          "enable_predictive": true,
-          "enable_logging": true,
-          "enable_sort_rules": true,
-          "min_chars": 2,
-          "max_results": 5
-        }
-      }
-    },
     "color_schemes": {
       "color-scheme-1": {
         "settings": {
