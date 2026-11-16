@@ -213,6 +213,17 @@ export class GitHub {
   }
   // Changes are squashed into staging (one tidy commit per change); a release keeps
   // staging's history with a merge commit, so live and staging stay related.
+  closePull(number) { return this.request('PATCH', this.route(`pulls/${number}`), { state: 'closed' }); }
+  // GitHub's own revert of a merged pull request: a new branch and PR with the inverse change.
+  async revertPull(nodeId, title, body) {
+    const token = this.auth ? (await this.auth({ type: 'installation' })).token : this.config.githubToken;
+    ensure(token, 'GITHUB_UNCONFIGURED', 'GitHub authentication is not configured.', 503);
+    const response = await this.fetch('https://api.github.com/graphql', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'User-Agent': 'Release-Desk' }, body: JSON.stringify({ query: 'mutation($id: ID!, $title: String, $body: String) { revertPullRequest(input: { pullRequestId: $id, title: $title, body: $body }) { revertPullRequest { number url baseRefName } } }', variables: { id: nodeId, title, body } }), signal: AbortSignal.timeout(30_000), redirect: 'error' });
+    const result = await response.json().catch(() => ({}));
+    const revert = result?.data?.revertPullRequest?.revertPullRequest;
+    ensure(response.ok && revert && revert.baseRefName === this.config.stagingBranch, 'REVERT_FAILED', 'The change could not be removed automatically. Ask Strix to remove it.', 502);
+    return revert;
+  }
   merge(number, sha, method = 'squash') { return this.request('PUT', this.route(`pulls/${number}/merge`), { sha, merge_method: method }); }
 }
 

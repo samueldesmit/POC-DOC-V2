@@ -77,10 +77,13 @@ export class Flow {
   }
   async step(number) {
     const pr = await this.github.getPull(number);
-    const intent = this.intent(number);
-    if (pr.state !== 'open' || pr.draft) { this.clearIntent(number); return; }
+    let intent = this.intent(number);
+    if (pr.state !== 'open' || pr.draft) { if (intent) this.clearIntent(number); return; }
     if (!releaseTargets(this.config).includes(pr.base?.ref)) return;
     try { validatePull(pr, this.config); } catch { return; }
+    // Changes Claude made go into the test version by themselves once they pass:
+    // the test version is not visible to customers, and that is where they look at it.
+    if (!intent && pr.base.ref === this.config.stagingBranch && /^claude\//.test(pr.head.ref)) { this.setIntent(number, SYSTEM, 'staging'); intent = this.intent(number); }
     if (pr.mergeable_state === 'dirty') {
       if (intent) this.problem(number, 'This change conflicts with another change. Strix needs to combine them.');
       return;
@@ -113,7 +116,32 @@ export class Flow {
       if (intent) this.problem(number, 'The automatic check found a problem. Ask Claude to fix it; the change is checked again after the fix.');
       return;
     }
+    // A new version of the change (for example Claude's fix) starts with a clean slate.
+    if (intent?.problem) this.problem(number, null);
     await this.service.test(number, pr.head.sha, intent?.actor || SYSTEM);
+  }
+  // "Remove from the test version": a revert of that change, checked and merged like any other.
+  async remove(number, actor) {
+    this.service.requireReviewer(actor);
+    const pr = await this.github.getPull(number);
+    if (!(pr.merged && pr.base?.ref === this.config.stagingBranch)) throw new DeskError('NOT_IN_TEST_VERSION', 'This change is not in the test version.', 409);
+    const comparison = await this.github.compareBranches(this.config.liveBranch, this.config.stagingBranch, 100);
+    if (!(comparison.commits || []).some(commit => commit.sha === pr.merge_commit_sha)) throw new DeskError('ALREADY_LIVE', 'This change is already live. Ask Claude to undo it instead.', 409);
+    const revert = await this.github.revertPull(pr.node_id, `Remove: ${pr.title}`, `Removes #${number} from the test version (requested in Release Desk).`);
+    this.setIntent(revert.number, actor, 'staging');
+    this.store.audit(actor.id, 'flow.remove', { pr: number, revert: revert.number });
+    await this.progress(revert.number);
+    return { number: revert.number };
+  }
+  // "Discard": stop a change that has not reached the test version yet.
+  async discard(number, actor) {
+    this.service.requireReviewer(actor);
+    const pr = await this.github.getPull(number);
+    if (!(pr.state === 'open' && pr.base?.ref === this.config.stagingBranch)) throw new DeskError('NOT_OPEN', 'This change can no longer be discarded.', 409);
+    await this.github.closePull(number);
+    this.clearIntent(number);
+    this.store.audit(actor.id, 'flow.discard', { pr: number });
+    return { closed: true };
   }
   waiting() { return this.db.prepare('SELECT pr FROM intents').all().map(row => row.pr); }
 

@@ -29,7 +29,11 @@ export class Service {
   // The changes a release took live, read from its description ("- Title (#8)").
   releaseIncludes(pr) {
     const seen = new Set();
-    return String(pr.body || '').split('\n').flatMap(line => {
+    const lines = String(pr.body || '').split('\n');
+    // "Remove: X" cancels X within the same release.
+    const removed = new Set(lines.map(line => line.match(/^-\s+Remove: (.*?)\s*\(#\d+\)\s*$/)?.[1]).filter(Boolean));
+    return lines.flatMap(line => {
+      if (/^-\s+Remove: /.test(line) || [...removed].some(title => line.match(/^-\s+(.*?)\s*\(#\d+\)\s*$/)?.[1] === title)) return [];
       const match = line.match(/^-\s+(.*?)\s*\(#(\d+)\)\s*$/);
       if (!match || seen.has(match[2])) return [];
       seen.add(match[2]);
@@ -66,7 +70,12 @@ export class Service {
         if (results[4].status === 'fulfilled') {
           const openRelease = pulls.find(pr => pr.stage === 'live');
           // Which changes are on staging but not live: squash merges end their first line with "(#123)".
-          const included = [...new Set((results[4].value.commits || []).map(commit => String(commit.commit?.message || '').split('\n')[0].match(/\(#(\d+)\)\s*$/)?.[1]).filter(Boolean).map(Number))];
+          let included = [...new Set((results[4].value.commits || []).map(commit => String(commit.commit?.message || '').split('\n')[0].match(/\(#(\d+)\)\s*$/)?.[1]).filter(Boolean).map(Number))];
+          // A removed change and its removal cancel out: neither is "waiting to go live".
+          const closed = new Map((results[3].status === 'fulfilled' ? results[3].value : []).map(pr => [pr.number, pr]));
+          const cancelled = new Set();
+          for (const number of included) { const target = String(closed.get(number)?.body || '').match(/^Removes #(\d+) from the test version/)?.[1]; if (target) { cancelled.add(number); cancelled.add(Number(target)); } }
+          included = included.filter(number => !cancelled.has(number));
           // Content decides, not commit ids: no differing files means live already has everything.
           const differs = (results[4].value.files || []).length > 0;
           release = { aheadBy: differs ? results[4].value.ahead_by ?? 0 : 0, behindBy: results[4].value.behind_by ?? 0, openPull: openRelease ? openRelease.number : null, pulls: differs ? included : [] };

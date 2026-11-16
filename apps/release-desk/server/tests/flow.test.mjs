@@ -21,6 +21,8 @@ function harness(t, pr = pull()) {
     async workflowEvidence() { return { status: 'completed', conclusion: 'success', runId: 12, attempt: 1 }; },
     async verifyCheck() {},
     async merge(number, sha, method) { this.calls.push(['merge', number, sha]); this.methods = [...(this.methods || []), method]; return { merged: true, sha: merged }; },
+    async closePull(number) { this.calls.push(['closePull', number]); this.pr = { ...this.pr, state: 'closed' }; },
+    async revertPull(nodeId, title) { this.calls.push(['revertPull', nodeId, title]); this.pr = pull({ number: 12, title, head: { sha: head, ref: 'revert-7-claude/hero', repo: { full_name: 'example-org/theme-repo' } } }); return { number: 12 }; },
     async updateBranch(number, sha) { this.calls.push(['updateBranch', number, sha]); },
     async mergeBranches(b, h) { this.calls.push(['mergeBranches', b, h]); if (this.syncConflict) { const error = new Error('conflict'); error.httpStatus = 409; throw error; } },
     async compareBranches() { return { ahead_by: 1, files: [{ filename: 'sections/hero.liquid' }], commits: [] }; },
@@ -46,8 +48,8 @@ test('one click: the change is checked automatically, then merged into staging o
   assert.equal(flow.intent(7), null);
 });
 
-test('without a request to publish, a passing check never merges', async t => {
-  const { github, flow, pass } = harness(t);
+test('a change that does not come from Claude is never merged without a request', async t => {
+  const { github, flow, pass } = harness(t, pull({ head: { sha: head, ref: 'feature/manual', repo: { full_name: 'example-org/theme-repo' } } }));
   await flow.progress(7);
   pass(7);
   await flow.progress(7);
@@ -120,4 +122,49 @@ test('changes are squashed into staging; a release merges with a merge commit', 
   store.updateRun(release.id, { status: 'passed', checkId: 1, reviews: ['security', 'correctness', 'maintainability'].map(role => ({ role, status: 'completed', simulated: true, verdict: 'approve', findings: [] })), ci: { status: 'completed', conclusion: 'success', runId: 12, attempt: 1 } });
   await flow.progress(9);
   assert.deepEqual(github.methods, ['squash', 'merge']);
+});
+
+test('a change from Claude goes into the test version by itself once its check passes', async t => {
+  const { github, flow, pass, store } = harness(t);
+  await flow.progress(7);
+  assert.equal(store.listRuns(7).length, 1, 'checked without a click');
+  assert.equal(flow.intent(7).actor.id, 'auto');
+  pass(7);
+  await flow.progress(7);
+  assert.deepEqual(github.calls.find(call => call[0] === 'merge'), ['merge', 7, head]);
+});
+
+test('a failed change shows the problem, and a fixed version starts clean', async t => {
+  const { github, flow, store } = harness(t);
+  await flow.progress(7);
+  store.updateRun(store.listRuns(7, 1)[0].id, { status: 'failed' });
+  await flow.progress(7);
+  assert.match(flow.intent(7).problem, /Ask Claude/);
+  github.pr = pull({ head: { ...pull().head, sha: 'd'.repeat(40) } });
+  await flow.progress(7);
+  assert.equal(flow.intent(7).problem, null);
+  assert.ok(store.listRuns(7).some(run => run.headSha === 'd'.repeat(40)), 'the fixed version gets its own check');
+});
+
+test('removing a change from the test version opens a revert that goes through the same check', async t => {
+  const { github, flow, store } = harness(t, pull({ state: 'closed', merged: true, merge_commit_sha: 'e'.repeat(40), node_id: 'PR_node', title: 'Hero groen' }));
+  github.compareBranches = async () => ({ commits: [{ sha: 'e'.repeat(40) }], files: [{}] });
+  const result = await flow.remove(7, actor);
+  assert.equal(result.number, 12);
+  assert.deepEqual(github.calls[0], ['revertPull', 'PR_node', 'Remove: Hero groen']);
+  assert.equal(flow.intent(12).kind, 'staging');
+  assert.equal(store.listRuns(12).length, 1);
+});
+
+test('a change that is already live cannot be removed from the test version', async t => {
+  const { github, flow } = harness(t, pull({ state: 'closed', merged: true, merge_commit_sha: 'e'.repeat(40) }));
+  github.compareBranches = async () => ({ commits: [], files: [] });
+  await assert.rejects(flow.remove(7, actor), { code: 'ALREADY_LIVE' });
+});
+
+test('discarding closes a change that is not in the test version yet', async t => {
+  const { github, flow } = harness(t);
+  await flow.discard(7, actor);
+  assert.deepEqual(github.calls, [['closePull', 7]]);
+  await assert.rejects(flow.discard(7, { id: '43', canMutate: false }), { code: 'FORBIDDEN' });
 });

@@ -1,6 +1,15 @@
 // Merchant-facing text. Shopify passes the admin language as ?locale=...;
 // Dutch for nl*, English for everything else.
 const nl = {
+  intro2: 'Vraag Claude om iets aan je webshop te veranderen. Na een minuut of twee staat de wijziging vanzelf in de proefversie van je winkel. Daar bekijk je hem, en als het goed is zet je hem met één klik live.',
+  s1: 'Vraag het aan Claude', s1t: 'Bijvoorbeeld: “Maak de knoppen op de productpagina groen.”',
+  s2: 'Bekijk het in de proefversie', s2t: 'De wijziging wordt gecontroleerd en komt er vanzelf in.',
+  s3: 'Zet live', s3t: 'Tevreden? Eén klik en het staat in je echte winkel.',
+  preparing: 'Wordt klaargezet', preparingHint: 'Komt vanzelf in je proefversie, meestal binnen 2 minuten.',
+  discard: 'Niet doorzetten', discardConfirm: 'Deze wijziging niet in de proefversie zetten?',
+  remove: 'Weghalen', removeConfirm: 'Deze wijziging uit de proefversie halen?', removing: 'Wordt weggehaald',
+  inTest: n => `${n} ${n === 1 ? 'wijziging staat' : 'wijzigingen staan'} klaar in je proefversie`,
+  testIntro: 'Bekijk ze in de proefversie. Klopt alles? Zet ze dan live.',
   title: 'Thema-wijzigingen',
   refresh: 'Vernieuwen', refreshing: 'Vernieuwen…', connect: 'Claude koppelen', technical: 'Technische details', back: 'Terug naar overzicht',
   intro: 'Vraag Claude om iets aan je webshop te veranderen. Elke wijziging komt hier binnen. Jij bekijkt hem eerst in de proefversie van je winkel en zet hem daarna zelf live.',
@@ -33,6 +42,15 @@ const nl = {
   cOnlyReviewers: 'Je hebt geen rechten om Claude te koppelen.', cFailed: 'Dat lukte niet',
 };
 const en = {
+  intro2: 'Ask Claude to change something in your shop. After a minute or two the change appears in the test version of your shop by itself. Look at it there, and if it is right, put it live with one click.',
+  s1: 'Ask Claude', s1t: 'For example: “Make the buttons on the product page green.”',
+  s2: 'Look at the test version', s2t: 'The change is checked and goes in by itself.',
+  s3: 'Go live', s3t: 'Happy? One click and it is in your real shop.',
+  preparing: 'Being prepared', preparingHint: 'Appears in your test version by itself, usually within 2 minutes.',
+  discard: 'Don’t use', discardConfirm: 'Not put this change in the test version?',
+  remove: 'Remove', removeConfirm: 'Remove this change from the test version?', removing: 'Being removed',
+  inTest: n => `${n} ${n === 1 ? 'change is' : 'changes are'} ready in your test version`,
+  testIntro: 'Look at them in the test version. All good? Put them live.',
   title: 'Theme changes',
   refresh: 'Refresh', refreshing: 'Refreshing…', connect: 'Connect Claude', technical: 'Technical details', back: 'Back to overview',
   intro: 'Ask Claude to change something in your shop. Every change arrives here. You look at it in the test version of your shop first, then put it live yourself.',
