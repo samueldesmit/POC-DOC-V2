@@ -9,6 +9,13 @@
 /* Palette, fonts, breakpoints, radii and section padding from design-tokens.json (npm run tokens). */
 @import './tokens.css';
 
+/* Green used by every button (bg-button-green, text-button-green, ...).
+   White text on #2e7d32 has a contrast ratio of about 5:1. */
+@theme {
+    --color-button-green: #2e7d32;
+    --color-button-green-hover: #1b5e20;
+}
+
 @import './header.css';
 @import './utilities/price-range-slider.css';
 
