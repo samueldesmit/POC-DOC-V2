@@ -91,7 +91,8 @@ export default function MerchantApp({ onTechnical }) {
   const lastLive = Math.max(0, ...history.map(pull => Date.parse(pull.mergedAt) || 0));
   const waiting = data?.release?.aheadBy || 0;
   const inStaging = waiting > 0 ? merged.filter(pull => pull.stage === 'staging' && Date.parse(pull.mergedAt) > lastLive) : [];
-  const working = pulls.some(pull => pull.intent || ACTIVE.has(currentRun(pull)?.status));
+  // Keep the page fresh while anything is waiting for, or in, its automatic check.
+  const working = pulls.some(pull => pull.intent || !currentRun(pull) || ACTIVE.has(currentRun(pull)?.status));
 
   // While something is being checked or merged, refresh quietly every 10 seconds.
   useEffect(() => {
