@@ -27,7 +27,7 @@ export function parseReview(response, role) {
   ensure(result.verdict !== 'approve' || result.findings.length === 0, 'REVIEW_CONFLICT', 'The AI approved while also reporting unresolved findings.');
   return { role, status: 'completed', simulated: false, ...result };
 }
-export const DEMO_REVIEW_DELAYS = [3500, 6500, 9500];
+export const DEMO_REVIEW_DELAYS = [1500, 2500, 3500];
 export const DEMO_REVIEW_SUMMARY = 'Simulated reviewer result for the demonstration. No AI code review was performed.';
 export class Reviews {
   constructor(config, client = null, { sleep = delay } = {}) { this.config = config; this.sleep = sleep; this.client = client || (config.reviewMode !== 'demo' && config.anthropicKey ? new Anthropic({ apiKey: config.anthropicKey, timeout: 100_000, maxRetries: 0 }) : null); }

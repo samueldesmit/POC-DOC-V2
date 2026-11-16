@@ -21,11 +21,11 @@ const colour = name => PALETTE[[...String(name || '')].reduce((sum, char) => sum
 function stateOf(pull) {
   const run = currentRun(pull);
   if (pull.intent?.problem) return { tone: 'bad', label: t.problem, detail: pull.intent.problem };
-  if (run && ACTIVE.has(run.status)) return { tone: 'busy', label: t.checking };
+  if (run && ACTIVE.has(run.status)) return { tone: 'busy', label: t.checking, hint: true };
   if (run?.status === 'failed') return { tone: 'bad', label: t.problem, detail: t.checkFailed };
   if (pull.intent) return { tone: 'busy', label: pull.intent.kind === 'live' ? t.goingLive : t.queuedStaging };
   if (run?.status === 'passed') return { tone: 'good', label: t.checked };
-  return { tone: 'neutral', label: t.notChecked };
+  return { tone: 'busy', label: t.notChecked, hint: true };
 }
 
 function Badge({ state }) {
@@ -55,6 +55,7 @@ function ChangeCard({ pull, canAct, busy, onPublish, onWithdraw }) {
     <p className="muted">{t.askedBy} {who}{pull.requestedBy ? ` ${t.via}` : ''} · {formatDate(pull.createdAt || pull.updatedAt)}</p>
     {pull.request && <blockquote className="m-quote">{pull.request}</blockquote>}
     {state.detail && <p className="m-problem">{Icon.alert}<span>{state.detail}</span></p>}
+    {state.hint && !pull.intent && <p className="muted" style={{ fontSize: 12 }}>{t.busyHint}</p>}
     <div className="m-actions" style={{ gridColumn: 2, marginTop: 6 }}>
       {!pull.intent && <button className="button button--primary" disabled={!canAct || busy || state.tone === 'bad'} onClick={() => onPublish(pull.number)}>{busy && <span className="m-spinner" aria-hidden="true" />}{t.toStaging}</button>}
       {pull.intent && !pull.intent.problem && <button className="button" disabled={!canAct || busy} onClick={() => onWithdraw(pull.number)}>{t.cancel}</button>}
@@ -97,15 +98,25 @@ export default function MerchantApp({ onTechnical }) {
   // Exactly the changes that are on the test version and not live (from the server's comparison).
   const stagedNumbers = new Set(data?.release?.pulls || []);
   const inStaging = waiting > 0 ? merged.filter(pull => pull.stage === 'staging' && stagedNumbers.has(pull.number)) : [];
-  // Keep the page fresh while anything is waiting for, or in, its automatic check.
-  const working = pulls.some(pull => pull.intent || !currentRun(pull) || ACTIVE.has(currentRun(pull)?.status));
-
-  // While something is being checked or merged, refresh quietly every 10 seconds.
+  // Live updates: ask the server every few seconds whether anything changed (a tiny
+  // local check), and reload the overview only when it did. Paused while the tab is hidden.
+  const version = useRef(null);
   useEffect(() => {
-    clearTimeout(timer.current);
-    if (working) timer.current = setTimeout(() => void load(), 10_000);
-    return () => clearTimeout(timer.current);
-  }, [working, data, load]);
+    let stopped = false;
+    const tick = async () => {
+      if (stopped) return;
+      if (document.visibilityState === 'visible') {
+        try {
+          const { version: next } = await request('/api/version');
+          if (version.current !== null && next !== version.current) await load();
+          version.current = next;
+        } catch { /* keep the last overview; the next tick tries again */ }
+      }
+      if (!stopped) timer.current = setTimeout(tick, 3_000);
+    };
+    void tick();
+    return () => { stopped = true; clearTimeout(timer.current); };
+  }, [load]);
 
   const act = async (key, path) => {
     setBusy(key); setActionError(null);

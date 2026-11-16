@@ -17,6 +17,9 @@ export class Store {
       CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY AUTOINCREMENT, created INTEGER NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL, body TEXT NOT NULL);`);
   }
   close() { this.db.close(); }
+  // A cheap change marker: the merchant screen polls it and reloads only when it moves.
+  bump() { this.version = Math.max(Date.now(), (this.version || 0) + 1); return this.version; }
+  currentVersion() { return this.version || this.bump(); }
   transaction(fn) { this.db.exec('BEGIN IMMEDIATE'); try { const result = fn(); this.db.exec('COMMIT'); return result; } catch (error) { this.db.exec('ROLLBACK'); throw error; } }
   audit(actor, action, detail = {}) {
     // Callers supply structured identifiers/outcomes only, never request headers or credentials.
@@ -30,6 +33,7 @@ export class Store {
   updateRun(id, changes) {
     const run = this.getRun(id); if (!run) throw new DeskError('RUN_NOT_FOUND', 'Review run not found.', 404);
     Object.assign(run, changes, { updatedAt: nowIso() });
+    this.bump();
     this.db.prepare('UPDATE runs SET status=?,updated=?,body=? WHERE id=?').run(run.status, Date.now(), JSON.stringify(run), id);
     return run;
   }
@@ -77,6 +81,7 @@ export class Store {
     return this.transaction(() => {
       const inserted = this.db.prepare('INSERT OR IGNORE INTO deliveries(id,received) VALUES(?,?)').run(deliveryId, Date.now());
       if (!inserted.changes) return false;
+      this.bump();
       if (['pull_request', 'workflow_run', 'check_run', 'push'].includes(event)) {
         const pr = payload.pull_request?.number ?? payload.number ?? null;
         const notification = { id: deliveryId, event, prNumber: Number.isInteger(pr) ? pr : null, title: event === 'pull_request' ? `PR #${pr} ${String(payload.action || 'updated').slice(0, 40)}` : `${event.replaceAll('_', ' ')} update`, createdAt: nowIso() };

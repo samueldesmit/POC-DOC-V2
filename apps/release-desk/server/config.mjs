@@ -29,7 +29,7 @@ export function configuration(env = process.env) {
     anthropicModel: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
     dataDir: path.resolve(env.DATA_DIR || './.data'), port: Number(env.PORT || 3000),
     publicUrl: env.APP_URL || '', production: env.NODE_ENV === 'production',
-    maxActiveRuns: 2, maxRunsPerHour: 10, maxRunMs: 20 * 60_000, pollMs: 8_000,
+    maxActiveRuns: 2, maxRunsPerHour: 10, maxRunMs: 20 * 60_000, pollMs: 3_000,
     previewThemeToken: env.SHOPIFY_THEME_TOKEN || '',
     stagingThemeId: /^\d+$/.test(env.STAGING_THEME_ID || '') ? env.STAGING_THEME_ID : '',
     previewCliPath: env.SHOPIFY_CLI_PATH || '', maxPreviewsPerHour: 10, maxPreviewMs: 15 * 60_000,

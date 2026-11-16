@@ -42,6 +42,7 @@ export function createApp({ config, store, service, connectorStore = null, githu
   for (const method of ['get', 'delete']) app[method]('/mcp/:token', (_req, res) => res.status(405).set('Allow', 'POST').json({ jsonrpc: '2.0', error: { code: -32000, message: 'Method not allowed.' }, id: null }));
   app.use('/api', async (req, _res, next) => { req.actor = await authenticate(req.get('authorization'), config); next(); });
   app.use('/api', express.json({ limit: '8kb', strict: true }));
+  app.get('/api/version', (_req, res) => res.json({ version: store.currentVersion() }));
   app.get('/api/dashboard', async (req, res) => res.json(await service.dashboard(req.actor)));
   app.param('number', (req, _res, next, value) => { ensure(/^[1-9]\d{0,8}$/.test(value), 'INVALID_PR', 'Invalid PR number.', 400); req.prNumber = Number(value); next(); });
   app.get('/api/pulls/:number', async (req, res) => res.json(await service.detail(req.prNumber)));

@@ -59,6 +59,7 @@ export async function fixtureRequest(path, { method, body, signal } = {}) {
   const number = Number(path.match(/\/pulls\/(\d+)/)?.[1]);
   if (method === 'POST' && path.endsWith('/test')) { testStarted = Date.now(); return { run: reviewRun() }; }
   if (method === 'POST' && path.endsWith('/reconcile')) { reconciled = true; return { run: reviewRun() }; }
+  if (path === '/api/version') return { version: 1 };
   if (path === '/api/connections' && method === 'GET') return { connections: [{ id: '00000000-0000-4000-8000-000000000001', name: 'Fixture user', email: 'fixture@example.com', createdAt: new Date().toISOString(), lastUsedAt: null }] };
   if (path === '/api/connections' && method === 'POST') return { connection: { id: '00000000-0000-4000-8000-000000000002', name: body?.name || 'Fixture user' }, url: 'https://desk.example/mcp/rdc_fixture-link-not-real' };
   if (path.startsWith('/api/connections/') && method === 'DELETE') return { revoked: true };

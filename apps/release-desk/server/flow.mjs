@@ -22,9 +22,10 @@ export class Flow {
   setIntent(number, actor, kind) {
     this.db.prepare('INSERT INTO intents(pr,actor,kind,created,problem) VALUES(?,?,?,?,NULL) ON CONFLICT(pr) DO UPDATE SET actor=excluded.actor,kind=excluded.kind,created=excluded.created,problem=NULL').run(number, actor.id, kind, Date.now());
     this.store.audit(actor.id, 'intent.set', { pr: number, kind });
+    this.store.bump();
   }
-  clearIntent(number) { this.db.prepare('DELETE FROM intents WHERE pr=?').run(number); }
-  problem(number, message) { this.db.prepare('UPDATE intents SET problem=? WHERE pr=?').run(message, number); }
+  clearIntent(number) { this.db.prepare('DELETE FROM intents WHERE pr=?').run(number); this.store.bump(); }
+  problem(number, message) { this.db.prepare('UPDATE intents SET problem=? WHERE pr=?').run(message, number); this.store.bump(); }
 
   // "Put this change in the test version": merge into staging once checks pass.
   async publish(number, actor) {
