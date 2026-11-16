@@ -6,6 +6,9 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        # The repository's default workflow token is read-only; the job commits the compiled assets back to the PR branch.
+        permissions:
+            contents: write
         steps:
             - uses: actions/checkout@v4
 
