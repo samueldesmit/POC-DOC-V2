@@ -4,6 +4,7 @@ import { ensure, isSha, DeskError, nowIso } from './errors.mjs';
 import { validatePull } from './github.mjs';
 import { allApprove } from './reviews.mjs';
 
+const MERGEABLE = new Set(['clean', 'unstable']);
 export function eligibility(pr, run, protection, config) {
   const reasons = [];
   try { validatePull(pr, config); } catch (error) { reasons.push(error.message); }
@@ -12,7 +13,9 @@ export function eligibility(pr, run, protection, config) {
   if (run && (run.headSha !== pr.head.sha || run.baseSha !== pr.base.sha)) reasons.push(`The PR or ${pr.base?.ref || 'its base'} changed after this review.`);
   if (run && (run.reviewMode || 'live') !== config.reviewMode) reasons.push('The configured reviewer mode changed. Start a fresh review.');
   if (run && (!allApprove(run.reviews, run.reviewMode || 'live') || run.ci?.status !== 'completed' || run.ci?.conclusion !== 'success' || !run.checkId)) reasons.push(config.reviewMode === 'demo' ? 'Real CI must pass and all three explicitly simulated reviewers must finish for this exact revision.' : 'CI and all three AI reviewers must approve this exact revision.');
-  if (pr.mergeable !== true || pr.mergeable_state !== 'clean') reasons.push('GitHub has not confirmed a clean, unblocked merge.');
+  // 'unstable' = all required checks passed but an optional one did not (for example a
+  // build run on a bot commit waiting for approval). GitHub still enforces the required checks.
+  if (pr.mergeable !== true || !MERGEABLE.has(pr.mergeable_state)) reasons.push('GitHub has not confirmed a clean, unblocked merge.');
   return { allowed: reasons.length === 0, reasons };
 }
 export function pullView(pr, run, protection, config) {
@@ -41,7 +44,7 @@ export class Service {
     const protections = Object.fromEntries(releaseTargets(this.config).map(branch => [branch, { ready: false }]));
     if (!blockers.some(blocker => ['GITHUB_AUTH_MISSING', 'REPOSITORY_MISSING'].includes(blocker.code))) {
       try {
-        const results = await Promise.allSettled([this.github.listPulls(), this.github.protection(this.config.stagingBranch), this.github.protection(this.config.liveBranch), this.github.listHistory(), this.github.compareBranches(this.config.liveBranch, this.config.stagingBranch)]);
+        const results = await Promise.allSettled([this.github.listPulls(), this.github.protection(this.config.stagingBranch), this.github.protection(this.config.liveBranch), this.github.listHistory(), this.github.compareBranches(this.config.liveBranch, this.config.stagingBranch, 100)]);
         if (results[1].status === 'fulfilled') protections[this.config.stagingBranch] = results[1].value;
         if (results[2].status === 'fulfilled') protections[this.config.liveBranch] = results[2].value;
         // Pull-list responses omit GitHub's computed mergeability. Detail endpoint refreshes that on selection.
@@ -51,13 +54,16 @@ export class Service {
         else historyError = 'Recent pull-request history could not be loaded. Try refreshing.';
         if (results[4].status === 'fulfilled') {
           const openRelease = pulls.find(pr => pr.stage === 'live');
-          release = { aheadBy: results[4].value.ahead_by ?? 0, behindBy: results[4].value.behind_by ?? 0, openPull: openRelease ? openRelease.number : null };
+          // Which changes are on staging but not live: squash merges end their first line with "(#123)".
+          const included = [...new Set((results[4].value.commits || []).map(commit => String(commit.commit?.message || '').split('\n')[0].match(/\(#(\d+)\)\s*$/)?.[1]).filter(Boolean).map(Number))];
+          release = { aheadBy: results[4].value.ahead_by ?? 0, behindBy: results[4].value.behind_by ?? 0, openPull: openRelease ? openRelease.number : null, pulls: included };
         }
       } catch { blockers.push({ code: 'GITHUB_UNAVAILABLE', message: 'GitHub status could not be loaded.' }); }
     }
     // Every open change gets an automatic check without anyone asking: start one
     // for any PR whose current commit has none yet (the flow ignores busy PRs).
-    if (this.flow && !blockers.length) for (const pull of pulls) if (!pull.draft && (!pull.latestRun || pull.latestRun.headSha !== pull.headSha || pull.latestRun.baseSha !== pull.baseSha)) void this.flow.progress(pull.number);
+    // Also nudge every change the merchant already asked to publish (the flow is idempotent).
+    if (this.flow && !blockers.length) for (const pull of pulls) if (!pull.draft && (pull.intent || !pull.latestRun || pull.latestRun.headSha !== pull.headSha || pull.latestRun.baseSha !== pull.baseSha)) void this.flow.progress(pull.number);
     for (const [branch, protection] of Object.entries(protections)) if (!protection.ready) blockers.push({ code: 'BRANCH_PROTECTION_REQUIRED', message: `${branch} needs strict, administrator-enforced protection requiring the Release Desk check from this GitHub App.` });
     return { shop: this.config.shop, actor: { id: actor.id, canMutate: actor.canMutate }, repository: this.config.repository, branches: { staging: this.config.stagingBranch, live: this.config.liveBranch }, release, themes: { stagingPreviewUrl: this.config.stagingThemeId ? `https://${this.config.shop}/?preview_theme_id=${this.config.stagingThemeId}` : null, liveUrl: `https://${this.config.shop}/` }, reviewMode: this.config.reviewMode, setup: { ready: blockers.length === 0, blockers }, pulls, history, historyError, runs: this.store.listRuns(), notifications: this.store.notifications(), deployment: { description: `Changes are merged into ${this.config.stagingBranch} first and tested on the staging theme. Releasing merges ${this.config.stagingBranch} into ${this.config.liveBranch}, which the live theme follows.` }, updatedAt: nowIso() };
   }
@@ -115,7 +121,7 @@ export class Service {
       ensure(ci.status === 'completed' && ci.conclusion === 'success' && ci.attempt === run.ci.attempt, 'CI_CHANGED', 'The trusted workflow changed after approval. Run a fresh review.');
       await this.github.verifyCheck(run);
       const fresh = await this.github.getPull(number); validatePull(fresh, this.config, run.headSha, run.baseSha);
-      ensure(fresh.mergeable === true && fresh.mergeable_state === 'clean', 'MERGE_BLOCKED', 'GitHub mergeability is unknown or blocked.');
+      ensure(fresh.mergeable === true && MERGEABLE.has(fresh.mergeable_state), 'MERGE_BLOCKED', 'GitHub mergeability is unknown or blocked.');
       ensure(await this.github.getBranchSha(run.baseBranch) === run.baseSha, 'STALE_BASE', `${run.baseBranch} changed. Start a new review.`);
       assertLock();
       // GitHub's atomic head comparison plus strict branch protection cover changes during the network gap.

@@ -88,9 +88,10 @@ export default function MerchantApp({ onTechnical }) {
   // History is what went live. What is only in the test version shows in its own section,
   // and only while the test version is actually ahead of live.
   const history = merged.filter(pull => pull.stage === 'live');
-  const lastLive = Math.max(0, ...history.map(pull => Date.parse(pull.mergedAt) || 0));
   const waiting = data?.release?.aheadBy || 0;
-  const inStaging = waiting > 0 ? merged.filter(pull => pull.stage === 'staging' && Date.parse(pull.mergedAt) > lastLive) : [];
+  // Exactly the changes that are on the test version and not live (from the server's comparison).
+  const stagedNumbers = new Set(data?.release?.pulls || []);
+  const inStaging = waiting > 0 ? merged.filter(pull => pull.stage === 'staging' && stagedNumbers.has(pull.number)) : [];
   // Keep the page fresh while anything is waiting for, or in, its automatic check.
   const working = pulls.some(pull => pull.intent || !currentRun(pull) || ACTIVE.has(currentRun(pull)?.status));
 
@@ -148,7 +149,7 @@ export default function MerchantApp({ onTechnical }) {
           <span className={`m-stage-icon m-stage-icon--${ahead ? 'waiting' : 'done'}`}>{ahead ? Icon.clock : Icon.check}</span>
           <div style={{ display: 'grid', gap: 8, flex: 1 }}>
             {ahead ? <>
-              <strong>{t.stagingWaiting(Math.max(waiting, inStaging.length, 1))}</strong>
+              <strong>{t.stagingWaiting(inStaging.length || Math.max(waiting, 1))}</strong>
               {inStaging.length > 0 && <ul className="m-staged">{inStaging.map(pull => <li key={pull.number}>{pull.title} <span className="muted">· {pull.requestedBy || pull.author}</span></li>)}</ul>}
               {release && <div><Badge state={stateOf(release)} /></div>}
               {release && stateOf(release).detail && <p className="m-problem">{Icon.alert}<span>{stateOf(release).detail}</span></p>}

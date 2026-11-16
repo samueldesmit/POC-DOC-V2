@@ -92,7 +92,7 @@ export class GitHub {
     ensure(releaseTargets(this.config).includes(branch), 'BRANCH_SCOPE', 'Only the staging and live branches are tracked.', 500);
     return (await this.request('GET', this.route(`git/ref/heads/${branch}`))).object.sha;
   }
-  async compareBranches(base, head) { return this.request('GET', this.route(`compare/${base}...${head}?per_page=1`)); }
+  async compareBranches(base, head, perPage = 1) { return this.request('GET', this.route(`compare/${base}...${head}?per_page=${perPage}`)); }
   createPull({ title, head, base, body }) { return this.request('POST', this.route('pulls'), { title, head, base, body, maintainer_can_modify: false }); }
   async files(number, expectedCount = null) {
     if (expectedCount !== null) ensure(expectedCount <= this.config.maxFiles, 'DIFF_LIMIT', 'The PR exceeds the supported review file limit.');

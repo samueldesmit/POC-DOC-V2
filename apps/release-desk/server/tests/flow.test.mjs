@@ -104,3 +104,11 @@ test('GitHub events schedule progress; a finished check moves its PR on', async 
   flow.onRunFinished({ prNumber: 7 });
   assert.equal(scheduled.length, 3);
 });
+
+test('a change whose only open item is an optional check (unstable) still goes into staging', async t => {
+  const { github, flow, pass } = harness(t, pull({ mergeable_state: 'unstable' }));
+  await flow.publish(7, actor);
+  pass(7);
+  await flow.progress(7);
+  assert.deepEqual(github.calls.find(call => call[0] === 'merge'), ['merge', 7, head]);
+});
