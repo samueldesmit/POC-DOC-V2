@@ -7,7 +7,7 @@
         id="{{ section_id }}"
         class="{{ s.desktop_padding }} {{ s.mobile_padding }} bg-background"
         data-announcement-bar
-     role="region" aria-label="{{ 'sections.announcement_bar.label' | t: default: 'Announcement' }}">
+     role="region" aria-label="{{ 'sections.announcement_bar.label' | t }}">
         {% render 'section-colors', current_section: section %}
         <splide-section
             data-splide-type="slide"
