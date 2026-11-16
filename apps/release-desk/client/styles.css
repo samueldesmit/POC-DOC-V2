@@ -319,3 +319,17 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
   .replay-toolbar .release-actions { flex-wrap: wrap; }
   .replay-toolbar .release-actions .button { flex: 1 1 auto; }
 }
+
+/* Claude connections and change provenance */
+.connections { padding: 20px; display: grid; gap: 12px; }
+.connection-form { display: grid; gap: 10px; max-width: 420px; }
+.connection-form label { display: grid; gap: 4px; font-weight: 600; }
+.connection-form input { font: inherit; padding: 8px 10px; border: 1px solid var(--border, #c9ccd0); border-radius: 8px; background: transparent; color: inherit; }
+.connection-url { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.connection-url code { word-break: break-all; padding: 6px 8px; border-radius: 6px; background: rgba(127, 127, 127, .12); }
+.connection-created ol { margin: 8px 0 8px 18px; }
+.connection-list, .commit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.connection-list li, .commit-list li { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid rgba(127, 127, 127, .2); }
+.commit-list li { align-items: flex-start; }
+.commits-section { margin-top: 16px; }
+.request-quote { margin: 6px 0 0; padding-left: 10px; border-left: 3px solid rgba(127, 127, 127, .4); white-space: pre-wrap; }

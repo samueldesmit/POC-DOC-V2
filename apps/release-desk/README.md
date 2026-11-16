@@ -22,6 +22,22 @@ feature branch ──PR──▶ staging ──release PR──▶ main
 
 Only `staging` itself can be merged into `main`; a PR from any other branch into `main` is refused by the app and by the review workflow.
 
+## Claude connector
+
+Merchants change the theme by asking their own Claude (Claude Desktop, claude.ai or Claude Code). Release Desk is the only way in:
+
+1. In Release Desk, **Connect Claude** creates a personal connection link (name and email are recorded on every change). The link is shown once; only its SHA-256 is stored, and it can be revoked at any time.
+2. The person adds the link as a custom connector in Claude.
+3. Claude gets eight tools: `get_started`, `list_files`, `read_file`, `start_change`, `save_files`, `submit_change`, `change_status`, `list_changes`. There is no tool to merge, release, publish or push to a theme.
+4. Every request is its own branch (`claude/<title>-<id>`) from staging. Each save is one commit authored by the person. Submitting opens a pull request into staging with the original request quoted.
+5. In Release Desk the PR shows who asked for it, the request, and every commit with its author. Test, preview, merge to staging and release work as for any PR.
+
+What Claude can change: `assets`, `blocks`, `config`, `layout`, `locales`, `sections`, `snippets`, `templates`, `src`. Never: the compiled `assets/index.css|main.js|global.js` (built from `src/` on the PR), `config/settings_data.json` and `config/markets.json` (owned by the theme editor), `.github/`, `apps/`, package and build files. Binary files cannot be written. People only see and change their own changes. Budgets: 600 reads and 60 writes per connection per hour.
+
+## Branch rules
+
+A repository ruleset on `main` and `staging` requires the `Release Desk` check (pinned to this GitHub App, up to date), and blocks force pushes and deletion. Its only bypass actor is the Shopify GitHub app (id 101950), so saves in the theme editor of the connected themes still sync to git. Everyone else, administrators included, goes through a tested pull request.
+
 ## What runs where
 
 | Part | Where |
@@ -39,7 +55,7 @@ The app never publishes a theme. It merges pull requests; Shopify's GitHub integ
 1. **Branches.** Create `staging` from `main`.
 2. **Themes.** In the store: Online Store, Themes, Add theme, Connect from GitHub. Connect `main` (publish it as the live theme when ready) and `staging` (keep unpublished).
 3. **GitHub App.** Create one, install it on this repository only. Repository permissions: Pull requests write (the app opens the release PR), Contents write, Actions write, Checks write, Administration read, Metadata read. Webhook URL `https://<host>/webhooks/github`, events `pull_request`, `workflow_run`, `check_run`, `push`.
-4. **Branch protection** on both `staging` and `main`: require status check `Release Desk` pinned to the GitHub App, require branches to be up to date, enforce for administrators. The app shows a setup warning until this is in place.
+4. **Branch rules**: a ruleset on `staging` and `main` as described under Branch rules. The app shows a setup warning until it is in place.
 5. **Shopify app.** Create it in the Dev Dashboard, fill in `shopify.app.toml` (client id, host), install it on the store. No Admin API scopes are needed.
 6. **Previews (optional).** Install Shopify's Theme Access app on the store and create a password for `SHOPIFY_THEME_TOKEN`.
 7. **Hosting.** Any Docker host with a persistent volume on `/data` and one replica (the Dockerfile and `railway.toml` work on Railway). Set the variables from `.env.example`.
@@ -69,5 +85,5 @@ The fixture shows illustrative data and makes no Shopify or GitHub calls. For th
 
 ## Not built yet
 
-- Making a change from the app ("ask Claude"). For now a pull request into `staging` comes from a developer or Claude Code.
-- Cleaning up preview themes after a PR closes.
+- Cleaning up preview themes and `claude/` branches after a PR closes.
+- A revert button for a release.

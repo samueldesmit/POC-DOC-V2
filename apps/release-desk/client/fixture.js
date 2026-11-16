@@ -51,7 +51,7 @@ function dashboard() {
   return { reviewMode: mode === 'demo' ? 'demo' : 'live', shop: 'example-store.myshopify.com', actor: { id: 'development-fixture', canMutate: mode !== 'readonly' }, repository: 'example-org/theme-repo', setup: { ready: mode !== 'setup', blockers: mode === 'setup' ? [{ code: 'GITHUB_AUTH_MISSING', message: 'Connect the GitHub App to example-org/theme-repo.' }, { code: 'ANTHROPIC_KEY_MISSING', message: 'Add an Anthropic API key for live review mode, or configure demo mode.' }] : [] }, pulls, history, historyError: null, runs: [...(run ? [run] : []), ...(history.length ? [savedRun] : [])], notifications: mode === 'empty' ? [] : [{ id: 'fixture-notification-2', title: merged ? 'Hero playback fix merged' : run?.status === 'passed' ? 'Review completed for the hero playback fix' : 'New pull request opened', prNumber: 12, createdAt: startedAt }, { id: 'fixture-notification-1', title: 'Release workflow documentation merged', prNumber: 9, createdAt: historicalDate }], deployment: { description: 'Merging updates main. Store deployment follows the repository workflow; this app does not publish themes directly.' }, updatedAt: new Date().toISOString() };
 }
 
-export async function fixtureRequest(path, { method, signal } = {}) {
+export async function fixtureRequest(path, { method, body, signal } = {}) {
   await new Promise((resolve, reject) => { const timer = setTimeout(resolve, 220); if (signal?.aborted) { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); } else signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); }, { once: true }); });
   if (mode === 'error') throw new Error('The development fixture is simulating an unavailable release service.');
   if (path === '/api/dashboard') return dashboard();
@@ -59,6 +59,9 @@ export async function fixtureRequest(path, { method, signal } = {}) {
   const number = Number(path.match(/\/pulls\/(\d+)/)?.[1]);
   if (method === 'POST' && path.endsWith('/test')) { testStarted = Date.now(); return { run: reviewRun() }; }
   if (method === 'POST' && path.endsWith('/reconcile')) { reconciled = true; return { run: reviewRun() }; }
+  if (path === '/api/connections' && method === 'GET') return { connections: [{ id: '00000000-0000-4000-8000-000000000001', name: 'Fixture user', email: 'fixture@example.com', createdAt: new Date().toISOString(), lastUsedAt: null }] };
+  if (path === '/api/connections' && method === 'POST') return { connection: { id: '00000000-0000-4000-8000-000000000002', name: body?.name || 'Fixture user' }, url: 'https://desk.example/mcp/rdc_fixture-link-not-real' };
+  if (path.startsWith('/api/connections/') && method === 'DELETE') return { revoked: true };
   if (method === 'POST' && path === '/api/release') return { created: true, number: 12, url: 'https://github.com/example-org/theme-repo/pull/12' };
   if (method === 'POST' && path.endsWith('/merge')) { merged = true; mergedAt = new Date().toISOString(); return { merged: true, sha, url: 'https://github.com/example-org/theme-repo/pull/12' }; }
   const data = dashboard();

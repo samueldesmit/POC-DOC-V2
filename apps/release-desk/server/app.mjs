@@ -4,8 +4,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { authenticate, verifyWebhook } from './auth.mjs';
 import { DeskError, ensure } from './errors.mjs';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { createConnectorServer } from './connector.mjs';
 
-export function createApp({ config, store, service, clientDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist/client') }) {
+export function createApp({ config, store, service, connectorStore = null, github = null, clientDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist/client') }) {
   const app = express(); app.disable('x-powered-by');
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -22,6 +24,20 @@ export function createApp({ config, store, service, clientDir = path.resolve(pat
     ensure(payload.repository?.full_name === config.repository || event === 'ping', 'WEBHOOK_REPOSITORY', 'Unexpected repository.', 403);
     res.json({ received: true, duplicate: !store.receive(id, event, payload) });
   });
+  // Claude connector (MCP over streamable HTTP, stateless). The personal token in
+  // the path is the credential; it is created in the authenticated app and
+  // identifies the Shopify user every change is recorded under.
+  const connectorEnabled = Boolean(connectorStore && github);
+  app.post('/mcp/:token', express.json({ limit: '2mb' }), async (req, res) => {
+    const identity = connectorEnabled ? connectorStore.verify(req.params.token) : null;
+    if (!identity) return res.status(401).json({ jsonrpc: '2.0', error: { code: -32001, message: 'This Claude connection is invalid or was revoked. Create a new one in Release Desk.' }, id: null });
+    const server = createConnectorServer({ config, github, connectorStore, store, identity });
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+    res.on('close', () => { transport.close().catch(() => {}); server.close().catch(() => {}); });
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  });
+  for (const method of ['get', 'delete']) app[method]('/mcp/:token', (_req, res) => res.status(405).set('Allow', 'POST').json({ jsonrpc: '2.0', error: { code: -32000, message: 'Method not allowed.' }, id: null }));
   app.use('/api', async (req, _res, next) => { req.actor = await authenticate(req.get('authorization'), config); next(); });
   app.use('/api', express.json({ limit: '8kb', strict: true }));
   app.get('/api/dashboard', async (req, res) => res.json(await service.dashboard(req.actor)));
@@ -32,6 +48,18 @@ export function createApp({ config, store, service, clientDir = path.resolve(pat
   app.get('/api/runs/:id', (req, res) => { const run = store.getRun(req.params.id); ensure(run, 'RUN_NOT_FOUND', 'Review run not found.', 404); res.json({ run }); });
   app.post('/api/pulls/:number/test', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.status(202).json({ run: await service.test(req.prNumber, req.body?.headSha, req.actor) }); });
   app.post('/api/pulls/:number/merge', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json(await service.merge(req.prNumber, req.body || {}, req.actor)); });
+  app.get('/api/connections', (req, res) => { ensure(connectorEnabled, 'CONNECTOR_UNAVAILABLE', 'The Claude connector is not enabled.', 503); res.json({ connections: connectorStore.list(req.actor.id), mcpBase: `${config.publicUrl}/mcp/` }); });
+  app.post('/api/connections', (req, res) => {
+    ensure(connectorEnabled, 'CONNECTOR_UNAVAILABLE', 'The Claude connector is not enabled.', 503);
+    ensure(req.actor.canMutate, 'FORBIDDEN', 'Only release reviewers can connect Claude to this theme.', 403);
+    ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415);
+    const name = String(req.body?.name || '').trim(), email = String(req.body?.email || '').trim();
+    ensure(name.length >= 2 && name.length <= 80 && !/[<>\n]/.test(name), 'INVALID_NAME', 'Enter your name (2–80 characters).', 400);
+    ensure(/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) && email.length <= 120, 'INVALID_EMAIL', 'Enter a valid email address.', 400);
+    const { connection, token } = connectorStore.create(req.actor, { name, email });
+    res.status(201).json({ connection, url: `${config.publicUrl}/mcp/${token}` });
+  });
+  app.delete('/api/connections/:id', (req, res) => { ensure(connectorEnabled, 'CONNECTOR_UNAVAILABLE', 'The Claude connector is not enabled.', 503); ensure(/^[a-f0-9-]{36}$/.test(req.params.id), 'INVALID_REQUEST', 'Invalid connection.', 400); connectorStore.revoke(req.actor, req.params.id); res.json({ revoked: true }); });
   app.post('/api/release', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json(await service.createRelease(req.actor)); });
   app.post('/api/pulls/:number/reconcile', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json({ run: await service.reconcile(req.prNumber, req.body?.runId, req.actor) }); });
   app.use('/api', (_req, _res) => { throw new DeskError('NOT_FOUND', 'API endpoint not found.', 404); });

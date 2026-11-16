@@ -22,7 +22,8 @@ export function pullView(pr, run, protection, config) {
   return { number: pr.number, stage: stageOf(config, pr.base?.ref), headBranch: pr.head?.ref || '', title: pr.title, url: pr.html_url, author: pr.user?.login || '', draft: pr.draft, state: pr.state, status: merged ? 'merged' : pr.state, merged, createdAt: pr.created_at || null, closedAt: pr.closed_at || null, mergedAt: pr.merged_at || null, mergedBy: pr.merged_by?.login || null, mergeCommitSha: merged ? pr.merge_commit_sha || null : null, headSha: pr.head.sha, baseSha: pr.base.sha, baseBranch: pr.base.ref, updatedAt: pr.updated_at, mergeable: pr.mergeable ?? null, mergeState: pr.mergeable_state || 'unknown', latestRun: run || null, mergeEligibility: eligibility(pr, run, protection, config) };
 }
 export class Service {
-  constructor({ config, store, github, previewService = null }) { this.config = config; this.store = store; this.github = github; this.previewService = previewService; }
+  constructor({ config, store, github, previewService = null, connectorStore = null }) { this.config = config; this.store = store; this.github = github; this.previewService = previewService; this.connectorStore = connectorStore; }
+  withRequester(view) { const change = this.connectorStore?.changeForPull(view.number); return change ? { ...view, requestedBy: change.name } : view; }
   requireReviewer(actor) { ensure(this.config.reviewers.size > 0, 'REVIEWERS_MISSING', 'No reviewers have been configured.', 503); ensure(actor.canMutate, 'FORBIDDEN', 'Your Shopify user is not authorized to run tests or merge.', 403); }
   async locked(pr, action) {
     const owner = randomUUID(); ensure(this.store.lock(pr, owner), 'PR_BUSY', 'Another action is already in progress for this PR.');
@@ -40,9 +41,9 @@ export class Service {
         if (results[1].status === 'fulfilled') protections[this.config.stagingBranch] = results[1].value;
         if (results[2].status === 'fulfilled') protections[this.config.liveBranch] = results[2].value;
         // Pull-list responses omit GitHub's computed mergeability. Detail endpoint refreshes that on selection.
-        if (results[0].status === 'fulfilled') pulls = results[0].value.map(pr => pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config));
+        if (results[0].status === 'fulfilled') pulls = results[0].value.map(pr => this.withRequester(pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config)));
         else blockers.push({ code: 'GITHUB_UNAVAILABLE', message: 'Open pull requests could not be loaded.' });
-        if (results[3].status === 'fulfilled') history = results[3].value.filter(pr => pr.state === 'closed' && releaseTargets(this.config).includes(pr.base?.ref)).slice(0, 50).map(pr => pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config));
+        if (results[3].status === 'fulfilled') history = results[3].value.filter(pr => pr.state === 'closed' && releaseTargets(this.config).includes(pr.base?.ref)).slice(0, 50).map(pr => this.withRequester(pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config)));
         else historyError = 'Recent pull-request history could not be loaded. Try refreshing.';
         if (results[4].status === 'fulfilled') {
           const openRelease = pulls.find(pr => pr.stage === 'live');
@@ -66,7 +67,11 @@ export class Service {
     }
     const runs = this.store.listRuns(number);
     const previewState = this.previewsStatus(number);
-    return { pull: pullView(pr, runs[0], protection, this.config), files: files.map(file => ({ path: file.filename, status: file.status, additions: file.additions, deletions: file.deletions, url: file.blob_url })), filesUnavailableReason, runs, previews: previewState.previews, previewsConfigured: previewState.configured };
+    // Who did what: every commit with its author, and the Claude request behind the PR.
+    let commits = [];
+    try { commits = (await this.github.pullCommits(number)).map(item => ({ sha: item.sha, message: String(item.commit?.message || '').split('\n')[0].slice(0, 200), author: item.commit?.author?.name || item.author?.login || 'Unknown', date: item.commit?.author?.date || null, url: item.html_url })); } catch { commits = []; }
+    const change = this.connectorStore?.changeForPull(number) || null;
+    return { pull: pullView(pr, runs[0], protection, this.config), files: files.map(file => ({ path: file.filename, status: file.status, additions: file.additions, deletions: file.deletions, url: file.blob_url })), filesUnavailableReason, runs, commits, request: change ? { by: change.name, text: change.request, changeId: change.id } : null, previews: previewState.previews, previewsConfigured: previewState.configured };
   }
   previewsStatus(number) { return this.previewService?.status(number) || { previews: null, configured: false }; }
   async generatePreviews(number, headSha, actor) {

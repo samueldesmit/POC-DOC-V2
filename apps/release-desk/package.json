@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.20.0" },
+  "engines": {
+    "node": ">=22.20.0"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "dev:server": "node --watch server/index.mjs",
@@ -13,11 +15,15 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@octokit/auth-app": "^8.3.1",
     "express": "^5.3.0",
     "jose": "^6.2.17",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
   },
-  "devDependencies": { "vite": "8.3.8" }
+  "devDependencies": {
+    "vite": "8.3.8"
+  }
 }

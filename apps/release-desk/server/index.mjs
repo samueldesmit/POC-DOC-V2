@@ -9,15 +9,17 @@ import { createApp } from './app.mjs';
 import { PreviewStore } from './preview-store.mjs';
 import { PreviewService } from './preview-service.mjs';
 import { PreviewTransport } from './preview-transport.mjs';
+import { ConnectorStore } from './connector-store.mjs';
 
 const config = configuration();
 const store = new Store(path.join(config.dataDir, 'release-desk.sqlite'));
 const github = new GitHub(config), reviews = new Reviews(config);
 const previewStore = new PreviewStore(store);
 const previewService = new PreviewService({ config, store, previewStore, github, transport: new PreviewTransport({ config, github }) });
-const service = new Service({ config, store, github, previewService });
+const connectorStore = new ConnectorStore(store);
+const service = new Service({ config, store, github, previewService, connectorStore });
 const worker = new Worker({ config, store, github, reviews });
-const app = createApp({ config, store, service });
+const app = createApp({ config, store, service, connectorStore, github });
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(JSON.stringify({ event: 'server.started', port: config.port })); worker.start(); previewService.resume();
 });

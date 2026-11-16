@@ -112,14 +112,25 @@ export class GitHub {
     return comparison.files;
   }
   async protection(branch) {
+    const none = { ready: false, strict: false, appPinned: false, adminsEnforced: false, source: null };
+    try { ensure(releaseTargets(this.config).includes(branch), 'BRANCH_SCOPE', 'Only the staging and live branches are tracked.', 500); } catch { return none; }
+    const appId = Number(this.config.githubAppId);
+    // Repository rulesets: the required Release Desk check, pinned to this app, strict.
+    // Rulesets apply to administrators unless they are listed as bypass actors.
     try {
-      ensure(releaseTargets(this.config).includes(branch), 'BRANCH_SCOPE', 'Only the staging and live branches are tracked.', 500);
+      const rules = await this.request('GET', this.route(`rules/branches/${encodeURIComponent(branch)}`));
+      const check = (Array.isArray(rules) ? rules : []).find(rule => rule.type === 'required_status_checks' && rule.parameters?.required_status_checks?.some(c => c.context === CHECK_NAME && Number(c.integration_id) === appId && appId > 0));
+      if (check) {
+        const strict = check.parameters.strict_required_status_checks_policy === true;
+        return { ready: strict, strict, appPinned: true, adminsEnforced: true, source: 'ruleset' };
+      }
+    } catch { /* fall through to classic protection */ }
+    try {
       const p = await this.request('GET', this.route(`branches/${branch}/protection`));
       const checks = p.required_status_checks;
-      const appId = Number(this.config.githubAppId);
       const pinned = checks?.checks?.some(c => c.context === CHECK_NAME && Number(c.app_id) === appId && appId > 0);
-      return { ready: checks?.strict === true && pinned && p.enforce_admins?.enabled === true, strict: checks?.strict === true, appPinned: Boolean(pinned), adminsEnforced: p.enforce_admins?.enabled === true };
-    } catch { return { ready: false, strict: false, appPinned: false, adminsEnforced: false }; }
+      return { ready: checks?.strict === true && pinned && p.enforce_admins?.enabled === true, strict: checks?.strict === true, appPinned: Boolean(pinned), adminsEnforced: p.enforce_admins?.enabled === true, source: 'branch_protection' };
+    } catch { return none; }
   }
   dispatch(run) { return this.request('POST', this.route('actions/workflows/review-pr.yml/dispatches'), { ref: run.baseBranch, inputs: { pr: String(run.prNumber), head_sha: run.headSha, base_sha: run.baseSha, run_id: run.id } }); }
   async findWorkflowRun(run) {
@@ -155,6 +166,41 @@ export class GitHub {
   async verifyCheck(run) {
     const check = await this.request('GET', this.route(`check-runs/${run.checkId}`));
     ensure(check.name === CHECK_NAME && check.external_id === run.id && check.head_sha === run.headSha && check.conclusion === 'success' && check.status === 'completed' && Number(check.app?.id) === Number(this.config.githubAppId), 'CHECK_INVALID', 'The GitHub review check is missing or no longer successful.');
+  }
+  pullCommits(number) { return this.request('GET', this.route(`pulls/${number}/commits?per_page=100`)); }
+  // --- Claude connector: read the theme and write only to claude/ change branches ---
+  async tree(ref) {
+    const sha = isSha(ref) ? ref : await this.branchSha(ref);
+    const tree = await this.request('GET', this.route(`git/trees/${sha}?recursive=1`), undefined, { maxBytes: 8_000_000 });
+    ensure(!tree.truncated && Array.isArray(tree.tree), 'TREE_INCOMPLETE', 'The repository tree is too large to list.', 422);
+    return tree.tree.filter(entry => entry.type === 'blob').map(entry => ({ path: entry.path, size: entry.size, sha: entry.sha }));
+  }
+  async readFile(path, ref) {
+    const blob = await this.request('GET', this.route(`contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(ref)}`), undefined, { maxBytes: 4_000_000 });
+    ensure(blob && blob.type === 'file' && blob.encoding === 'base64', 'NOT_A_FILE', 'That path is not a file.', 404);
+    return { content: Buffer.from(blob.content, 'base64'), sha: blob.sha, size: blob.size };
+  }
+  async branchSha(branch) { return (await this.request('GET', this.route(`git/ref/heads/${branch.split('/').map(encodeURIComponent).join('/')}`))).object.sha; }
+  createBranch(branch, sha) {
+    ensure(/^claude\/[a-z0-9-]{3,80}$/.test(branch), 'BRANCH_SCOPE', 'Connector branches must be claude/ branches.', 500);
+    return this.request('POST', this.route('git/refs'), { ref: `refs/heads/${branch}`, sha });
+  }
+  // One commit for a set of file changes, authored by the person who asked for it.
+  async commitFiles(branch, { message, files, author }) {
+    ensure(/^claude\/[a-z0-9-]{3,80}$/.test(branch), 'BRANCH_SCOPE', 'Connector branches must be claude/ branches.', 500);
+    const parent = await this.branchSha(branch);
+    const parentCommit = await this.request('GET', this.route(`git/commits/${parent}`));
+    const tree = [];
+    for (const file of files) {
+      if (file.delete) { tree.push({ path: file.path, mode: '100644', type: 'blob', sha: null }); continue; }
+      const blob = await this.request('POST', this.route('git/blobs'), { content: Buffer.from(file.content, 'utf8').toString('base64'), encoding: 'base64' });
+      tree.push({ path: file.path, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+    const newTree = await this.request('POST', this.route('git/trees'), { base_tree: parentCommit.tree.sha, tree });
+    const commit = await this.request('POST', this.route('git/commits'), { message, tree: newTree.sha, parents: [parent], author: { ...author, date: new Date().toISOString() } });
+    // Non-forced: fails if the branch moved meanwhile, so nothing is overwritten.
+    await this.request('PATCH', this.route(`git/refs/heads/${branch.split('/').map(encodeURIComponent).join('/')}`), { sha: commit.sha, force: false });
+    return commit.sha;
   }
   merge(number, sha) { return this.request('PUT', this.route(`pulls/${number}/merge`), { sha, merge_method: 'squash' }); }
 }
