@@ -44,9 +44,16 @@
       "second": "Seconde",
       "placeholder_text": "Voeg een geldige einddatum toe om de afteltimer te starten.",
       "countdown_label": "Aftellen"
+    },
+    "announcement_bar": {
+      "label": "Aankondiging"
     }
   },
   "general": {
+    "404": {
+      "go_home": "Naar home",
+      "title": "Pagina niet gevonden"
+    },
     "accessibility": {
       "skip_to_content": "Ga naar inhoud"
     },
@@ -85,10 +92,6 @@
       "next": "Volgende",
       "previous": "Vorige",
       "page": "Pagina"
-    },
-    "404": {
-      "go_home": "Naar home",
-      "title": "Pagina niet gevonden"
     },
     "meta": {
       "page": "Pagina {{ page }}",
