@@ -1,0 +1,18 @@
+# Fill in after creating the app in the Shopify Dev Dashboard (one app per store).
+# client_id is public; the secret goes in the hosting service's private variables.
+client_id = ""
+name = "Release Desk"
+application_url = "https://REPLACE-WITH-YOUR-APP-HOST"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = false
+
+[webhooks]
+api_version = "2026-10"
+
+[access_scopes]
+scopes = ""
+
+[auth]
+redirect_urls = ["https://REPLACE-WITH-YOUR-APP-HOST/auth/callback"]
