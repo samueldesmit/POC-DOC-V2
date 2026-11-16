@@ -1,6 +1,5 @@
 {% liquid
     assign s = section.settings
-    assign section_id = 'section-' | append: s.id
     assign section_id = 'section-' | append: section.id
     assign product_list = s.collection.products | default: s.product_list
 
