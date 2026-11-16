@@ -8,223 +8,223 @@
  * ------------------------------------------------------------
  */
 {
-    "accessibility": {
-        "close_cart": "Winkelwagen sluiten",
-        "header_main_navigation": "Hoofdnavigatie",
-        "open_mobile_menu": "Mobiel menu openen",
-        "go_to_homepage": "Ga naar de homepagina",
-        "open_user_account": "Account openen",
-        "open_cart": "Winkelwagen openen",
-        "header_menu_navigation": "Menunavigatie",
-        "open_hotspot": "Open hotspotdetails",
-        "close_search": "Zoekopdracht sluiten",
-        "mobile_navigation_menu": "Mobiel navigatiemenu",
-        "next_slide": "Volgende slide",
-        "previous_slide": "Vorige slide",
-        "search": "Zoeken",
-        "search_results": "Zoekresultaten",
-        "shopping_cart": "Winkelwagen"
-    },
-    "sections": {
-        "cart": {
-            "accessibility": {
-                "decrease_quantity": "Aantal verlagen",
-                "increase_quantity": "Aantal verhogen",
-                "remove_item": "Artikel verwijderen"
-            }
-        },
-        "countdown_banner": {
-            "days": "Dagen",
-            "day": "Dag",
-            "hours": "Uren",
-            "hour": "Uur",
-            "minutes": "Minuten",
-            "minute": "Minuut",
-            "seconds": "Seconden",
-            "second": "Seconde",
-            "placeholder_text": "Voeg een geldige einddatum toe om de afteltimer te starten.",
-            "countdown_label": "Aftellen"
-        },
-        "announcement_bar": {
-            "label": "Aankondiging"
-        }
-    },
-    "general": {
-        "404": {
-            "go_home": "Naar home",
-            "title": "Pagina niet gevonden"
-        },
-        "accessibility": {
-            "skip_to_content": "Ga naar inhoud"
-        },
-        "search": {
-            "search": "Zoeken",
-            "placeholder_text": "Waar ben je naar op zoek?",
-            "collections": "Collecties",
-            "pages": "Pagina's",
-            "articles": "Artikelen",
-            "suggestions": "Suggesties",
-            "read_more": "Lees meer",
-            "no_results": "Geen resultaten gevonden",
-            "no_results_description": "We konden geen resultaten vinden voor je zoekopdracht. Probeer het opnieuw.",
-            "intial_search": "Waar ben je naar op zoek?",
-            "intial_search_description": "Zoek naar producten, collecties, pagina's en artikelen.",
-            "view_all_products": "Bekijk alle producten"
-        },
-        "search_page": {
-            "no_results": "Geen resultaten gevonden voor '{{query}}'",
-            "placeholder_text": "Zoek naar producten, collecties, pagina's en artikelen",
-            "search": "Zoeken",
-            "submit_search": "Zoeken"
-        },
-        "password": {
-            "submit": "Verzenden",
-            "placeholder": "Wachtwoord",
-            "error": "Het wachtwoord is onjuist.",
-            "label": "Wachtwoord"
-        },
-        "breadcrumbs": {
-            "home": "Home",
-            "cart": "Winkelwagen"
-        },
-        "pagination": {
-            "label": "Paginering",
-            "next": "Volgende",
-            "previous": "Vorige",
-            "page": "Pagina"
-        },
-        "meta": {
-            "page": "Pagina {{ page }}",
-            "tags": "getagd \"{{ tags }}\""
-        },
-        "social": {
-            "facebook": "Facebook",
-            "instagram": "Instagram",
-            "linkedin": "LinkedIn",
-            "pinterest": "Pinterest",
-            "snapchat": "Snapchat",
-            "tiktok": "TikTok",
-            "tumblr": "Tumblr",
-            "vimeo": "Vimeo",
-            "x": "X",
-            "youtube": "YouTube"
-        }
-    },
-    "localization": {
-        "country_label": "Land",
-        "language_label": "Taal",
-        "save": "Opslaan",
-        "country_language_selector": "Land- en taalkiezer"
-    },
+  "accessibility": {
+    "close_cart": "Winkelwagen sluiten",
+    "header_main_navigation": "Hoofdnavigatie",
+    "open_mobile_menu": "Mobiel menu openen",
+    "go_to_homepage": "Ga naar de homepagina",
+    "open_user_account": "Account openen",
+    "open_cart": "Winkelwagen openen",
+    "header_menu_navigation": "Menunavigatie",
+    "open_hotspot": "Open hotspotdetails",
+    "close_search": "Zoekopdracht sluiten",
+    "mobile_navigation_menu": "Mobiel navigatiemenu",
+    "next_slide": "Volgende slide",
+    "previous_slide": "Vorige slide",
+    "search": "Zoeken",
+    "search_results": "Zoekresultaten",
+    "shopping_cart": "Winkelwagen"
+  },
+  "sections": {
     "cart": {
-        "drawer": {
-            "title": "Winkelwagen",
-            "empty": "Je winkelwagen is leeg",
-            "continue_shopping": "Verder winkelen",
-            "view_cart": "Winkelwagen bekijken",
-            "subtotal": "Subtotaal",
-            "checkout": "Afrekenen"
-        },
-        "main-cart": {
-            "title": "Winkelwagen",
-            "empty": "Je winkelwagen is leeg",
-            "continue_shopping": "Verder winkelen",
-            "checkout": "Afrekenen",
-            "subtotal": "Subtotaal"
-        },
-        "discount": "Korting",
-        "discount_code": "Voer kortingscode in",
-        "apply": "Toepassen",
-        "discount_code_error": "De kortingscode '{{code}}' is niet geldig",
-        "shipping_discount_error": "Verzendkortingen worden bij het afrekenen getoond na het toevoegen van een adres",
-        "remove_discount": "Verwijder kortingscode {{code}}",
-        "accessibility": {
-            "discount": "Invoerveld kortingscode"
-        }
+      "accessibility": {
+        "decrease_quantity": "Aantal verlagen",
+        "increase_quantity": "Aantal verhogen",
+        "remove_item": "Artikel verwijderen"
+      }
     },
-    "collection": {
-        "filters": {
-            "off_canvas_filters_header_title": "Filter",
-            "filter": "Filter",
-            "filter_by_label": "Filter:",
-            "clear_all": "Alles wissen",
-            "apply": "Toepassen",
-            "active_filters": "Actieve filters",
-            "product_count_simple": {
-                "one": "{{ count }} product",
-                "other": "{{ count }} producten"
-            },
-            "max_price": "Maximumprijs",
-            "min_price": "Minimumprijs",
-            "sort_by_label": "Sorteren op"
-        },
-        "pagination": {
-            "one_result": "1 resultaat",
-            "other_results": "{{count}} resultaten",
-            "one_product": "1 product",
-            "other_products": "{{count}} producten",
-            "one_product_of_count": "1 product van {{total}}",
-            "other_products_of_count": "{{count}} producten van {{total}}",
-            "load_previous": "Vorige laden",
-            "load_more": "Meer laden"
-        }
+    "countdown_banner": {
+      "days": "Dagen",
+      "day": "Dag",
+      "hours": "Uren",
+      "hour": "Uur",
+      "minutes": "Minuten",
+      "minute": "Minuut",
+      "seconds": "Seconden",
+      "second": "Seconde",
+      "placeholder_text": "Voeg een geldige einddatum toe om de afteltimer te starten.",
+      "countdown_label": "Aftellen"
     },
-    "comparison": {
-        "labels": {
-            "image": "Afbeelding",
-            "price": "Prijs",
-            "product_name": "Productnaam"
-        }
-    },
-    "products": {
-        "facets": {
-            "from": "Vanaf"
-        },
-        "product": {
-            "add_to_cart": "In winkelwagen",
-            "sold_out": "Uitverkocht",
-            "unavailable": "Niet beschikbaar",
-            "more_from_collection": "Meer uit deze collectie",
-            "form": {
-                "add_to_cart": "In winkelwagen",
-                "sold_out": "Uitverkocht"
-            },
-            "gallery": {
-                "prev_slide": "Vorige slide",
-                "next_slide": "Volgende slide"
-            },
-            "out_of_stock_form": {
-                "title": "Stuur me een bericht zodra beschikbaar",
-                "subtitle": "We sturen je een e-mail wanneer dit product weer op voorraad is.",
-                "placeholder": "Vul je e-mailadres in",
-                "submit": "Verzenden"
-            },
-            "quantity": {
-                "label": "Aantal"
-            },
-            "product_sku": "SKU"
-        }
-    },
-    "blogs": {
-        "no_results": "Geen resultaten gevonden",
-        "article": {
-            "read_more": "Lees meer"
-        }
-    },
-    "newsletter": {
-        "label": "E-mailadres",
-        "button_label": "Aanmelden",
-        "success": "Bedankt voor je aanmelding!"
-    },
-    "privacy": {
-        "label": "Ik ga akkoord met het privacybeleid"
-    },
-    "customer": {
-        "account": {
-            "title": "Account"
-        },
-        "login_page": {
-            "title": "Inloggen"
-        }
+    "announcement_bar": {
+      "label": "Aankondiging"
     }
+  },
+  "general": {
+    "404": {
+      "go_home": "Naar home",
+      "title": "Pagina niet gevonden"
+    },
+    "accessibility": {
+      "skip_to_content": "Ga naar inhoud"
+    },
+    "search": {
+      "search": "Zoeken",
+      "placeholder_text": "Waar ben je naar op zoek?",
+      "collections": "Collecties",
+      "pages": "Pagina's",
+      "articles": "Artikelen",
+      "suggestions": "Suggesties",
+      "read_more": "Lees meer",
+      "no_results": "Geen resultaten gevonden",
+      "no_results_description": "We konden geen resultaten vinden voor je zoekopdracht. Probeer het opnieuw.",
+      "intial_search": "Waar ben je naar op zoek?",
+      "intial_search_description": "Zoek naar producten, collecties, pagina's en artikelen.",
+      "view_all_products": "Bekijk alle producten"
+    },
+    "search_page": {
+      "no_results": "Geen resultaten gevonden voor '{{query}}'",
+      "placeholder_text": "Zoek naar producten, collecties, pagina's en artikelen",
+      "search": "Zoeken",
+      "submit_search": "Zoeken"
+    },
+    "password": {
+      "submit": "Verzenden",
+      "placeholder": "Wachtwoord",
+      "error": "Het wachtwoord is onjuist.",
+      "label": "Wachtwoord"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "cart": "Winkelwagen"
+    },
+    "pagination": {
+      "label": "Paginering",
+      "next": "Volgende",
+      "previous": "Vorige",
+      "page": "Pagina"
+    },
+    "meta": {
+      "page": "Pagina {{ page }}",
+      "tags": "getagd \"{{ tags }}\""
+    },
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "pinterest": "Pinterest",
+      "snapchat": "Snapchat",
+      "tiktok": "TikTok",
+      "tumblr": "Tumblr",
+      "vimeo": "Vimeo",
+      "x": "X",
+      "youtube": "YouTube"
+    }
+  },
+  "localization": {
+    "country_label": "Land",
+    "language_label": "Taal",
+    "save": "Opslaan",
+    "country_language_selector": "Land- en taalkiezer"
+  },
+  "cart": {
+    "drawer": {
+      "title": "Winkelwagen",
+      "empty": "Je winkelwagen is leeg",
+      "continue_shopping": "Verder winkelen",
+      "view_cart": "Winkelwagen bekijken",
+      "subtotal": "Subtotaal",
+      "checkout": "Afrekenen"
+    },
+    "main-cart": {
+      "title": "Winkelwagen",
+      "empty": "Je winkelwagen is leeg",
+      "continue_shopping": "Verder winkelen",
+      "checkout": "Afrekenen",
+      "subtotal": "Subtotaal"
+    },
+    "discount": "Korting",
+    "discount_code": "Voer kortingscode in",
+    "apply": "Toepassen",
+    "discount_code_error": "De kortingscode '{{code}}' is niet geldig",
+    "shipping_discount_error": "Verzendkortingen worden bij het afrekenen getoond na het toevoegen van een adres",
+    "remove_discount": "Verwijder kortingscode {{code}}",
+    "accessibility": {
+      "discount": "Invoerveld kortingscode"
+    }
+  },
+  "collection": {
+    "filters": {
+      "off_canvas_filters_header_title": "Filter",
+      "filter": "Filter",
+      "filter_by_label": "Filter:",
+      "clear_all": "Alles wissen",
+      "apply": "Toepassen",
+      "active_filters": "Actieve filters",
+      "product_count_simple": {
+        "one": "{{ count }} product",
+        "other": "{{ count }} producten"
+      },
+      "max_price": "Maximumprijs",
+      "min_price": "Minimumprijs",
+      "sort_by_label": "Sorteren op"
+    },
+    "pagination": {
+      "one_result": "1 resultaat",
+      "other_results": "{{count}} resultaten",
+      "one_product": "1 product",
+      "other_products": "{{count}} producten",
+      "one_product_of_count": "1 product van {{total}}",
+      "other_products_of_count": "{{count}} producten van {{total}}",
+      "load_previous": "Vorige laden",
+      "load_more": "Meer laden"
+    }
+  },
+  "comparison": {
+    "labels": {
+      "image": "Afbeelding",
+      "price": "Prijs",
+      "product_name": "Productnaam"
+    }
+  },
+  "products": {
+    "facets": {
+      "from": "Vanaf"
+    },
+    "product": {
+      "add_to_cart": "In winkelwagen",
+      "sold_out": "Uitverkocht",
+      "unavailable": "Niet beschikbaar",
+      "more_from_collection": "Meer uit deze collectie",
+      "form": {
+        "add_to_cart": "In winkelwagen",
+        "sold_out": "Uitverkocht"
+      },
+      "gallery": {
+        "prev_slide": "Vorige slide",
+        "next_slide": "Volgende slide"
+      },
+      "out_of_stock_form": {
+        "title": "Stuur me een bericht zodra beschikbaar",
+        "subtitle": "We sturen je een e-mail wanneer dit product weer op voorraad is.",
+        "placeholder": "Vul je e-mailadres in",
+        "submit": "Verzenden"
+      },
+      "quantity": {
+        "label": "Aantal"
+      },
+      "product_sku": "SKU"
+    }
+  },
+  "blogs": {
+    "no_results": "Geen resultaten gevonden",
+    "article": {
+      "read_more": "Lees meer"
+    }
+  },
+  "newsletter": {
+    "label": "E-mailadres",
+    "button_label": "Aanmelden",
+    "success": "Bedankt voor je aanmelding!"
+  },
+  "privacy": {
+    "label": "Ik ga akkoord met het privacybeleid"
+  },
+  "customer": {
+    "account": {
+      "title": "Account"
+    },
+    "login_page": {
+      "title": "Inloggen"
+    }
+  }
 }
