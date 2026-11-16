@@ -1,0 +1,247 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero_CNBLx7": {
+      "type": "hero",
+      "blocks": {
+        "hero_slide_dxTPg8": {
+          "type": "hero_slide",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_6_mei_2026_16_32_20.png",
+            "enable_overlay": true,
+            "mobile_gradient": "linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 100%)",
+            "desktop_gradient": "linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7) 99%)",
+            "title": "Strix | Pushing boundries",
+            "text": "Stukje text kan hier Stukje text kan hier Stukje text kan hier Stukje text kan hier Stukje text kan hier",
+            "button_text": "Button naar collection",
+            "button_url": "shopify://collections",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "hero_slide_dxTPg8"
+      ],
+      "name": "Hero",
+      "settings": {
+        "section_styling": true,
+        "mobile_padding": "py-0",
+        "desktop_padding": "lg:py-0",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#ffffff",
+        "secondary_text_color": "#ffffff",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "secondary_button_color": "#000000",
+        "secondary_button_text_color": "#ffffff"
+      }
+    },
+    "product_slider_4XKyGF": {
+      "type": "product-slider",
+      "name": "Product Slider",
+      "settings": {
+        "section_styling": false,
+        "mobile_padding": "py-0",
+        "desktop_padding": "lg:py-4",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "collection": "",
+        "product_list": [
+          "test-product-continue-selling-when-out-of-stock-off",
+          "test-product",
+          "test-product-with-stock",
+          "test-product-with-stock-copy",
+          "test-product-with-stock-copy-copy"
+        ],
+        "text": "Subtitle",
+        "title": "<h2>De bestsellers van deze maand</h2>",
+        "button_text": "BEKIJK ZE ALLEMAAL",
+        "button_url": "",
+        "button_style": "primary"
+      }
+    },
+    "richtext_hkgyf4": {
+      "type": "richtext",
+      "blocks": {
+        "heading_QygXHY": {
+          "type": "heading",
+          "settings": {
+            "heading": "Talk about your brand",
+            "heading_size": "lg"
+          }
+        },
+        "subheading_zgUqfB": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Talk about your brand",
+            "subheading_size": "md"
+          }
+        },
+        "text_7FqUXa": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "heading_QygXHY",
+        "subheading_zgUqfB",
+        "text_7FqUXa"
+      ],
+      "name": "Richtext",
+      "settings": {
+        "section_styling": true,
+        "container": true,
+        "content_alignment": "text-left",
+        "mobile_padding": "py-4",
+        "desktop_padding": "lg:py-6",
+        "mobile_margin": "mb-8",
+        "desktop_margin": "lg:mb-12",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "secondary_button_color": "#000000",
+        "secondary_button_text_color": "#ffffff"
+      }
+    },
+    "text_image_C9iwcU": {
+      "type": "text-image",
+      "name": "Text with Image",
+      "settings": {
+        "section_styling": true,
+        "mobile_padding": "py-6",
+        "desktop_padding": "lg:py-8",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "image": "shopify://shop_images/ChatGPT_Image_2_mei_2026_20_14_22.png",
+        "enable_overlay": false,
+        "mobile_gradient": "linear-gradient(transparent, #000000)",
+        "desktop_gradient": "linear-gradient(transparent, #000000)",
+        "image_position": "right",
+        "text_alignment": "left",
+        "heading": "Feature highlight with image",
+        "heading_size": "lg",
+        "subheading": "<em>Strix Group</em>",
+        "text": "<p>Combine text and image to showcase your product features, tell your brand story, or explain your value proposition. This versatile section can be customized to match your brand's design.</p>",
+        "button_text": "Button text",
+        "button_url": "#",
+        "button_style": "primary"
+      }
+    },
+    "faq_yeExAC": {
+      "type": "faq",
+      "name": "FAQ",
+      "settings": {
+        "section_styling": false,
+        "mobile_padding": "py-0",
+        "desktop_padding": "lg:py-4",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "title": "<p>FAQ</p>",
+        "subtitle": "Find the answers to all your questions in our faqs below",
+        "faq_menu": "main-menu",
+        "metaobject": "delivery"
+      }
+    },
+    "countdown_banner_cHpWB4": {
+      "type": "countdown-banner",
+      "name": "Countdown banner",
+      "settings": {
+        "section_styling": false,
+        "mobile_padding": "py-6",
+        "desktop_padding": "lg:py-8",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "title": "New collection coming in:",
+        "end_datetime": "2027-11-15T09:00:00+01:00",
+        "countdown_visibility": ""
+      }
+    },
+    "hotspots_YeqXJb": {
+      "type": "hotspots",
+      "blocks": {
+        "hotspot_K8EUhV": {
+          "type": "hotspot",
+          "settings": {
+            "hotspot_text": "<p>Sample hotspot text</p>",
+            "hotspot_text_alignment": "left",
+            "hotspot_link": "/collections/all",
+            "hotspot_button_label": "Shop now",
+            "pin_position_x": 50,
+            "pin_position_y": 50,
+            "pin_position_x_mobile": 50,
+            "pin_position_y_mobile": 50,
+            "bubble_position_desktop": "top",
+            "bubble_position_mobile": ""
+          }
+        }
+      },
+      "block_order": [
+        "hotspot_K8EUhV"
+      ],
+      "name": "Hotspots",
+      "settings": {
+        "section_styling": false,
+        "mobile_padding": "py-6",
+        "desktop_padding": "lg:py-8",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "secondary_button_color": "#000000",
+        "secondary_button_text_color": "#ffffff",
+        "image": "shopify://shop_images/ChatGPT_Image_2_mei_2026_20_14_22.png",
+        "full_width_image": false,
+        "hotspots_title": "Discover our products",
+        "headline_size": "lg",
+        "hotspots_description": "Click on the hotspot to learn more about the collection.",
+        "hotspots_button_label": "View Collection",
+        "hotspots_button_link": "/collections/all"
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {}
+    }
+  },
+  "order": [
+    "hero_CNBLx7",
+    "product_slider_4XKyGF",
+    "richtext_hkgyf4",
+    "text_image_C9iwcU",
+    "faq_yeExAC",
+    "countdown_banner_cHpWB4",
+    "hotspots_YeqXJb",
+    "main"
+  ]
+}

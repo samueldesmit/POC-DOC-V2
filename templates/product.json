@@ -1,0 +1,183 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "product_title",
+          "settings": {}
+        },
+        "price": {
+          "type": "product_price",
+          "settings": {}
+        },
+        "description": {
+          "type": "product_description",
+          "settings": {}
+        },
+        "sku": {
+          "type": "product_sku",
+          "settings": {}
+        },
+        "variants": {
+          "type": "product_variants",
+          "settings": {}
+        },
+        "form": {
+          "type": "product_form",
+          "settings": {}
+        },
+        "more_from_collection": {
+          "type": "product_more_collection",
+          "settings": {}
+        },
+        "additional_info": {
+          "type": "product_additional_info",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "description",
+        "sku",
+        "variants",
+        "form",
+        "more_from_collection",
+        "additional_info"
+      ],
+      "settings": {}
+    },
+    "hero_Up4CFz": {
+      "type": "hero",
+      "blocks": {
+        "hero_slide_izyHba": {
+          "type": "hero_slide",
+          "settings": {
+            "image": "shopify://shop_images/ChatGPT_Image_6_mei_2026_16_32_20.png",
+            "enable_overlay": false,
+            "overlay_type": "gradient",
+            "mobile_gradient": "linear-gradient(transparent, #000000)",
+            "desktop_gradient": "linear-gradient(transparent, #000000)",
+            "overlay_opacity": 30,
+            "subtitle": "",
+            "title": "Strix Group",
+            "text": "Pushing Boundaries",
+            "content_position_x": "left",
+            "content_position_y": "bottom",
+            "button_text": "Shop Now",
+            "button_url": "https://www.strix.net",
+            "button_style": "primary"
+          }
+        },
+        "hero_slide_KH8EqA": {
+          "type": "hero_slide",
+          "settings": {
+            "image": "shopify://shop_images/theme_cover_image.jpg",
+            "enable_overlay": false,
+            "overlay_type": "gradient",
+            "mobile_gradient": "linear-gradient(transparent, #000000)",
+            "desktop_gradient": "linear-gradient(transparent, #000000)",
+            "overlay_opacity": 30,
+            "subtitle": "",
+            "title": "Strix Group",
+            "text": "Pushing Boundaries",
+            "content_position_x": "left",
+            "content_position_y": "bottom",
+            "button_text": "Shop Now",
+            "button_url": "https://www.strix.net",
+            "button_style": "primary"
+          }
+        },
+        "hero_slide_xFgw8j": {
+          "type": "hero_slide",
+          "settings": {
+            "image": "shopify://shop_images/theme_cover_image.jpg",
+            "enable_overlay": false,
+            "overlay_type": "gradient",
+            "mobile_gradient": "linear-gradient(transparent, #000000)",
+            "desktop_gradient": "linear-gradient(transparent, #000000)",
+            "overlay_opacity": 30,
+            "subtitle": "",
+            "title": "Strix Group",
+            "text": "Pushing Boundaries",
+            "content_position_x": "left",
+            "content_position_y": "bottom",
+            "button_text": "Shop Now",
+            "button_url": "https://www.strix.net",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "hero_slide_izyHba",
+        "hero_slide_KH8EqA",
+        "hero_slide_xFgw8j"
+      ],
+      "name": "Hero",
+      "settings": {
+        "section_styling": true,
+        "mobile_padding": "py-4",
+        "desktop_padding": "lg:py-6",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#ffffff",
+        "secondary_text_color": "#ffffff",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "secondary_button_color": "#000000",
+        "secondary_button_text_color": "#ffffff",
+        "animation_type": "fade-in",
+        "animation_duration": 0.8
+      }
+    },
+    "product_slider_WDbpXW": {
+      "type": "product-slider",
+      "name": "Product Slider",
+      "settings": {
+        "section_styling": false,
+        "mobile_padding": "py-0",
+        "desktop_padding": "lg:py-4",
+        "mobile_margin": "mb-0",
+        "desktop_margin": "lg:mb-0",
+        "background": "#ffffff",
+        "primary_text_color": "#000000",
+        "secondary_text_color": "#000000",
+        "primary_button_color": "#ffffff",
+        "primary_button_text_color": "#000000",
+        "secondary_button_color": "#000000",
+        "secondary_button_text_color": "#ffffff",
+        "collection": "",
+        "product_list": [
+          "test-product-continue-selling-when-out-of-stock-off",
+          "test-product",
+          "test-product-with-stock",
+          "test-product-with-stock-copy",
+          "test-product-with-stock-copy-copy"
+        ],
+        "text": "Subtitle",
+        "title": "<h2>De bestsellers van deze maand</h2>",
+        "button_text": "BEKIJK ZE ALLEMAAL",
+        "button_url": "",
+        "button_style": "primary",
+        "animation_type": "fade-up",
+        "animation_duration": 0.8
+      }
+    }
+  },
+  "order": [
+    "main",
+    "hero_Up4CFz",
+    "product_slider_WDbpXW"
+  ]
+}

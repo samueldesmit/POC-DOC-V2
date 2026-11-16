@@ -12,3 +12,4 @@ jsconfig.json
 watch.js
 scripts/*
 design-tokens.json
+apps/*

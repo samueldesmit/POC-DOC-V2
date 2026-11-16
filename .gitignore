@@ -10,10 +10,17 @@ Thumbs.db
 # Project
 node_modules/
 *.local
-**/settings_data.json
-templates
 .cursor*
 .claude/
-/assets/
 .kickstarter/
 .playwright-mcp/
+
+# Release Desk app
+apps/release-desk/node_modules/
+apps/release-desk/dist/
+apps/release-desk/.data/
+apps/release-desk/.tmp/
+.tmp/
+.env
+.env.*
+!.env.example
