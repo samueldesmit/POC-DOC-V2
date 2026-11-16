@@ -50,7 +50,11 @@
     </div>
     <div class="container">
         <p class="text-center text-sm text-primary">
-            {{- s.copyright -}}
+            {%- if s.copyright != blank -%}
+                {{- s.copyright -}}
+            {%- else -%}
+                &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}
+            {%- endif -%}
         </p>
     </div>
 </footer>
