@@ -87,7 +87,12 @@ export default function MerchantApp({ onTechnical }) {
   const merged = (data?.history || []).filter(pull => pull.merged);
   // History is what went live. What is only in the test version shows in its own section,
   // and only while the test version is actually ahead of live.
-  const history = merged.filter(pull => pull.stage === 'live');
+  // A release lists the changes it took live; an empty release (nothing new) is left out.
+  const liveEntries = merged.filter(pull => pull.stage === 'live').flatMap(pull => pull.release ? (pull.includes || []).map(item => ({ ...item, key: `${pull.number}-${item.number}`, mergedAt: pull.mergedAt })) : [{ ...pull, key: String(pull.number) }]);
+  // A change can be named by more than one release; show it once, when it first went live.
+  const firstLive = new Map();
+  for (const entry of liveEntries) { const id = entry.release === undefined && entry.number ? `c${entry.number}` : entry.key; const known = firstLive.get(id); if (!known || Date.parse(entry.mergedAt) < Date.parse(known.mergedAt)) firstLive.set(id, entry); }
+  const history = [...firstLive.values()].sort((a, b) => Date.parse(b.mergedAt) - Date.parse(a.mergedAt));
   const waiting = data?.release?.aheadBy || 0;
   // Exactly the changes that are on the test version and not live (from the server's comparison).
   const stagedNumbers = new Set(data?.release?.pulls || []);
@@ -161,7 +166,7 @@ export default function MerchantApp({ onTechnical }) {
 
       <section className="m-card">
         <h2>{t.history}</h2>
-        {history.length ? <ul className="m-history">{history.slice(0, 15).map(pull => <li key={pull.number}><span className="m-dot" aria-hidden="true" /><span><strong>{pull.title}</strong> <span className="muted">· {pull.requestedBy || pull.author}</span></span><span className="muted">{t.wentLive} · {formatDate(pull.mergedAt)}</span></li>)}</ul> : <div className="m-empty"><span>{t.noHistory}</span></div>}
+        {history.length ? <ul className="m-history">{history.slice(0, 15).map(pull => <li key={pull.key}><span className="m-dot" aria-hidden="true" /><span><strong>{pull.title}</strong>{(pull.requestedBy || pull.author) && <span className="muted"> · {pull.requestedBy || pull.author}</span>}</span><span className="muted">{t.wentLive} · {formatDate(pull.mergedAt)}</span></li>)}</ul> : <div className="m-empty"><span>{t.noHistory}</span></div>}
       </section>
 
       <footer className="m-footer"><span className="muted">{t.updated} {formatDate(data.updatedAt)}</span><button className="text-button" onClick={onTechnical}>{t.technical}</button></footer>

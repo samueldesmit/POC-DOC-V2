@@ -26,6 +26,17 @@ export function pullView(pr, run, protection, config) {
 }
 export class Service {
   constructor({ config, store, github, previewService = null, connectorStore = null }) { this.config = config; this.store = store; this.github = github; this.previewService = previewService; this.connectorStore = connectorStore; }
+  // The changes a release took live, read from its description ("- Title (#8)").
+  releaseIncludes(pr) {
+    const seen = new Set();
+    return String(pr.body || '').split('\n').flatMap(line => {
+      const match = line.match(/^-\s+(.*?)\s*\(#(\d+)\)\s*$/);
+      if (!match || seen.has(match[2])) return [];
+      seen.add(match[2]);
+      const number = Number(match[2]), change = this.connectorStore?.changeForPull(number);
+      return [{ number, title: change?.title || match[1].replace(/\s*\(#\d+\)\s*$/, ''), requestedBy: change?.name || null }];
+    });
+  }
   withRequester(view) {
     const change = this.connectorStore?.changeForPull(view.number);
     const intent = this.flow?.view(view.number) || null;
@@ -50,7 +61,7 @@ export class Service {
         // Pull-list responses omit GitHub's computed mergeability. Detail endpoint refreshes that on selection.
         if (results[0].status === 'fulfilled') pulls = results[0].value.map(pr => this.withRequester(pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config)));
         else blockers.push({ code: 'GITHUB_UNAVAILABLE', message: 'Open pull requests could not be loaded.' });
-        if (results[3].status === 'fulfilled') history = results[3].value.filter(pr => pr.state === 'closed' && releaseTargets(this.config).includes(pr.base?.ref)).slice(0, 50).map(pr => this.withRequester(pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config)));
+        if (results[3].status === 'fulfilled') history = results[3].value.filter(pr => pr.state === 'closed' && releaseTargets(this.config).includes(pr.base?.ref)).slice(0, 50).map(pr => ({ ...this.withRequester(pullView(pr, this.store.listRuns(pr.number, 1)[0], protections[pr.base.ref], this.config)), ...(pr.head?.ref === this.config.stagingBranch && pr.base?.ref === this.config.liveBranch ? { release: true, includes: this.releaseIncludes(pr) } : {}) }));
         else historyError = 'Recent pull-request history could not be loaded. Try refreshing.';
         if (results[4].status === 'fulfilled') {
           const openRelease = pulls.find(pr => pr.stage === 'live');
