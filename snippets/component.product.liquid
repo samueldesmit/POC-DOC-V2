@@ -5,6 +5,7 @@
     @param {boolean} eager - Eager load first product image (default: false)
     @param {object} current_variant - The current variant object (default: product.selected_or_first_available_variant)
     @param {boolean} add_to_cart - Show add to cart button (default: false)
+    @param {string} button_variant - Style variant of the add to cart button, see component.button (default: primary)
     @param {boolean} product_link - Changes article image and description wrappers into links (default: false)
     @param {string} class - CSS classes for the product card (default: '')
 
@@ -25,6 +26,7 @@
 
     assign current_variant = current_variant | default: product.selected_or_first_available_variant
     assign add_to_cart = add_to_cart | default: false, allow_false: true
+    assign button_variant = button_variant | default: 'primary'
     assign card_image = current_variant.featured_image | default: product.featured_image
     assign product_tag_link = 'div'
 
@@ -147,7 +149,7 @@
                             productId="{{ current_variant.id }}"
                         >
                             {% render 'component.button',
-                                variant: 'primary',
+                                variant: button_variant,
                                 label: atc_label,
                                 class: 'w-fit group-data-[loading]/atc:[&>span]:opacity-0',
                                 attributes: 'data-atc-button',
