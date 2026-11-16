@@ -14,6 +14,19 @@
         else
             assign media_height_class = 'h-full w-full aspect-[375/552] lg:aspect-[1440/657]'
     endcase
+
+    comment
+        Oval shape: the whole slider track is clipped to an ellipse. The text
+        wrapper is inset by 15% so the content stays inside the oval instead of
+        being cut off in the corners.
+    endcomment
+    if s.hero_oval
+        assign track_shape_class = '[clip-path:ellipse(50%_50%_at_50%_50%)]'
+        assign content_wrapper_class = 'absolute inset-[15%]'
+    else
+        assign track_shape_class = ''
+        assign content_wrapper_class = 'absolute left-0 top-0 w-full h-full'
+    endif
 -%}
 {% render 'component.animation-open', section: section %}
 <div
@@ -33,7 +46,7 @@
             class="flex justify-between items-center"
         >
             <div class="splide w-full">
-                <div class="h-full overflow-hidden splide__track w-full">
+                <div class="h-full overflow-hidden splide__track w-full {{ track_shape_class }}">
                     <ul class="flex splide__list w-full">
                         {%- for block in section.blocks -%}
                             {% liquid
@@ -100,7 +113,7 @@
                                             {% endif %}
                                         {% endif %}
                                     </responsive-media>
-                                    <div class="absolute left-0 top-0 w-full h-full">
+                                    <div class="{{ content_wrapper_class }}">
                                         <div class="container h-full flex py-6 lg:py-12 {{ justify_class }} {{ items_class }}">
                                             <div class="flex flex-col gap-4 lg:max-w-[443px] {{ text_align_class }}">
                                             {% if b.subtitle != blank %}
@@ -355,6 +368,17 @@
                 }
             ],
             "default": "full"
+        },
+        {
+            "type": "header",
+            "content": "Shape"
+        },
+        {
+            "type": "checkbox",
+            "id": "hero_oval",
+            "label": "Oval shape",
+            "info": "Clips the hero to an oval (clip-path). The text is moved inwards so it stays inside the oval.",
+            "default": true
         },
         {
             "type": "header",
