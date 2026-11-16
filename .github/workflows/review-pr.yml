@@ -1,0 +1,93 @@
+name: Release Desk review
+run-name: Release Desk ${{ inputs.run_id }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+        type: string
+      head_sha:
+        description: Exact candidate commit
+        required: true
+        type: string
+      base_sha:
+        description: Exact trusted commit of the target branch (staging or main)
+        required: true
+        type: string
+      run_id:
+        description: Release Desk review identifier
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: release-desk-${{ inputs.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  review-checks:
+    name: review-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the trusted workflow source
+        uses: actions/checkout@v4
+        with:
+          path: trusted
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate the exact review request
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REVIEW_PR: ${{ inputs.pr }}
+          REVIEW_HEAD: ${{ inputs.head_sha }}
+          REVIEW_BASE: ${{ inputs.base_sha }}
+          REVIEW_RUN_ID: ${{ inputs.run_id }}
+          WORKFLOW_SHA: ${{ github.sha }}
+          WORKFLOW_REF: ${{ github.ref }}
+          WORKFLOW_EVENT: ${{ github.event_name }}
+          STAGING_BRANCH: ${{ vars.STAGING_BRANCH || 'staging' }}
+          LIVE_BRANCH: ${{ vars.LIVE_BRANCH || 'main' }}
+        run: node trusted/.github/scripts/validate-review-request.mjs
+      - name: Check out only the validated candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.head_sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Verify the trusted isolation runner
+        run: node --test trusted/.github/scripts/*.test.mjs
+      # Only this trusted target-branch runner executes on the host. Candidate source and
+      # its dependencies execute inside restricted containers without host
+      # credentials, command files, caches, or the Docker socket. Installation
+      # has network access; actual tests/builds have isolated loopback only.
+      - name: Run protected regressions and builds in isolated Node 22 containers
+        run: node trusted/.github/scripts/run-isolated-review.mjs
+
+  # Shopify's theme check on the candidate, with the built-in recommended
+  # config so a .theme-check.yml in the PR cannot load its own check code.
+  # No secrets and no write token: the job only reads the candidate.
+  theme-check:
+    name: theme-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out only the requested candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Theme check
+        run: npx --yes @shopify/cli@3 theme check --path . --config theme-check:recommended --fail-level error
