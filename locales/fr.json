@@ -35,16 +35,9 @@
       "second": "Seconde",
       "placeholder_text": "Ajoutez une date de fin valide pour démarrer le compte à rebours.",
       "countdown_label": "Compte à rebours"
-    },
-    "announcement_bar": {
-      "label": "Annonce"
     }
   },
   "general": {
-    "404": {
-      "go_home": "Retour à l'accueil",
-      "title": "Page introuvable"
-    },
     "accessibility": {
       "skip_to_content": "Aller au contenu"
     },
@@ -83,6 +76,10 @@
       "next": "Suivant",
       "previous": "Précédent",
       "page": "Page"
+    },
+    "404": {
+      "go_home": "Retour à l'accueil",
+      "title": "Page introuvable"
     },
     "meta": {
       "page": "Page {{ page }}",
