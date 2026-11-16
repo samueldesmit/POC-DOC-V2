@@ -16,6 +16,13 @@
     --color-button-green-hover: #1b5e20;
 }
 
+/* Red used by the 'red' and 'red-ghost' button variants (product slider).
+   White text on #c62828 has a contrast ratio of about 5.6:1. */
+@theme {
+    --color-button-red: #c62828;
+    --color-button-red-hover: #8e1c1c;
+}
+
 @import './header.css';
 @import './utilities/price-range-slider.css';
 

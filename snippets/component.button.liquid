@@ -1,8 +1,8 @@
 {% doc %}
-    Renders a button or link with one of three style variants.
+    Renders a button or link with one of the style variants.
 
     @param {string} [label] - Button text
-    @param {string} [variant] - primary | secondary | ghost (default: primary)
+    @param {string} [variant] - primary | secondary | ghost | red | red-ghost (default: primary)
     @param {string} [href] - If set, renders <a>; otherwise <button>
     @param {string} [type] - button | submit | reset (default: button)
     @param {string} [class] - Extra CSS classes
@@ -39,6 +39,10 @@
             assign variant_classes = 'px-6 py-2 bg-button-green-hover text-white border border-button-green-hover focus:outline-button-green-hover hover:bg-button-green hover:border-button-green'
         when 'ghost'
             assign variant_classes = 'text-button-green focus:outline-button-green border border-button-green px-6 py-2'
+        when 'red'
+            assign variant_classes = 'px-6 py-2 bg-button-red text-white border border-button-red focus:outline-button-red hover:bg-button-red-hover hover:border-button-red-hover'
+        when 'red-ghost'
+            assign variant_classes = 'text-button-red focus:outline-button-red border border-button-red px-6 py-2'
         else
             assign variant_classes = 'px-6 py-2 bg-button-green text-white border border-button-green focus:outline-button-green hover:bg-button-green-hover hover:border-button-green-hover'
     endcase

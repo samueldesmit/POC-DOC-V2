@@ -2,6 +2,15 @@
     assign s = section.settings
     assign section_id = 'section-' | append: section.id
     assign product_list = s.collection.products | default: s.product_list
+
+    comment
+        All buttons in this section are red: 'red' (filled) or 'red-ghost' (outline).
+    endcomment
+    if s.button_style == 'ghost'
+        assign view_all_variant = 'red-ghost'
+    else
+        assign view_all_variant = 'red'
+    endif
 %}
 
 {% if product_list != blank %}
@@ -34,7 +43,7 @@
                                 </div>
                             {% endif %}
                             {% render 'component.splide-arrows',
-                                variant: 'primary',
+                                variant: 'red',
                                 icon_class: 'size-5',
                                 container_class: 'splide__arrows splide__arrows--ltr space-x-3 items-center pointer-events-none z-10 hidden lg:flex'
                             %}
@@ -45,7 +54,7 @@
                                 title: s.button_text,
                                 href: s.button_url,
                                 class: 'border-transparent hover:border-transparent w-fit mt-4',
-                                variant: s.button_style,
+                                variant: view_all_variant,
                                 aria_label: s.button_text
                             -%}
                         {% endif %}
@@ -58,6 +67,7 @@
                                         product: product,
                                         product_link: true,
                                         add_to_cart: true,
+                                        button_variant: 'red',
                                         class: 'h-full w-full aspect-[310/420] md:aspect-[400/420]',
                                         eager: false,
                                         current_variant: product.selected_or_first_available_variant
