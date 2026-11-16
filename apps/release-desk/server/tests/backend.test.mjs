@@ -39,9 +39,11 @@ test('Shopify real JWT validation enforces signature, algorithm, audience, exact
   for (const [payload, options] of cases) await assert.rejects(authenticate(`Bearer ${await token(payload, options)}`, config(), { onReject() {} }), error => error.status === 401);
   assert.equal((await authenticate(`Bearer ${await token({ sub: '43' })}`, config())).canMutate, false);
 });
-test('no automatic reviewer bootstrap and production rejects development token fallback', async t => {
-  const ctx = context(t); ctx.config.reviewers.clear();
-  await assert.rejects(ctx.service.test(7, head, actor), { code: 'REVIEWERS_MISSING' });
+test('without a reviewer list every store user may act; with one only those users; production rejects development token fallback', async t => {
+  const ctx = context(t);
+  await assert.rejects(ctx.service.test(7, head, { id: '43', canMutate: false }), { code: 'FORBIDDEN' });
+  const open = { ...config(), reviewers: new Set() };
+  assert.equal((await authenticate(`Bearer ${await token({ sub: '43' })}`, open)).canMutate, true);
   const production = configuration({ GITHUB_REPOSITORY: 'example-org/theme-repo', SHOP_DOMAIN: 'example-store.myshopify.com',  NODE_ENV: 'production', ALLOW_DEV_GITHUB_TOKEN: 'true', GITHUB_TOKEN: 'dummy' }); assert.equal(production.githubToken, '');
   assert.equal(ctx.github.dispatched.length, 0);
 });

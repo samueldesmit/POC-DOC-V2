@@ -43,7 +43,7 @@ export class PreviewService {
     return { previews, configured: this.configured() };
   }
   async generate(number, headSha, actor) {
-    ensure(this.config.reviewers.size > 0 && actor.canMutate, 'FORBIDDEN', 'Your Shopify user is not authorized to generate previews.', 403);
+    ensure(actor.canMutate, 'FORBIDDEN', 'Your Shopify user is not authorized to generate previews.', 403);
     ensure(isSha(headSha), 'INVALID_SHA', 'Supply the full PR head SHA.', 400);
     ensure(this.configured(), 'PREVIEW_UNAVAILABLE', 'Theme access for the store must be configured before generating previews.', 503);
     const pr = await this.github.getPull(number); validatePull(pr, this.config, headSha);

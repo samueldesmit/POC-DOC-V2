@@ -39,7 +39,8 @@ export class Store {
       if (active >= config.maxActiveRuns) throw new DeskError('CAPACITY', 'Review capacity is busy. Wait for a running review to finish.', 429);
       if (this.db.prepare("SELECT 1 FROM runs WHERE pr=? AND status IN ('queued','running','merging')").get(pr.number)) throw new DeskError('RUN_IN_PROGRESS', 'This PR already has an active review.');
       const recent = this.db.prepare('SELECT COUNT(*) n FROM runs WHERE actor=? AND created>?').get(actor.id, Date.now() - 3_600_000).n;
-      if (recent >= config.maxRunsPerHour) throw new DeskError('RATE_LIMIT', 'The hourly review limit has been reached.', 429);
+      // Automatic checks (actor 'auto') follow every pushed change, so they get a larger budget.
+      if (recent >= (actor.id === 'auto' ? config.maxRunsPerHour * 6 : config.maxRunsPerHour)) throw new DeskError('RATE_LIMIT', 'The hourly review limit has been reached.', 429);
       const run = { id: randomUUID(), prNumber: pr.number, headSha: pr.head.sha, baseSha: pr.base.sha, baseBranch: pr.base.ref, reviewMode: config.reviewMode, status: 'queued', stage: 'queued', actor: actor.id, createdAt: nowIso(), updatedAt: nowIso(), ci: { status: 'pending', conclusion: null, url: null, runId: null }, reviews: [], error: null, dispatchAt: null, checkId: null };
       this.db.prepare('INSERT INTO runs(id,pr,status,actor,created,updated,body) VALUES(?,?,?,?,?,?,?)').run(run.id, run.prNumber, run.status, actor.id, Date.now(), Date.now(), JSON.stringify(run));
       this.audit(actor.id, 'review.queued', { runId: run.id, pr: pr.number, headSha: run.headSha, baseSha: run.baseSha, reviewMode: run.reviewMode });

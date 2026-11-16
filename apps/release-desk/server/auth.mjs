@@ -21,7 +21,7 @@ export async function authenticate(header, config, { onReject = logRejection } =
     // Exact values reject ports, credentials, suffix hosts, HTTP and arbitrary paths.
     ensure(payload.dest === `https://${config.shop}`, 'INVALID_SESSION', 'Invalid Shopify destination.', 401);
     ensure(typeof payload.sub === 'string' && /^\d+$/.test(payload.sub), 'INVALID_SESSION', 'Invalid Shopify user.', 401);
-    return { id: payload.sub, shop: config.shop, canMutate: config.reviewers.has(payload.sub) };
+    return { id: payload.sub, shop: config.shop, canMutate: config.reviewers.size === 0 || config.reviewers.has(payload.sub) };
   } catch (error) {
     if (error instanceof DeskError) throw error;
     // Deliberately omit messages, tokens, payloads, user IDs and all claim values.

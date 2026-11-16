@@ -23,8 +23,12 @@ export function pullView(pr, run, protection, config) {
 }
 export class Service {
   constructor({ config, store, github, previewService = null, connectorStore = null }) { this.config = config; this.store = store; this.github = github; this.previewService = previewService; this.connectorStore = connectorStore; }
-  withRequester(view) { const change = this.connectorStore?.changeForPull(view.number); return change ? { ...view, requestedBy: change.name } : view; }
-  requireReviewer(actor) { ensure(this.config.reviewers.size > 0, 'REVIEWERS_MISSING', 'No reviewers have been configured.', 503); ensure(actor.canMutate, 'FORBIDDEN', 'Your Shopify user is not authorized to run tests or merge.', 403); }
+  withRequester(view) {
+    const change = this.connectorStore?.changeForPull(view.number);
+    const intent = this.flow?.view(view.number) || null;
+    return { ...view, ...(change ? { requestedBy: change.name, request: change.request } : {}), intent };
+  }
+  requireReviewer(actor) { ensure(actor.canMutate, 'FORBIDDEN', 'Your Shopify user is not authorized to run tests or merge.', 403); }
   async locked(pr, action) {
     const owner = randomUUID(); ensure(this.store.lock(pr, owner), 'PR_BUSY', 'Another action is already in progress for this PR.');
     const heartbeat = setInterval(() => this.store.renewLock(pr, owner), 30_000); heartbeat.unref();
@@ -51,8 +55,11 @@ export class Service {
         }
       } catch { blockers.push({ code: 'GITHUB_UNAVAILABLE', message: 'GitHub status could not be loaded.' }); }
     }
+    // Every open change gets an automatic check without anyone asking: start one
+    // for any PR whose current commit has none yet (the flow ignores busy PRs).
+    if (this.flow && !blockers.length) for (const pull of pulls) if (!pull.draft && (!pull.latestRun || pull.latestRun.headSha !== pull.headSha || pull.latestRun.baseSha !== pull.baseSha)) void this.flow.progress(pull.number);
     for (const [branch, protection] of Object.entries(protections)) if (!protection.ready) blockers.push({ code: 'BRANCH_PROTECTION_REQUIRED', message: `${branch} needs strict, administrator-enforced protection requiring the Release Desk check from this GitHub App.` });
-    return { shop: this.config.shop, actor: { id: actor.id, canMutate: actor.canMutate }, repository: this.config.repository, branches: { staging: this.config.stagingBranch, live: this.config.liveBranch }, release, reviewMode: this.config.reviewMode, setup: { ready: blockers.length === 0, blockers }, pulls, history, historyError, runs: this.store.listRuns(), notifications: this.store.notifications(), deployment: { description: `Changes are merged into ${this.config.stagingBranch} first and tested on the staging theme. Releasing merges ${this.config.stagingBranch} into ${this.config.liveBranch}, which the live theme follows.` }, updatedAt: nowIso() };
+    return { shop: this.config.shop, actor: { id: actor.id, canMutate: actor.canMutate }, repository: this.config.repository, branches: { staging: this.config.stagingBranch, live: this.config.liveBranch }, release, themes: { stagingPreviewUrl: this.config.stagingThemeId ? `https://${this.config.shop}/?preview_theme_id=${this.config.stagingThemeId}` : null, liveUrl: `https://${this.config.shop}/` }, reviewMode: this.config.reviewMode, setup: { ready: blockers.length === 0, blockers }, pulls, history, historyError, runs: this.store.listRuns(), notifications: this.store.notifications(), deployment: { description: `Changes are merged into ${this.config.stagingBranch} first and tested on the staging theme. Releasing merges ${this.config.stagingBranch} into ${this.config.liveBranch}, which the live theme follows.` }, updatedAt: nowIso() };
   }
   async detail(number) {
     const pr = await this.github.getPull(number);

@@ -22,6 +22,16 @@ feature branch ──PR──▶ staging ──release PR──▶ main
 
 Only `staging` itself can be merged into `main`; a PR from any other branch into `main` is refused by the app and by the review workflow.
 
+## What the merchant sees
+
+The app opens on a plain overview (Dutch or English, following the Shopify admin language):
+
+- **New changes**: everything Claude made, with who asked for it and their request. Each change is checked automatically (build, theme check, reviewers). One button, **Put in test version**: it goes into staging as soon as the check passes.
+- **Test version**: what is on staging but not live yet, a link to view the staging theme, and one button, **Go live**. Going live first brings staging up to date with anything saved in the live theme editor, then opens one release and merges it when its check passes.
+- **History**: what went into the test version and what went live, by whom and when.
+
+The technical release desk (pull requests, commits, checks) is one click away under **Technical details**. Every store user who can open the app may act; set `SHOPIFY_REVIEWER_IDS` to restrict it to specific users. `STAGING_THEME_ID` gives the **View test version** link.
+
 ## Claude connector
 
 Merchants change the theme by asking their own Claude (Claude Desktop, claude.ai or Claude Code). Release Desk is the only way in:
@@ -36,7 +46,7 @@ What Claude can change: `assets`, `blocks`, `config`, `layout`, `locales`, `sect
 
 ## Branch rules
 
-A repository ruleset on `main` and `staging` requires the `Release Desk` check (pinned to this GitHub App, up to date), and blocks force pushes and deletion. Its only bypass actor is the Shopify GitHub app (id 101950), so saves in the theme editor of the connected themes still sync to git. Everyone else, administrators included, goes through a tested pull request.
+A repository ruleset on `main` and `staging` requires the `Release Desk` check (pinned to this GitHub App, up to date), and blocks force pushes and deletion. The Shopify GitHub app (id 101950) may bypass it on both branches, so saves in the theme editor of the connected themes still sync to git. On `staging` this app may bypass it too, only to merge `main` into `staging` before a release. Everyone else, administrators included, goes through a tested pull request.
 
 ## What runs where
 

@@ -7,7 +7,7 @@ import { DeskError, ensure } from './errors.mjs';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createConnectorServer } from './connector.mjs';
 
-export function createApp({ config, store, service, connectorStore = null, github = null, clientDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist/client') }) {
+export function createApp({ config, store, service, connectorStore = null, github = null, flow = null, clientDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist/client') }) {
   const app = express(); app.disable('x-powered-by');
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -22,7 +22,9 @@ export function createApp({ config, store, service, connectorStore = null, githu
     ensure(typeof id === 'string' && /^[a-zA-Z0-9-]{1,100}$/.test(id) && typeof event === 'string' && /^[a-z_]{1,50}$/.test(event), 'WEBHOOK_HEADERS', 'Invalid webhook headers.', 400);
     let payload; try { payload = JSON.parse(req.body.toString('utf8')); } catch { throw new DeskError('INVALID_JSON', 'Invalid JSON.', 400); }
     ensure(payload.repository?.full_name === config.repository || event === 'ping', 'WEBHOOK_REPOSITORY', 'Unexpected repository.', 403);
-    res.json({ received: true, duplicate: !store.receive(id, event, payload) });
+    const fresh = store.receive(id, event, payload);
+    if (fresh && flow) { try { flow.onWebhook(event, payload); } catch { /* the flow also advances on the next action */ } }
+    res.json({ received: true, duplicate: !fresh });
   });
   // Claude connector (MCP over streamable HTTP, stateless). The personal token in
   // the path is the credential; it is created in the authenticated app and
@@ -60,6 +62,9 @@ export function createApp({ config, store, service, connectorStore = null, githu
     res.status(201).json({ connection, url: `${config.publicUrl}/mcp/${token}` });
   });
   app.delete('/api/connections/:id', (req, res) => { ensure(connectorEnabled, 'CONNECTOR_UNAVAILABLE', 'The Claude connector is not enabled.', 503); ensure(/^[a-f0-9-]{36}$/.test(req.params.id), 'INVALID_REQUEST', 'Invalid connection.', 400); connectorStore.revoke(req.actor, req.params.id); res.json({ revoked: true }); });
+  app.post('/api/pulls/:number/publish', async (req, res) => { ensure(flow, 'FLOW_UNAVAILABLE', 'Not available.', 503); ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json(await flow.publish(req.prNumber, req.actor)); });
+  app.post('/api/pulls/:number/withdraw', (req, res) => { ensure(flow && req.actor.canMutate, 'FORBIDDEN', 'Not allowed.', 403); flow.clearIntent(req.prNumber); res.json({ withdrawn: true }); });
+  app.post('/api/go-live', async (req, res) => { ensure(flow, 'FLOW_UNAVAILABLE', 'Not available.', 503); ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json(await flow.goLive(req.actor)); });
   app.post('/api/release', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json(await service.createRelease(req.actor)); });
   app.post('/api/pulls/:number/reconcile', async (req, res) => { ensure(req.is('application/json'), 'CONTENT_TYPE', 'JSON is required.', 415); res.json({ run: await service.reconcile(req.prNumber, req.body?.runId, req.actor) }); });
   app.use('/api', (_req, _res) => { throw new DeskError('NOT_FOUND', 'API endpoint not found.', 404); });

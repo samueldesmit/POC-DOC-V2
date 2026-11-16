@@ -55,7 +55,9 @@ export class GitHub {
         if (!response.ok) {
           await response.body?.cancel().catch(() => {});
           if (isRead && TRANSIENT_READ_STATUSES.has(response.status)) throw readUnavailable(retryDelay(response, this.now()));
-          throw new DeskError('GITHUB_ERROR', `GitHub rejected the operation (HTTP ${response.status}).`, response.status === 404 ? 404 : 502);
+          const rejected = new DeskError('GITHUB_ERROR', `GitHub rejected the operation (HTTP ${response.status}).`, response.status === 404 ? 404 : 502);
+          rejected.httpStatus = response.status;
+          throw rejected;
         }
         if (response.status === 204) return null;
         let bytes = 0; const chunks = [];
@@ -201,6 +203,13 @@ export class GitHub {
     // Non-forced: fails if the branch moved meanwhile, so nothing is overwritten.
     await this.request('PATCH', this.route(`git/refs/heads/${branch.split('/').map(encodeURIComponent).join('/')}`), { sha: commit.sha, force: false });
     return commit.sha;
+  }
+  // Bring a change branch up to date with its target (a merge commit on the change branch).
+  updateBranch(number, expectedHeadSha) { return this.request('PUT', this.route(`pulls/${number}/update-branch`), { expected_head_sha: expectedHeadSha }); }
+  // Merge one tracked branch into another (used only to bring staging up to date with live).
+  mergeBranches(base, head, message) {
+    ensure(base === this.config.stagingBranch && head === this.config.liveBranch, 'BRANCH_SCOPE', 'Only live can be merged into staging directly.', 500);
+    return this.request('POST', this.route('merges'), { base, head, commit_message: message });
   }
   merge(number, sha) { return this.request('PUT', this.route(`pulls/${number}/merge`), { sha, merge_method: 'squash' }); }
 }

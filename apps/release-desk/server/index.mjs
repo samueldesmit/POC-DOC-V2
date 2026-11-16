@@ -10,6 +10,7 @@ import { PreviewStore } from './preview-store.mjs';
 import { PreviewService } from './preview-service.mjs';
 import { PreviewTransport } from './preview-transport.mjs';
 import { ConnectorStore } from './connector-store.mjs';
+import { Flow } from './flow.mjs';
 
 const config = configuration();
 const store = new Store(path.join(config.dataDir, 'release-desk.sqlite'));
@@ -19,7 +20,10 @@ const previewService = new PreviewService({ config, store, previewStore, github,
 const connectorStore = new ConnectorStore(store);
 const service = new Service({ config, store, github, previewService, connectorStore });
 const worker = new Worker({ config, store, github, reviews });
-const app = createApp({ config, store, service, connectorStore, github });
+const flow = new Flow({ config, store, github, service });
+service.flow = flow;
+worker.onFinished = run => flow.onRunFinished(run);
+const app = createApp({ config, store, service, connectorStore, github, flow });
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(JSON.stringify({ event: 'server.started', port: config.port })); worker.start(); previewService.resume();
 });

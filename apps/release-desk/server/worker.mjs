@@ -40,6 +40,7 @@ export class Worker {
         const stale = ['STALE_HEAD', 'STALE_BASE', 'PR_INELIGIBLE', 'PR_SCOPE'].includes(error.code);
         this.store.updateLeasedRun(run.id, this.owner, { status: stale ? 'stale' : 'failed', stage: 'finished', error: safeError(error), githubRetryAt: null });
         this.store.audit('worker', 'review.failed', { runId: run.id, code: error.code || 'UPSTREAM_ERROR' });
+        try { this.onFinished?.(this.store.getRun(run.id)); } catch { /* informational only */ }
         try { await this.github.finishCheck(run, false, safeError(error)); } catch { this.store.audit('worker', 'check.update_failed', { runId: run.id }); }
       } finally { clearInterval(heartbeat); if (!deferred) this.store.release(run.id, this.owner); }
     } catch { /* Transient SQLite availability: leave the durable lease for recovery. No approval occurs. */ }
@@ -91,6 +92,7 @@ export class Worker {
     ensure(this.store.ownsLease(run.id, this.owner), 'LEASE_LOST', 'The worker lease expired.');
     await this.github.finishCheck(run, true, reviewMode === 'demo' ? 'Real trusted GitHub CI passed for this exact head and base. All three AI reviewer results were SIMULATED for the demo. No AI code review was performed.' : 'Trusted CI and all three independent AI reviewers approved this exact head and base.');
     update({ status: 'passed', stage: 'finished', error: null });
+    try { this.onFinished?.(this.store.getRun(run.id)); } catch { /* the flow retries on the next event */ }
     this.store.audit('worker', 'review.passed', { runId: run.id, headSha: run.headSha, baseSha: run.baseSha, reviewMode });
   }
 }
