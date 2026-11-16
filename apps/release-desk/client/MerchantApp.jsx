@@ -11,6 +11,7 @@ const Icon = {
   check: <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clipRule="evenodd" /></svg>,
   clock: <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm.8 4a.8.8 0 00-1.6 0v4.3c0 .3.1.5.3.6l2.8 2a.8.8 0 00.9-1.3l-2.4-1.7V6z" clipRule="evenodd" /></svg>,
   alert: <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="m-icon"><path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 4a.8.8 0 01.8.8v3.6a.8.8 0 01-1.6 0V6.8A.8.8 0 0110 6zm0 8.2a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>,
+  pencil: <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="m-icon"><path d="M13.6 2.9a2 2 0 012.8 0l.7.7a2 2 0 010 2.8l-9.4 9.4a1 1 0 01-.5.3l-3.6.9a.8.8 0 01-1-1l.9-3.6a1 1 0 01.3-.5l9.8-9z" /></svg>,
   eye: <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="m-icon"><path fillRule="evenodd" d="M10 4C5.5 4 2.3 7.3 1.2 9.6a1 1 0 000 .8C2.3 12.7 5.5 16 10 16s7.7-3.3 8.8-5.6a1 1 0 000-.8C17.7 7.3 14.5 4 10 4zm0 9.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7zm0-2a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clipRule="evenodd" /></svg>,
 };
 const PALETTE = ['#5c2fc2', '#0b7a75', '#b54708', '#005bd3', '#a3195b', '#2d6a1f'];
@@ -123,6 +124,7 @@ export default function MerchantApp({ onTechnical }) {
   const ahead = inTest.length > 0 || (data?.release?.aheadBy || 0) > 0;
   const canAct = Boolean(data?.actor?.canMutate) && Boolean(data?.setup?.ready);
   const stagingUrl = externalUrl(data?.themes?.stagingPreviewUrl);
+  const editorUrl = externalUrl(data?.themes?.stagingEditorUrl);
   const spinner = key => busy === key ? <span className="m-spinner" aria-hidden="true" /> : null;
 
   return <div className="merchant"><div className="merchant-inner">
@@ -161,7 +163,7 @@ export default function MerchantApp({ onTechnical }) {
       </section>}
 
       <section className="m-card">
-        <div className="m-card-head"><h2>{t.staging}</h2>{stagingUrl && <a className="button" href={stagingUrl} target="_blank" rel="noopener noreferrer"><span className="m-icon">{Icon.eye}</span>{t.viewStaging}</a>}</div>
+        <div className="m-card-head"><h2>{t.staging}</h2><div className="m-actions">{editorUrl && <a className="button" href={editorUrl} target="_blank" rel="noopener noreferrer"><span className="m-icon">{Icon.pencil}</span>{t.editStaging}</a>}{stagingUrl && <a className="button" href={stagingUrl} target="_blank" rel="noopener noreferrer"><span className="m-icon">{Icon.eye}</span>{t.viewStaging}</a>}</div></div>
         {ahead ? <>
           <div className="m-stage"><span className="m-stage-icon m-stage-icon--waiting">{Icon.clock}</span><div style={{ display: 'grid', gap: 2 }}><strong>{t.inTest(inTest.length || 1)}</strong><span className="muted">{t.testIntro}</span></div></div>
           {inTest.length > 0 && <div className="m-list">{inTest.map(pull => <Change key={pull.number} pull={pull}
