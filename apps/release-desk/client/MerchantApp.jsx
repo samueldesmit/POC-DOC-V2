@@ -71,6 +71,8 @@ export default function MerchantApp({ onTechnical }) {
   const [busy, setBusy] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [showConnect, setShowConnect] = useState(false);
+  const [brand, setBrand] = useState(null);
+  useEffect(() => { request('/api/brand').then(setBrand, () => setBrand({})); }, []);
   const timer = useRef(null);
   const version = useRef(null);
 
@@ -127,13 +129,24 @@ export default function MerchantApp({ onTechnical }) {
   const editorUrl = externalUrl(data?.themes?.stagingEditorUrl);
   const spinner = key => busy === key ? <span className="m-spinner" aria-hidden="true" /> : null;
 
-  return <div className="merchant"><div className="merchant-inner">
-    <header className="m-header">
-      <div><h1>{t.title}</h1><p className="muted">{data?.shop || ''}</p></div>
-      <div className="m-header-actions">
-        <button className="button" onClick={load} disabled={refreshing}>{refreshing && <span className="m-spinner" aria-hidden="true" />}{t.refresh}</button>
-        <button className="button button--primary" onClick={() => setShowConnect(value => !value)} aria-expanded={showConnect}><span className="m-icon">{Icon.sparkle}</span>{t.connect}</button>
+  const brandStyle = brand?.accent ? { '--m-brand': brand.accent, '--m-brand-text': brand.accentText } : undefined;
+  return <div className="merchant" style={brandStyle}><div className="merchant-inner">
+    <header className="m-brand">
+      <div className="m-brand-top">
+        <div className="m-brand-id">
+          {brand?.logoUrl ? <span className="m-brand-logo"><img src={brand.logoUrl} alt="" /></span> : <span className="m-brand-logo m-brand-logo--initials" aria-hidden="true">{initials(brand?.name || data?.shop || '')}</span>}
+          <div><p className="m-eyebrow">{t.title}</p><h1>{brand?.name || (data?.shop || '').replace(/\.myshopify\.com$/, '')}</h1></div>
+        </div>
+        <div className="m-header-actions">
+          <button className="button m-on-brand" onClick={load} disabled={refreshing}>{refreshing && <span className="m-spinner" aria-hidden="true" />}{t.refresh}</button>
+          <button className="button m-on-brand m-on-brand--solid" onClick={() => setShowConnect(value => !value)} aria-expanded={showConnect}><span className="m-icon">{Icon.sparkle}</span>{t.connect}</button>
+        </div>
       </div>
+      {data && <dl className="m-stats">
+        <div><dt>{t.statPreparing}</dt><dd>{preparing.length}</dd></div>
+        <div><dt>{t.statTest}</dt><dd>{inTest.length}</dd></div>
+        <div><dt>{t.statLive}</dt><dd>{history.filter(item => { const d = new Date(item.mergedAt), now = new Date(); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }).length}</dd></div>
+      </dl>}
     </header>
 
     {error && <div className="m-callout m-callout--bad" role="alert"><strong>{t.error}</strong><span>{error.message}</span><div><button className="button" onClick={load}>{t.tryAgain}</button></div></div>}

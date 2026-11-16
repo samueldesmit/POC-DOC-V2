@@ -11,6 +11,7 @@ import { PreviewService } from './preview-service.mjs';
 import { PreviewTransport } from './preview-transport.mjs';
 import { ConnectorStore } from './connector-store.mjs';
 import { Flow } from './flow.mjs';
+import { Brand } from './brand.mjs';
 
 const config = configuration();
 const store = new Store(path.join(config.dataDir, 'release-desk.sqlite'));
@@ -23,7 +24,7 @@ const worker = new Worker({ config, store, github, reviews });
 const flow = new Flow({ config, store, github, service });
 service.flow = flow;
 worker.onFinished = run => flow.onRunFinished(run);
-const app = createApp({ config, store, service, connectorStore, github, flow });
+const app = createApp({ config, store, service, connectorStore, github, flow, brand: new Brand({ config, github }) });
 const server = app.listen(config.port, '0.0.0.0', () => {
   console.log(JSON.stringify({ event: 'server.started', port: config.port })); worker.start(); previewService.resume();
 });
