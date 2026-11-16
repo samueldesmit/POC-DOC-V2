@@ -84,7 +84,7 @@
                             <p>{{- 'cart.drawer.empty' | t -}}</p>
                             <a
                                 href="{{ collections.all.url }}"
-                                class="inline-flex items-center bg-primary-background px-3 py-2 text-primary-foreground"
+                                class="inline-flex items-center bg-button-green px-3 py-2 text-white transition-colors hover:bg-button-green-hover"
                             >
                                 {% render 'component.icon',
                                     type: 'fallback_icon',
@@ -125,11 +125,11 @@
                             <button
                                 type="submit"
                                 name="checkout"
-                                class="inline-flex items-center bg-primary-background px-3 py-2 text-primary-foreground"
+                                class="inline-flex items-center bg-button-green px-3 py-2 text-white transition-colors hover:bg-button-green-hover"
                             >
                                 {% render 'component.icon',
                                     type: 'fallback_icon',
-                                    class: 'text-primary-foreground'
+                                    class: 'text-white'
                                 %}
                                 {{- 'cart.drawer.checkout' | t -}}
                             </button>
