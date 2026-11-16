@@ -61,20 +61,10 @@
       "settings": {
         "main_menu": "main-menu",
         "make_header_disappear_on_scroll": true,
-        "background_color": "#ffffff",
-        "text_color": "#ffffff",
-        "transparent_on_homepage": true,
-        "scrolled_background_color": "#ffffff",
-        "scrolled_text_color": "#000000",
-        "transparent_mobile_logo": "shopify://shop_images/image_26.svg",
-        "transparent_desktop_logo": "shopify://shop_images/image_26.svg",
-        "search_background_color": "#ffffff",
-        "search_text_color": "#000000",
         "search_placeholder": "Search products, collections, etc.",
         "search_initial_text": "Start typing to search",
         "search_no_results_text": "No results found for \"*search_term\". Please try a different search.",
         "search_show_collections": true,
-        "search_show_pages": false,
         "search_show_articles": false
       }
     }

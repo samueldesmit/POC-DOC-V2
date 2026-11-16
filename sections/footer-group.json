@@ -14,7 +14,6 @@
     "main": {
       "type": "footer",
       "settings": {
-        "copyright": "© 2025 Owls Nest. All rights reserved.",
         "footer_menu": "footer",
         "section_styling": true,
         "mobile_padding": "py-6",
