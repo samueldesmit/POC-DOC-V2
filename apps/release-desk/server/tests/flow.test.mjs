@@ -20,10 +20,10 @@ function harness(t, pr = pull()) {
     async listPulls() { return [structuredClone(this.pr)]; },
     async workflowEvidence() { return { status: 'completed', conclusion: 'success', runId: 12, attempt: 1 }; },
     async verifyCheck() {},
-    async merge(number, sha) { this.calls.push(['merge', number, sha]); return { merged: true, sha: merged }; },
+    async merge(number, sha, method) { this.calls.push(['merge', number, sha]); this.methods = [...(this.methods || []), method]; return { merged: true, sha: merged }; },
     async updateBranch(number, sha) { this.calls.push(['updateBranch', number, sha]); },
     async mergeBranches(b, h) { this.calls.push(['mergeBranches', b, h]); if (this.syncConflict) { const error = new Error('conflict'); error.httpStatus = 409; throw error; } },
-    async compareBranches() { return { ahead_by: 1, commits: [] }; },
+    async compareBranches() { return { ahead_by: 1, files: [{ filename: 'sections/hero.liquid' }], commits: [] }; },
     async createPull(input) { this.calls.push(['createPull', input.head, input.base]); this.pr = pull({ number: 9, head: { ...pr.head, ref: 'staging' }, base: { ...pr.base, ref: 'main' } }); return { number: 9, html_url: 'u9' }; },
   };
   const service = new Service({ config: cfg, store, github });
@@ -111,4 +111,13 @@ test('a change whose only open item is an optional check (unstable) still goes i
   pass(7);
   await flow.progress(7);
   assert.deepEqual(github.calls.find(call => call[0] === 'merge'), ['merge', 7, head]);
+});
+
+test('changes are squashed into staging; a release merges with a merge commit', async t => {
+  const { github, flow, pass, store } = harness(t);
+  await flow.publish(7, actor); pass(7); await flow.progress(7);
+  await flow.goLive(actor); const release = store.listRuns(9, 1)[0];
+  store.updateRun(release.id, { status: 'passed', checkId: 1, reviews: ['security', 'correctness', 'maintainability'].map(role => ({ role, status: 'completed', simulated: true, verdict: 'approve', findings: [] })), ci: { status: 'completed', conclusion: 'success', runId: 12, attempt: 1 } });
+  await flow.progress(9);
+  assert.deepEqual(github.methods, ['squash', 'merge']);
 });

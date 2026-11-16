@@ -318,7 +318,9 @@ test('GitHub history query keeps only closed staging- and live-target PRs and ca
 test('release opens one staging-to-live PR, only when staging is ahead, and reuses an open one', async t => {
   const ctx = context(t);
   await assert.rejects(ctx.service.createRelease(actor), { code: 'NOTHING_TO_RELEASE' });
-  ctx.github.compareBranches = async (baseRef, headRef) => { assert.deepEqual([baseRef, headRef], ['main', 'staging']); return { ahead_by: 2, behind_by: 0, commits: [{ commit: { message: 'Hero spacing\n\nbody' } }, { commit: { message: 'Footer links' } }] }; };
+  ctx.github.compareBranches = async () => ({ ahead_by: 3, files: [], commits: [] });
+  await assert.rejects(ctx.service.createRelease(actor), { code: 'NOTHING_TO_RELEASE' }, 'commits with identical content are nothing to release');
+  ctx.github.compareBranches = async (baseRef, headRef) => { assert.deepEqual([baseRef, headRef], ['main', 'staging']); return { ahead_by: 2, behind_by: 0, files: [{ filename: 'sections/hero.liquid' }], commits: [{ commit: { message: 'Hero spacing\n\nbody' } }, { commit: { message: 'Footer links' } }] }; };
   const created = await ctx.service.createRelease(actor);
   assert.deepEqual(created, { created: true, number: 99, url: 'https://github.com/example-org/theme-repo/pull/99' });
   assert.equal(ctx.github.created.head, 'staging'); assert.equal(ctx.github.created.base, 'main'); assert.match(ctx.github.created.body, /- Hero spacing\n- Footer links/);

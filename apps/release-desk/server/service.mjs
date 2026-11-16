@@ -56,7 +56,9 @@ export class Service {
           const openRelease = pulls.find(pr => pr.stage === 'live');
           // Which changes are on staging but not live: squash merges end their first line with "(#123)".
           const included = [...new Set((results[4].value.commits || []).map(commit => String(commit.commit?.message || '').split('\n')[0].match(/\(#(\d+)\)\s*$/)?.[1]).filter(Boolean).map(Number))];
-          release = { aheadBy: results[4].value.ahead_by ?? 0, behindBy: results[4].value.behind_by ?? 0, openPull: openRelease ? openRelease.number : null, pulls: included };
+          // Content decides, not commit ids: no differing files means live already has everything.
+          const differs = (results[4].value.files || []).length > 0;
+          release = { aheadBy: differs ? results[4].value.ahead_by ?? 0 : 0, behindBy: results[4].value.behind_by ?? 0, openPull: openRelease ? openRelease.number : null, pulls: differs ? included : [] };
         }
       } catch { blockers.push({ code: 'GITHUB_UNAVAILABLE', message: 'GitHub status could not be loaded.' }); }
     }
@@ -128,7 +130,7 @@ export class Service {
       run = this.store.updateRun(run.id, { status: 'merging', stage: 'merging' });
       this.store.audit(actor.id, 'merge.requested', { runId, pr: number, headSha, baseSha: run.baseSha, reviewMode: run.reviewMode || 'live' });
       let result;
-      try { result = await this.github.merge(number, headSha); }
+      try { result = await this.github.merge(number, headSha, run.baseBranch === this.config.liveBranch ? 'merge' : 'squash'); }
       catch {
         this.store.updateRun(run.id, { status: 'merge_unknown', stage: 'manual_verification_required', error: 'GitHub did not confirm the merge outcome. Check the PR before further action.' });
         this.store.audit(actor.id, 'merge.unknown', { runId, pr: number });
@@ -148,8 +150,8 @@ export class Service {
     const { stagingBranch: staging, liveBranch: live } = this.config;
     const open = (await this.github.listPulls()).find(pr => pr.base.ref === live && pr.head.ref === staging);
     if (open) return { created: false, number: open.number, url: open.html_url };
-    const comparison = await this.github.compareBranches(live, staging);
-    ensure((comparison.ahead_by ?? 0) > 0, 'NOTHING_TO_RELEASE', `${staging} has no changes that are not live yet.`);
+    const comparison = await this.github.compareBranches(live, staging, 100);
+    ensure((comparison.ahead_by ?? 0) > 0 && (comparison.files || []).length > 0, 'NOTHING_TO_RELEASE', `${staging} has no changes that are not live yet.`);
     const titles = (comparison.commits || []).map(commit => String(commit.commit?.message || '').split('\n')[0]).filter(Boolean).slice(-20);
     const pr = await this.github.createPull({ title: `Release ${staging} to ${live}`, head: staging, base: live, body: `Release opened from Release Desk.\n\n${titles.map(title => `- ${title}`).join('\n')}` });
     this.store.audit(actor.id, 'release.opened', { pr: pr.number, aheadBy: comparison.ahead_by });

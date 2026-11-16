@@ -211,7 +211,9 @@ export class GitHub {
     ensure(base === this.config.stagingBranch && head === this.config.liveBranch, 'BRANCH_SCOPE', 'Only live can be merged into staging directly.', 500);
     return this.request('POST', this.route('merges'), { base, head, commit_message: message });
   }
-  merge(number, sha) { return this.request('PUT', this.route(`pulls/${number}/merge`), { sha, merge_method: 'squash' }); }
+  // Changes are squashed into staging (one tidy commit per change); a release keeps
+  // staging's history with a merge commit, so live and staging stay related.
+  merge(number, sha, method = 'squash') { return this.request('PUT', this.route(`pulls/${number}/merge`), { sha, merge_method: method }); }
 }
 
 export function validateWorkflow(run, workflow, config) {
