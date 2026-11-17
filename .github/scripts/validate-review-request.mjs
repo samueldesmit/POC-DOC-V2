@@ -29,7 +29,8 @@ export function validatePull(pull, { head, base, baseBranch, repository, staging
   assert.equal(pull.draft, false, 'Draft PRs cannot be approved');
   assert.equal(pull.merged, false, 'PR has already merged');
   assert.equal(pull.base.ref, baseBranch, 'The PR does not target the branch this review runs from');
-  assert(baseBranch !== live || pull.head.ref === staging, `Only ${staging} can be released to ${live}`);
+  // Live takes either all of staging, or one change at a time (release/ branches made by Release Desk).
+  assert(baseBranch !== live || pull.head.ref === staging || /^release\/[a-z0-9-]{3,80}$/.test(pull.head.ref), `Only ${staging} or a release/ branch can be released to ${live}`);
   assert.equal(pull.base.repo.full_name, repository, 'Wrong base repository');
   assert.equal(pull.head.repo.full_name, repository, 'Fork execution is not supported');
   assert.equal(pull.head.sha, head, 'PR changed before the review started');
